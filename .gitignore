@@ -2,3 +2,7 @@
 /DerivedDataCache
 /Intermediate
 /Saved
+*.sdf
+*.sln
+*.opensdf
+*.suo

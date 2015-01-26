@@ -11,6 +11,16 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	maxHealth = 100.0f;
 	baseDamage = 20.0f;
 
+	//CollisionCapsule = ObjectInitializer.CreateDefaultSubobject<UCapsuleComponent>(this, TEXT("CapsuleComponent"));
+	//RootComponent = CollisionCapsule;
+
+	AITrigger = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITrigger"));
+	AITrigger->Mobility = EComponentMobility::Movable;
+	//AITrigger->AttachParent = RootComponent;
+
+	AITrigger->OnComponentBeginOverlap.AddDynamic(this, &AAIEnemy::OnOverlapBegin);
+	AITrigger->OnComponentEndOverlap.AddDynamic(this, &AAIEnemy::OnOverlapEnd);
+
 	/*
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Rotate character to moving direction
@@ -32,4 +42,18 @@ void AAIEnemy::Attack(float amount)
 
 }
 
+void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		//ToggleLight();
+	}
+}
 
+void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		//ToggleLight();
+	}
+}

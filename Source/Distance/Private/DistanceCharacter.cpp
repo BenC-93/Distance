@@ -34,3 +34,41 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 }
+
+/**
+* ChangeHealth()
+* 
+* healthAmount is negative if it represents health change from an attack
+* healthAmount is positive if it represents health change from a heal item
+*
+*/
+
+void ADistanceCharacter::ChangeHealth(float healthAmount) 
+{
+	float tempHealth = ADistanceCharacter::Health + healthAmount;
+
+	if (tempHealth <= ADistanceCharacter::MaxHealth)
+	{
+		if (tempHealth < 0)
+		{
+			ADistanceCharacter::Health = 0.0;
+		}
+		else
+		{
+			ADistanceCharacter::Health = tempHealth;
+		}
+	}
+}
+
+
+/**
+* Attack()
+*
+* calculates and returns player damage
+*
+*/
+float ADistanceCharacter::Attack()
+{
+	float damage = ADistanceCharacter::BaseDamage;
+	return damage;
+}

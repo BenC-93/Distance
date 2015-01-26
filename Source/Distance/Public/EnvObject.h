@@ -12,6 +12,10 @@ UCLASS()
 class DISTANCE_API AEnvObject : public AActor
 {
 	GENERATED_BODY()
+
+		/**
+		* stuff goes here
+		*/
 	
 	
 	

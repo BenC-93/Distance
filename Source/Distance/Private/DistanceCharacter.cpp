@@ -51,7 +51,7 @@ void ADistanceCharacter::ChangeHealth(float healthAmount)
 	{
 		if (tempHealth < 0)
 		{
-			ADistanceCharacter::Health = 0.0;
+			ADistanceCharacter::Health = 0.0f;
 		}
 		else
 		{

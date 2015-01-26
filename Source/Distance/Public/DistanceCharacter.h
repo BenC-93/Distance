@@ -17,8 +17,30 @@ class ADistanceCharacter : public ACharacter
 	class USpringArmComponent* CameraBoom;
 
 
+
+
 public:
 	ADistanceCharacter(const FObjectInitializer& ObjectInitializer);
+
+	/** Player's current health */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Health)
+	float Health;
+	
+	/** Player's maximum allowed health */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Health)
+	float MaxHealth;
+
+	/** Player's base damage level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
+	float BaseDamage;
+
+	/** Changes player's health based on an attack or item effect */
+	UFUNCTION(BlueprintCallable, Category = Health)
+	void ChangeHealth(float healthAmount);
+
+	/** Changes player's target's health based on player attack */
+	UFUNCTION(BlueprintCallable, Category = Damage)
+	float Attack();
 
 	/** Returns TopDownCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }

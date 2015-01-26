@@ -1,6 +1,7 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "GameFramework/Character.h"
+#include "Classes/PaperSpriteComponent.h"
 #include "DistanceCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -15,6 +16,9 @@ class ADistanceCharacter : public ACharacter
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
+	class UPaperSpriteComponent* SpriteComponent;
 
 
 

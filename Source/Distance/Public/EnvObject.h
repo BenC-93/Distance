@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "Classes/PaperSpriteComponent.h"
 #include "EnvObject.generated.h"
 
 /**
@@ -17,7 +18,9 @@ class DISTANCE_API AEnvObject : public AActor
 		* stuff goes here
 		*/
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
+	class UPaperSpriteComponent* SpriteComponent;
 	
-	
-	
+public:
+	AEnvObject(const FObjectInitializer& ObjectInitializer);
 };

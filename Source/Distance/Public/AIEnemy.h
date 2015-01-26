@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Character.h"
+#include "EnemyAIController.h"
 #include "AIEnemy.generated.h"
 
 /**
@@ -30,6 +31,8 @@ public:
 
 
 private:
+	class UClass* AIControllerClass;
+
 	float health;
 	float maxHealth;
 	float baseDamage;

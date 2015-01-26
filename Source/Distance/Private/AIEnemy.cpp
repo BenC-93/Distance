@@ -7,6 +7,8 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 
+	AIControllerClass = AEnemyAIController::StaticClass();
+
 	health = 100.0f;
 	maxHealth = 100.0f;
 	baseDamage = 20.0f;
@@ -47,6 +49,7 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		//ToggleLight();
+		UE_LOG(LogTemp, Warning, TEXT("Entered Triggered Area"));
 	}
 }
 
@@ -55,5 +58,6 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		//ToggleLight();
+		UE_LOG(LogTemp, Warning, TEXT("Exited Triggered Area fool!"));
 	}
 }

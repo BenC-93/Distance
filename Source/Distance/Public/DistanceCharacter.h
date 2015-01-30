@@ -38,6 +38,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
 	float BaseDamage;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
+	float lightAmount;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
+	bool bIsLightEnabled;
+
 	/** Changes player's health based on an attack or item effect */
 	UFUNCTION(BlueprintCallable, Category = Health)
 	void ChangeHealth(float healthAmount);

@@ -22,13 +22,22 @@ public:
 	class UPaperSpriteComponent* SpriteComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Triggers")
-	class UBoxComponent* AITrigger;
+	class UBoxComponent* AITriggerRange;//for approaching
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Triggers")
+	class UBoxComponent* AITriggerAttack;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapEnd(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	/*UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
+	void OnOverlapBeginAttack(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
+	void OnOverlapEndAttack(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);*/
 
 	UPROPERTY(EditAnywhere)
 	bool moveToPlayer;

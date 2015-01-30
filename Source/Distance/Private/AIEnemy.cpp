@@ -19,12 +19,21 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	SpriteComponent->RelativeRotation = FRotator(0.0f, 90.0f, -65.0f);//y,z,x
 	SpriteComponent->AttachTo(RootComponent);
 
-	AITrigger = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITrigger"));
-	AITrigger->Mobility = EComponentMobility::Movable;
-	AITrigger->AttachTo(RootComponent);
+	AITriggerRange = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerRange"));
+	AITriggerRange->Mobility = EComponentMobility::Movable;
+	AITriggerRange->SetBoxExtent(FVector(750.0f, 750.0f, 60.0f), true);
+	AITriggerRange->AttachTo(RootComponent);
 
-	AITrigger->OnComponentBeginOverlap.AddDynamic(this, &AAIEnemy::OnOverlapBegin);
-	AITrigger->OnComponentEndOverlap.AddDynamic(this, &AAIEnemy::OnOverlapEnd);
+	AITriggerRange->OnComponentBeginOverlap.AddDynamic(this, &AAIEnemy::OnOverlapBegin);
+	AITriggerRange->OnComponentEndOverlap.AddDynamic(this, &AAIEnemy::OnOverlapEnd);
+
+	AITriggerAttack = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerAttack"));
+	AITriggerAttack->Mobility = EComponentMobility::Movable;
+	AITriggerAttack->SetBoxExtent(FVector(300.0f,300.0f, 60.0f), true);
+	AITriggerAttack->AttachTo(RootComponent);
+
+	//AITriggerAttack->OnComponentBeginOverlap.AddDynamic(this, &AAIEnemy::OnOverlapBeginAttack);
+	//AITriggerAttack->OnComponentEndOverlap.AddDynamic(this, &AAIEnemy::OnOverlapEndAttack);
 	
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -52,7 +61,7 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Entered Triggered Area"));
+		UE_LOG(LogTemp, Warning, TEXT("-----Entered Triggered Area"));
 		player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 		player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
 		if (player1 != NULL && player1->GetActorLabel() == OtherActor->GetActorLabel())
@@ -81,6 +90,22 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Exited Triggered Area fool!"));
+		UE_LOG(LogTemp, Warning, TEXT("-------Exited Triggered Area fool!"));
 	}
 }
+
+/*void AAIEnemy::OnOverlapBeginAttack_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Attack thing!!!!!!!!!!!!!!!!!!!!!!!"));
+	}
+}
+
+void AAIEnemy::OnOverlapEndAttack_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Exited Attack thing!!!!!!!!!!"));
+	}
+}*/

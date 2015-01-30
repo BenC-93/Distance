@@ -6,6 +6,10 @@
 ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	Health = 100.0f;
+	MaxHealth = 100.0f;
+	BaseDamage = 20.0f;
+
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -52,15 +56,15 @@ void ADistanceCharacter::ChangeHealth(float healthAmount)
 {
 	float tempHealth = ADistanceCharacter::Health + healthAmount;
 
-	if (tempHealth <= ADistanceCharacter::MaxHealth)
+	if (tempHealth <= MaxHealth)
 	{
 		if (tempHealth < 0)
 		{
-			ADistanceCharacter::Health = 0.0f;
+			Health = 0.0f;
 		}
 		else
 		{
-			ADistanceCharacter::Health = tempHealth;
+			Health = tempHealth;
 		}
 	}
 }
@@ -74,6 +78,6 @@ void ADistanceCharacter::ChangeHealth(float healthAmount)
 */
 float ADistanceCharacter::Attack()
 {
-	float damage = ADistanceCharacter::BaseDamage;
+	float damage = BaseDamage;
 	return damage;
 }

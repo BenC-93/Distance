@@ -57,12 +57,12 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 		player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
 		if (player1 != NULL && player1->GetActorLabel() == OtherActor->GetActorLabel())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Moving to Player1"));
+			UE_LOG(LogTemp, Warning, TEXT("Moving to Player1"));
 			moveToPlayer = true;
 		}
 		else if (player2 != NULL && player2->GetActorLabel() == OtherActor->GetActorLabel())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Moving to Player2"));
+			UE_LOG(LogTemp, Warning, TEXT("Moving to Player2"));
 			moveToPlayer = true;
 		}
 		else if (player1 == NULL)

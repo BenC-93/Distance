@@ -62,12 +62,12 @@ void ADistancePlayerController::MoveToTouchLocation(const ETouchIndex::Type Fing
 	}
 }
 
-void ADistancePlayerController::SetNewMoveDestination(const FVector DestLocation)
+void ADistancePlayerController::SetNewMoveDestination_Implementation(const FVector DestLocation)
 {
 	APawn* const Pawn = GetPawn();
 	if (Pawn)
 	{
-		UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
+		UNavigationSystem* const NavSys = UNavigationSystem::GetCurrent(this);
 		float const Distance = FVector::Dist(DestLocation, Pawn->GetActorLocation());
 
 		// We need to issue move command only if far enough in order for walk animation to play correctly
@@ -76,6 +76,11 @@ void ADistancePlayerController::SetNewMoveDestination(const FVector DestLocation
 			NavSys->SimpleMoveToLocation(this, DestLocation);
 		}
 	}
+}
+
+bool ADistancePlayerController::SetNewMoveDestination_Validate(const FVector DestLocation)
+{
+	return true;
 }
 
 void ADistancePlayerController::OnSetDestinationPressed()

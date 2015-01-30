@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AIController.h"
+#include "AIEnemy.h"
 #include "EnemyAIController.generated.h"
 
 /**
@@ -16,15 +17,18 @@ class DISTANCE_API AEnemyAIController : public AAIController
 public:
 	AEnemyAIController(const FObjectInitializer& ObjectInitializer);
 
-protected:
-
 	virtual void Tick(float DeltaTime) override;
 
 	void ReactToPlayer();
 
-	void MoveToPlayer();
-
 	void Despawn();
-	
-	
+
+	virtual void Possess(class APawn *InPawn) override;
+
+private:
+
+	UPROPERTY(transient)
+	class AAIEnemy* AIEnemyClass;
+
+	FVector PlayerLoc;
 };

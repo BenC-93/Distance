@@ -3,7 +3,8 @@
 #pragma once
 
 #include "GameFramework/Character.h"
-#include "EnemyAIController.h"
+#include "Runtime/AIModule/Classes/AIController.h"
+#include "Classes/PaperSpriteComponent.h"
 #include "AIEnemy.generated.h"
 
 /**
@@ -17,8 +18,8 @@ class DISTANCE_API AAIEnemy : public ACharacter
 public:
 	AAIEnemy(const FObjectInitializer& ObjectInitializer);
 
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Triggers")
-	//class UCapsuleComponent* CollisionCapsule;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
+	class UPaperSpriteComponent* SpriteComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Triggers")
 	class UBoxComponent* AITrigger;
@@ -29,10 +30,17 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapEnd(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UPROPERTY(EditAnywhere)
+	bool moveToPlayer;
+
+	UPROPERTY(EditAnywhere)
+	class ACharacter* player1;
+
+	UPROPERTY(EditAnywhere)
+	class ACharacter* player2;
 
 private:
-	class UClass* AIControllerClass;
-
+	
 	float health;
 	float maxHealth;
 	float baseDamage;

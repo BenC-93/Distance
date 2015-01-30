@@ -45,7 +45,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Light)
 	float getLightAmount();
 
-	UFUNCTION(BlueprintCallable, Category = Light)
+	UFUNCTION(BlueprintCallable, Category = Light)//TODO: need to be able to enable this by some input
 	bool getLightEnabled();
 
 	UFUNCTION(BlueprintCallable, Category = Speed)

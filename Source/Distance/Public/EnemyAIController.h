@@ -19,6 +19,10 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	void AIMoveToPlayer(class ACharacter* player);
+
+	void AIMoveAwayFromPlayer(class ACharacter* player);
+
 	void ReactToPlayer();
 
 	void Despawn();

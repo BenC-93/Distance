@@ -8,6 +8,7 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	moveToPlayer = false;
+	moveAway = false;
 	player1 = NULL;
 	player2 = NULL;
 
@@ -97,22 +98,25 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("The AI will destroy you!"));
-	class ADistanceCharacter* player = Cast<ADistanceCharacter>(OtherActor);
-	player->ChangeSpeed(-200);//Works, but when do we set it back to normal??
+	class ADistanceCharacter* player = Cast<ADistanceCharacter>(OtherActor);//TODO: need to check if player is not null or 2nd player or something
+	player->ChangeSpeed(-200);//Sorta Works, but when do we set it back to normal?? there is a bug here that crashes sometimes because of the TODO that needs to happen or something.
+	//The bug involves going near the weird green thing in the middle of the screen, while the ai is chasing the player. It might be a multiple trigger conflict and not checking if its a player
 	if (player->getLightAmount() > 0)
 	{
 		if (player->getLightEnabled())
 		{
 			//scare ai away
+			moveToPlayer = false;
+			moveAway = true;
 		}
 		else
 		{
-			//drain from light
+			//drain from light: TODO
 		}
 	}
 	else
 	{
-		//drain health from player
+		//drain health from player: TODO
 	}
 }
 

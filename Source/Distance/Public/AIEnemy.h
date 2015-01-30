@@ -46,6 +46,9 @@ public:
 	bool moveToPlayer;
 
 	UPROPERTY(EditAnywhere)
+	bool moveAway;
+
+	UPROPERTY(EditAnywhere)
 	class ACharacter* player1;
 
 	UPROPERTY(EditAnywhere)

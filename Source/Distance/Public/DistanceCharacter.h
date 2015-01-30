@@ -2,6 +2,7 @@
 #pragma once
 #include "GameFramework/Character.h"
 #include "Classes/PaperSpriteComponent.h"
+#include "Item.h"
 #include "DistanceCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -20,9 +21,6 @@ class ADistanceCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent* SpriteComponent;
 
-
-
-
 public:
 	ADistanceCharacter(const FObjectInitializer& ObjectInitializer);
 
@@ -38,11 +36,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
 	float BaseDamage;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
-	float lightAmount;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
+	class AItem* Light;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
-	bool bIsLightEnabled;
+	UFUNCTION(BlueprintCallable, Category = Light)
+	void ChangeLight(float lightAmount);
+
+	UFUNCTION(BlueprintCallable, Category = Light)
+	float getLightAmount();
+
+	UFUNCTION(BlueprintCallable, Category = Light)
+	bool getLightEnabled();
+
+	UFUNCTION(BlueprintCallable, Category = Speed)
+	void ChangeSpeed(float speedAmount);
 
 	/** Changes player's health based on an attack or item effect */
 	UFUNCTION(BlueprintCallable, Category = Health)

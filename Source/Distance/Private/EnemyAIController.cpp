@@ -20,7 +20,7 @@ void AEnemyAIController::Tick(float DeltaTime)
 	{
 		if (AIEnemyClass->player1 != NULL)//method for clostest todo
 		{
-			MoveToActor(AIEnemyClass->player1);
+			MoveToActor(AIEnemyClass->player1);//call a function here that calls this TODO
 		}
 		else
 		{

@@ -10,6 +10,8 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	MaxHealth = 100.0f;
 	BaseDamage = 20.0f;
 
+	//Light = Cast<AItem>(ConstructObject(AItem::StaticClass()));//Doesnt work, TODO initialize this item correctly
+
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -69,6 +71,36 @@ void ADistanceCharacter::ChangeHealth(float healthAmount)
 	}
 }
 
+void ADistanceCharacter::ChangeLight(float lightAmount)
+{
+	if (Light != NULL)
+	{
+		Light->amount = lightAmount;
+	}
+}
+
+float ADistanceCharacter::getLightAmount()
+{
+	if (Light == NULL)
+	{
+		return -1;
+	}
+	return Light->amount;
+}
+
+bool ADistanceCharacter::getLightEnabled()
+{
+	if (Light == NULL)
+	{
+		return false;
+	}
+	return Light->bIsEnabled;
+}
+
+void ADistanceCharacter::ChangeSpeed(float speedAmount)
+{
+	GetCharacterMovement()->MaxWalkSpeed += speedAmount;
+}
 
 /**
 * Attack()

@@ -94,6 +94,28 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 	}
 }
 
+void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("The AI will destroy you!"));
+	class ADistanceCharacter* player = Cast<ADistanceCharacter>(OtherActor);
+	player->ChangeSpeed(-200);//Works, but when do we set it back to normal??
+	if (player->getLightAmount() > 0)
+	{
+		if (player->getLightEnabled())
+		{
+			//scare ai away
+		}
+		else
+		{
+			//drain from light
+		}
+	}
+	else
+	{
+		//drain health from player
+	}
+}
+
 /*void AAIEnemy::OnOverlapBeginAttack_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)

@@ -12,4 +12,21 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->AttachTo(RootComponent);
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
+
+	
+}
+
+void AItem::Use()
+{
+
+}
+
+void AItem::OnEquip()
+{
+
+}
+
+void AItem::OnUnequip()
+{
+
 }

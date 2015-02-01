@@ -26,4 +26,13 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent* SpriteComponent;
+
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void Use();
+
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void OnEquip();
+
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void OnUnequip();
 };

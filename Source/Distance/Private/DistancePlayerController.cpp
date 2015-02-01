@@ -33,6 +33,8 @@ void ADistancePlayerController::SetupInputComponent()
 	// support touch devices 
 	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ADistancePlayerController::MoveToTouchLocation);
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ADistancePlayerController::MoveToTouchLocation);
+
+	InputComponent->BindAction("UseItem", IE_Pressed, this, &ADistancePlayerController::OnUseItemPressed);
 }
 
 void ADistancePlayerController::MoveToMouseCursor()
@@ -93,4 +95,26 @@ void ADistancePlayerController::OnSetDestinationReleased()
 {
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
+}
+
+void ADistancePlayerController::OnUseItemPressed()
+{
+	if (DistanceCharacterClass == NULL)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DistanceCharacter is null."));
+		return;
+	}
+	if (DistanceCharacterClass->Light == NULL)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Light is null."));
+		return;
+	}
+	DistanceCharacterClass->Light->bIsEnabled = !DistanceCharacterClass->Light->bIsEnabled;
+	UE_LOG(LogTemp, Warning, TEXT("Light was pressed."));
+}
+
+void ADistancePlayerController::Possess(class APawn *InPawn)
+{
+	Super::Possess(InPawn);
+	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
 }

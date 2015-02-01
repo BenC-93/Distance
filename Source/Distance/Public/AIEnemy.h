@@ -18,6 +18,8 @@ class DISTANCE_API AAIEnemy : public ACharacter
 public:
 	AAIEnemy(const FObjectInitializer& ObjectInitializer);
 
+	virtual void Tick(float DeltaTime) override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
 	class UPaperSpriteComponent* SpriteComponent;
 
@@ -52,6 +54,11 @@ public:
 	bool moveAway;
 
 	UPROPERTY(EditAnywhere)
+	bool drainHealth;
+
+	int drainCounter;
+
+	UPROPERTY(EditAnywhere)
 	class ACharacter* player1;
 
 	UPROPERTY(EditAnywhere)
@@ -59,6 +66,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class ACharacter* currentPlayer;
+
+	// drain either player's lantern light or player health during attack
+	void Drain();
 
 private:
 	

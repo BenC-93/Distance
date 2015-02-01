@@ -9,12 +9,15 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 {
 	moveToPlayer = false;
 	moveAway = false;
+	drainHealth = false;
 	player1 = NULL;
 	player2 = NULL;
 
 	health = 100.0f;
 	maxHealth = 100.0f;
 	baseDamage = 20.0f;
+
+	drainCounter = 0;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(0.0f, 90.0f, -65.0f);//y,z,x
@@ -46,6 +49,27 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
+}
+
+void AAIEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (drainHealth && drainCounter%10 == 0 && drainCounter < 100) 
+	{
+		class ADistanceCharacter* player = Cast<ADistanceCharacter>(currentPlayer);
+		player->ChangeHealth(-1.0f);
+		if (player->Health == 0)
+		{
+			drainHealth = false;
+			moveAway = true;
+			moveToPlayer = false;
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
+		drainCounter++;
+	}
+
+
 }
 
 void AAIEnemy::ChangeHealth(float amount)
@@ -89,7 +113,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 		currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 		class ADistanceCharacter* player = Cast<ADistanceCharacter>(currentPlayer);
 		player->ChangeSpeed(400);//Works, but when do we set it back to normal??
-		//GetWorldTimerManager().SetTimer(this, &AAIEnemy::CheckPriorityRefresh, 1.0f, true);
+		//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
 		if (player->getLightAmount() > 0)
 		{
@@ -108,6 +132,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 		else
 		{
 			//drain health from player: TODO
+			drainHealth = true;
 		}
 	}
 }

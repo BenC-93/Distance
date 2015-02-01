@@ -2,6 +2,7 @@
 #pragma once
 #include "GameFramework/Character.h"
 #include "Classes/PaperSpriteComponent.h"
+#include "Classes/Components/ChildActorComponent.h"
 #include "Item.h"
 #include "DistanceCharacter.generated.h"
 
@@ -20,6 +21,9 @@ class ADistanceCharacter : public ACharacter
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent* SpriteComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
+	class UChildActorComponent* ItemComponent;
 
 public:
 	ADistanceCharacter(const FObjectInitializer& ObjectInitializer);

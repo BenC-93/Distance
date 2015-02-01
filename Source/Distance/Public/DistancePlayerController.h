@@ -1,6 +1,7 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "GameFramework/PlayerController.h"
+#include "DistanceCharacter.h"
 #include "DistancePlayerController.generated.h"
 
 UCLASS()
@@ -10,6 +11,8 @@ class ADistancePlayerController : public APlayerController
 
 public:
 	ADistancePlayerController(const FObjectInitializer& ObjectInitializer);
+
+	virtual void Possess(class APawn *InPawn) override;
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -33,6 +36,11 @@ protected:
 	/** Input handlers for SetDestination action. */
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
+
+	void OnUseItemPressed();
+
+	UPROPERTY(transient)
+	class ADistanceCharacter* DistanceCharacterClass;
 };
 
 

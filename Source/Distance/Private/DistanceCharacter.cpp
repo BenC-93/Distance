@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "DistanceCharacter.h"
+#include "Item.h"
 
 ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -10,7 +11,10 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	MaxHealth = 100.0f;
 	BaseDamage = 20.0f;
 
-	//Light = Cast<AItem>(ConstructObject(AItem::StaticClass()));//Doesnt work, TODO initialize this item correctly
+	//Light = Cast<AItem>(ConstructObject<AItem>(AItem::StaticClass()));//Doesnt work, TODO initialize this item correctly
+
+	//Light = new AItem(ObjectInitializer);
+
 
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -43,6 +47,13 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->AttachTo(RootComponent);
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
+
+	ItemComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("ItemComponent"));
+	ItemComponent->ChildActorClass = AItem::StaticClass();
+	ItemComponent->OnComponentCreated();
+	ItemComponent->AttachTo(RootComponent);
+
+	Light = Cast<AItem>(ItemComponent->ChildActor);
 
 }
 

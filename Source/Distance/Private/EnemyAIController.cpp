@@ -17,9 +17,9 @@ void AEnemyAIController::Tick(float DeltaTime)
 
 	if (AIEnemyClass->moveToPlayer)//Constantly moves toward player until light or life is drained or something
 	{
-		if (AIEnemyClass->player1 != NULL)//method for clostest todo!!!!
+		if (AIEnemyClass->currentPlayer != NULL)//method for clostest todo!!!!
 		{
-			AIMoveToPlayer(AIEnemyClass->player1);
+			AIMoveToPlayer(AIEnemyClass->currentPlayer);
 		}
 		else
 		{
@@ -30,9 +30,9 @@ void AEnemyAIController::Tick(float DeltaTime)
 
 	if (AIEnemyClass->moveAway)
 	{
-		if (AIEnemyClass->player1 != NULL)//method for clostest todo!!!!
+		if (AIEnemyClass->currentPlayer != NULL)//method for clostest todo!!!!
 		{
-			AIMoveAwayFromPlayer(AIEnemyClass->player1);
+			AIMoveAwayFromPlayer(AIEnemyClass->currentPlayer);
 		}
 		else
 		{

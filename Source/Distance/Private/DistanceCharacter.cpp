@@ -99,7 +99,7 @@ bool ADistanceCharacter::getLightEnabled()
 
 void ADistanceCharacter::ChangeSpeed(float speedAmount)
 {
-	GetCharacterMovement()->MaxWalkSpeed += speedAmount;
+	GetCharacterMovement()->MaxWalkSpeed = speedAmount;
 }
 
 /**

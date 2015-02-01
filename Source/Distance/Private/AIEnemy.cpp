@@ -67,6 +67,7 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Moving to Player"));
 			moveToPlayer = true;
+			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 		}
 	}
 }
@@ -85,19 +86,23 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 	if (CheckIfPlayer(OtherActor))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
-		class ADistanceCharacter* player = Cast<ADistanceCharacter>(OtherActor);
-		player->ChangeSpeed(-200);//Works, but when do we set it back to normal??
+		currentPlayer = Cast<ADistanceCharacter>(OtherActor);
+		class ADistanceCharacter* player = Cast<ADistanceCharacter>(currentPlayer);
+		player->ChangeSpeed(400);//Works, but when do we set it back to normal??
+		//GetWorldTimerManager().SetTimer(this, &AAIEnemy::CheckPriorityRefresh, 1.0f, true);
+
 		if (player->getLightAmount() > 0)
 		{
 			if (player->getLightEnabled())
 			{
+				// TODO: eventually we want the AI to drain 
+				// light when light is enabled, instead
+				// of draining player health
+
+				// TODO: AI should move away if it's finished draining
 				//scare ai away
 				moveToPlayer = false;
 				moveAway = true;
-			}
-			else
-			{
-				//drain from light: TODO
 			}
 		}
 		else

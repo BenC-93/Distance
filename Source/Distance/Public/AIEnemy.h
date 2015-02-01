@@ -57,12 +57,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	class ACharacter* player2;
 
+	UPROPERTY(EditAnywhere)
+	class ACharacter* currentPlayer;
+
 private:
 	
 	float health;
 	float maxHealth;
 	float baseDamage;
-
+	
 	void ChangeHealth(float amount);
 
 	void Attack(float amount);

@@ -18,6 +18,9 @@ class DISTANCE_API AEnvObject : public AActor
 		* stuff goes here
 		*/
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Root, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent *RootSceneComponent;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent* SpriteComponent;
 	

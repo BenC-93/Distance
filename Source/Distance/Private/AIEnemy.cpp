@@ -17,7 +17,7 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	baseDamage = 20.0f;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
-	SpriteComponent->RelativeRotation = FRotator(0.0f, 90.0f, -65.0f);//y,z,x
+	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
 	SpriteComponent->AttachTo(RootComponent);
 
 	AITriggerRange = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerRange"));

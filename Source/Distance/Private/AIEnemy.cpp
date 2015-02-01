@@ -55,9 +55,9 @@ void AAIEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (drainHealth && drainCounter%10 == 0 && drainCounter < 100) 
+	if (drainHealth && drainCounter < 100) 
 	{
-		class ADistanceCharacter* player = Cast<ADistanceCharacter>(currentPlayer);
+		class ADistanceCharacter* player = Cast<ADistanceCharacter>(currentPlayer);//TODO fix contiuous initializatio
 		player->ChangeHealth(-1.0f);
 		if (player->Health == 0)
 		{
@@ -66,6 +66,9 @@ void AAIEnemy::Tick(float DeltaTime)
 			moveToPlayer = false;
 		}
 		UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
+		//if (drainCounter % 10 == 0)
+		//{
+		//}
 		drainCounter++;
 	}
 

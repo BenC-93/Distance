@@ -36,6 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Trigger Functions")
 	void OnAttackTrigger(class AActor* OtherActor);
 
+	UFUNCTION(BlueprintCallable, Category = "Trigger Functions")
+	bool CheckIfPlayer(class AActor* OtherActor);
+
 	/*UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBeginAttack(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 

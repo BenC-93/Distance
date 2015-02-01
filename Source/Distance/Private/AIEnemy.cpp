@@ -63,27 +63,11 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("-----Entered Triggered Area"));
-		player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-		player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-		if (player1 != NULL && player1->GetActorLabel() == OtherActor->GetActorLabel())
+		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Moving to Player1"));
+			UE_LOG(LogTemp, Warning, TEXT("Moving to Player"));
 			moveToPlayer = true;
 		}
-		else if (player2 != NULL && player2->GetActorLabel() == OtherActor->GetActorLabel())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Moving to Player2"));
-			moveToPlayer = true;
-		}
-		else if (player1 == NULL)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player1 Null"));
-		}
-		else if (player2 == NULL)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Player2 Null"));
-		}
-		
 	}
 }
 
@@ -98,26 +82,44 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("The AI will destroy you!"));
-	class ADistanceCharacter* player = Cast<ADistanceCharacter>(OtherActor);//TODO: need to check if player is not null or 2nd player or something
-	player->ChangeSpeed(-200);//Sorta Works, but when do we set it back to normal?? there is a bug here that crashes sometimes because of the TODO that needs to happen or something.
-	//The bug involves going near the weird green thing in the middle of the screen, while the ai is chasing the player. It might be a multiple trigger conflict and not checking if its a player
-	if (player->getLightAmount() > 0)
+	if (CheckIfPlayer(OtherActor))
 	{
-		if (player->getLightEnabled())
+		UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
+		class ADistanceCharacter* player = Cast<ADistanceCharacter>(OtherActor);
+		player->ChangeSpeed(-200);//Works, but when do we set it back to normal??
+		if (player->getLightAmount() > 0)
 		{
-			//scare ai away
-			moveToPlayer = false;
-			moveAway = true;
+			if (player->getLightEnabled())
+			{
+				//scare ai away
+				moveToPlayer = false;
+				moveAway = true;
+			}
+			else
+			{
+				//drain from light: TODO
+			}
 		}
 		else
 		{
-			//drain from light: TODO
+			//drain health from player: TODO
 		}
 	}
-	else
+}
+
+bool AAIEnemy::CheckIfPlayer(class AActor* OtherActor)
+{
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+	if (player1 != NULL && player1->GetActorLabel() == OtherActor->GetActorLabel())
 	{
-		//drain health from player: TODO
+		return true;
 	}
+	else if (player2 != NULL && player2->GetActorLabel() == OtherActor->GetActorLabel())
+	{
+		return true;
+	}
+	return false;
 }
 
 /*void AAIEnemy::OnOverlapBeginAttack_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

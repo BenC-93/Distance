@@ -39,9 +39,8 @@ public:
 	/** Player's base damage level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
 	float BaseDamage;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
-	class AItem* Light;
+	
+	AItem* GetLight();
 
 	UFUNCTION(BlueprintCallable, Category = Light)
 	void ChangeLight(float lightAmount);

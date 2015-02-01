@@ -52,9 +52,6 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	ItemComponent->ChildActorClass = AItem::StaticClass();
 	ItemComponent->OnComponentCreated();
 	ItemComponent->AttachTo(RootComponent);
-
-	Light = Cast<AItem>(ItemComponent->ChildActor);
-
 }
 
 /**
@@ -84,33 +81,38 @@ void ADistanceCharacter::ChangeHealth(float healthAmount)
 
 void ADistanceCharacter::ChangeLight(float lightAmount)
 {
-	if (Light != NULL)
+	if (GetLight() != NULL)
 	{
-		Light->amount = lightAmount;
+		GetLight()->amount = lightAmount;
 	}
 }
 
 float ADistanceCharacter::getLightAmount()
 {
-	if (Light == NULL)
+	if (GetLight() == NULL)
 	{
 		return -1;
 	}
-	return Light->amount;
+	return GetLight()->amount;
 }
 
 bool ADistanceCharacter::getLightEnabled()
 {
-	if (Light == NULL)
+	if (GetLight() == NULL)
 	{
 		return false;
 	}
-	return Light->bIsEnabled;
+	return GetLight()->bIsEnabled;
 }
 
 void ADistanceCharacter::ChangeSpeed(float speedAmount)
 {
 	GetCharacterMovement()->MaxWalkSpeed = speedAmount;
+}
+
+AItem* ADistanceCharacter::GetLight()
+{
+	return (AItem *)ItemComponent->ChildActor;
 }
 
 /**

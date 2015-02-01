@@ -104,12 +104,13 @@ void ADistancePlayerController::OnUseItemPressed()
 		UE_LOG(LogTemp, Warning, TEXT("DistanceCharacter is null."));
 		return;
 	}
-	if (DistanceCharacterClass->Light == NULL)
+	if (DistanceCharacterClass->GetLight() == NULL)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Light is null."));
 		return;
 	}
-	DistanceCharacterClass->Light->bIsEnabled = !DistanceCharacterClass->Light->bIsEnabled;
+	UE_LOG(LogTemp, Warning, TEXT("Light is working."));
+	DistanceCharacterClass->GetLight()->bIsEnabled = !DistanceCharacterClass->GetLight()->bIsEnabled;
 	UE_LOG(LogTemp, Warning, TEXT("Light was pressed."));
 }
 

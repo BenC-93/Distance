@@ -4,6 +4,7 @@
 
 #include "GameFramework/Character.h"
 #include "Runtime/AIModule/Classes/AIController.h"
+#include "DistanceCharacter.h"
 #include "Classes/PaperSpriteComponent.h"
 #include "AIEnemy.generated.h"
 
@@ -58,6 +59,8 @@ public:
 
 	int drainCounter;
 
+	int drainRate;
+
 	UPROPERTY(EditAnywhere)
 	class ACharacter* player1;
 
@@ -66,6 +69,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class ACharacter* currentPlayer;
+
+	UPROPERTY(EditAnywhere)
+	class ADistanceCharacter* player;
 
 	// drain either player's lantern light or player health during attack
 	void Drain();

@@ -17,7 +17,8 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	maxHealth = 100.0f;
 	baseDamage = 20.0f;
 
-	drainCounter = 0;
+	drainCounter = 0; 
+	drainRate = 3;//must be greater than 0
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
@@ -54,22 +55,61 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 void AAIEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (drainHealth && drainCounter < 100) 
+	if (player != NULL)
 	{
-		class ADistanceCharacter* player = Cast<ADistanceCharacter>(currentPlayer);//TODO fix contiuous initializatio
-		player->ChangeHealth(-1.0f);
-		if (player->Health == 0)
+		if (drainHealth)
 		{
-			drainHealth = false;
-			moveAway = true;
-			moveToPlayer = false;
+			if (drainCounter < 100 * drainRate && drainCounter % drainRate == 0)
+			{
+				player->ChangeHealth(-1.0f);
+				if (player->Health == 0)
+				{
+					drainHealth = false;
+					moveAway = true;
+					moveToPlayer = false;
+				}
+				UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
+			}
+			drainCounter++;
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
-		//if (drainCounter % 10 == 0)
-		//{
-		//}
-		drainCounter++;
+		if (moveToPlayer)
+		{
+			FRotator playerDirection = player->GetVelocity().Rotation();
+			FRotator myDirection = GetVelocity().Rotation();
+			FRotator playerRevDir = playerDirection;
+			FRotator myRevDir = myDirection;
+			if (playerRevDir.Yaw > 0)//positive
+			{
+				playerRevDir.Yaw -= 180;
+			}
+			else if (playerRevDir.Yaw <= 0)//negative
+			{
+				playerRevDir.Yaw += 180;
+			}
+			if (myRevDir.Yaw > 0)//positive
+			{
+				myRevDir.Yaw -= 180;
+			}
+			else if (myRevDir.Yaw <= 0)//negative
+			{
+				myRevDir.Yaw += 180;
+			}
+
+			float range = 10.0f;
+			if (myDirection.Yaw > playerDirection.Yaw - range && myDirection.Yaw < playerDirection.Yaw + range)
+			{//this is where if light is enabled, player should be slowly moving faster and killing the monster
+				UE_LOG(LogTemp, Warning, TEXT("Same direction"));
+			}
+			else if (myDirection.Yaw > playerRevDir.Yaw - range && myDirection.Yaw < playerRevDir.Yaw + range)
+			{//this is where if light is not enabled (maybe light doesnt matter, dont know), but player slowly moves slower until he cannot escape
+				UE_LOG(LogTemp, Warning, TEXT("Opposite direction"));
+			}
+			else
+			{//not needed, just for testing purposes
+				//UE_LOG(LogTemp, Warning, TEXT("some other direction"));
+			}
+			//UE_LOG(LogTemp, Warning, TEXT("AI rotation: %s"), *myDirection.ToString());
+		}
 	}
 
 
@@ -95,6 +135,13 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 			UE_LOG(LogTemp, Warning, TEXT("Moving to Player"));
 			moveToPlayer = true;
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
+			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
+			if (player->getLightAmount() > 0 && player->getLightEnabled())//This is where the enemy is supposed to run away
+			{
+				moveToPlayer = false;
+				moveAway = true;
+				UE_LOG(LogTemp, Warning, TEXT("Moving away from Player"));
+			}
 		}
 	}
 }
@@ -114,11 +161,11 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
 		currentPlayer = Cast<ADistanceCharacter>(OtherActor);
-		class ADistanceCharacter* player = Cast<ADistanceCharacter>(currentPlayer);
+		player = Cast<ADistanceCharacter>(currentPlayer);
 		player->ChangeSpeed(400);//Works, but when do we set it back to normal??
 		//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
-		if (player->getLightAmount() > 0)
+		if (player->getLightAmount() > 0 && player->getLightEnabled())//I believe this belongs in the Tick method, since this only happens once on overlap
 		{
 			if (player->getLightEnabled())
 			{
@@ -128,8 +175,8 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 
 				// TODO: AI should move away if it's finished draining
 				//scare ai away
-				moveToPlayer = false;
-				moveAway = true;
+				//moveToPlayer = false;
+				//moveAway = true;
 			}
 		}
 		else
@@ -155,18 +202,3 @@ bool AAIEnemy::CheckIfPlayer(class AActor* OtherActor)
 	return false;
 }
 
-/*void AAIEnemy::OnOverlapBeginAttack_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor && (OtherActor != this) && OtherComp)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Attack thing!!!!!!!!!!!!!!!!!!!!!!!"));
-	}
-}
-
-void AAIEnemy::OnOverlapEndAttack_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (OtherActor && (OtherActor != this) && OtherComp)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Exited Attack thing!!!!!!!!!!"));
-	}
-}*/

@@ -83,7 +83,18 @@ void ADistanceCharacter::ChangeLight(float lightAmount)
 {
 	if (GetLight() != NULL)
 	{
-		GetLight()->amount = lightAmount;
+		float tempLight = getLightAmount() + lightAmount;
+		if (tempLight <= getMaxLightAmount())
+		{
+			if (tempLight < 0)
+			{
+				GetLight()->amount = 0.0f;
+			}
+			else
+			{
+				GetLight()->amount = tempLight;
+			}
+		}
 	}
 }
 
@@ -94,6 +105,15 @@ float ADistanceCharacter::getLightAmount()
 		return -1;
 	}
 	return GetLight()->amount;
+}
+
+float ADistanceCharacter::getMaxLightAmount()
+{
+	if (GetLight() == NULL)
+	{
+		return -1;
+	}
+	return GetLight()->maxAmount;
 }
 
 bool ADistanceCharacter::getLightEnabled()

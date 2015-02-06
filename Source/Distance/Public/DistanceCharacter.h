@@ -48,6 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Light)
 	float getLightAmount();
 
+	UFUNCTION(BlueprintCallable, Category = Light)
+	float getMaxLightAmount();
+
 	UFUNCTION(BlueprintCallable, Category = Light)//TODO: need to be able to enable this by some input
 	bool getLightEnabled();
 

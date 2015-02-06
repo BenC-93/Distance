@@ -40,6 +40,9 @@ public:
 	void OnAttackTrigger(class AActor* OtherActor);
 
 	UFUNCTION(BlueprintCallable, Category = "Trigger Functions")
+	void OnExitAttackTrigger(class AActor* OtherActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Trigger Functions")
 	bool CheckIfPlayer(class AActor* OtherActor);
 
 	/*UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
@@ -55,11 +58,20 @@ public:
 	bool moveAway;
 
 	UPROPERTY(EditAnywhere)
+	bool drainTrigger;
+
+	UPROPERTY(EditAnywhere)
 	bool drainHealth;
+
+	UPROPERTY(EditAnywhere)
+	bool drainLight;
 
 	int drainCounter;
 
 	int drainRate;
+
+	float speedCounter;
+	float speedLimit;
 
 	UPROPERTY(EditAnywhere)
 	class ACharacter* player1;

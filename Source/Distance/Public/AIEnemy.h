@@ -66,9 +66,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool drainLight;
 
-	int drainCounter;
-
-	int drainRate;
+	float drainCounter;
+	float drainRate;
 
 	float speedCounter;
 	float speedLimit;

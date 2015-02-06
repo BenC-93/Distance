@@ -4,6 +4,7 @@
 #include "DistanceCharacter.h"
 #include "Item.h"
 #include "Engine.h"
+#include <cmath>
 
 ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -78,23 +79,26 @@ void ADistanceCharacter::ChangeHealth(float healthAmount)
 			Health = tempHealth;
 		}
 	}
+	if (int(Health) % 10 == 0 || abs(healthAmount) >= 10)
+	{
+		UE_LOG(LogDistance, Verbose, TEXT("Changing Health Breakpoint: %f"), Health);
+	}
 }
 
 void ADistanceCharacter::RegenerateHealth()
 {
 	ChangeHealth(1.0);
+	if (Health >= MaxHealth)
+	{
+		GetWorldTimerManager().ClearTimer(this, &ADistanceCharacter::RegenerateHealth);
+		UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer stopped, max health reached"));
+	}
 }
 
 void ADistanceCharacter::StartRegeneration()
 {
 	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, 1.0f, true);
-	UE_LOG(LogTemp, Warning, TEXT("Health regeneration timer is set"));
-	if (Health == MaxHealth)
-	{
-		GetWorldTimerManager().PauseTimer(this, &ADistanceCharacter::RegenerateHealth);
-		UE_LOG(LogTemp, Warning, TEXT("Health regeneration timer is paused"));
-	}
-
+	UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer is set"));
 }
 
 void ADistanceCharacter::ChangeLight(float lightAmount)

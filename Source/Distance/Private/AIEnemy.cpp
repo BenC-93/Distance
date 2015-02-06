@@ -15,12 +15,12 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	player1 = NULL;
 	player2 = NULL;
 
-	health = 100.0f;
+	health = 0.0f;
 	maxHealth = 100.0f;
 	baseDamage = 20.0f;
 
-	drainCounter = 0; 
-	drainRate = 3;//must be greater than 0
+	drainCounter = 0.0f;
+	drainRate = 0.1f;// tenth of a second
 
 	speedCounter = 1.0f;
 	speedLimit = 1200.0f;
@@ -63,8 +63,11 @@ void AAIEnemy::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("Delta Time, %f"), DeltaTime);
 	if (player != NULL)
 	{
-		if (drainTrigger && drainCounter < 100 * drainRate)
+		// Player is in range of close trigger and Enemy is not "full"
+		if (drainTrigger && health < maxHealth)
 		{
+			// Add time to drain tick
+			drainCounter += DeltaTime;
 			if (player->getLightAmount() > 0 && player->getLightEnabled())
 			{
 				drainLight = true;
@@ -79,8 +82,11 @@ void AAIEnemy::Tick(float DeltaTime)
 
 		if (drainHealth && !drainLight && !moveAway)//drain health
 		{
-			if (drainCounter < 100 * drainRate && drainCounter % drainRate == 0)//TODO: use DeltaTime by add deltatime to drain counter, then if counter > drainrate, then counter-=drainRate
+			if (health < maxHealth && drainCounter > drainRate)
 			{
+				// Tick the drain
+				drainCounter -= drainRate;
+				health += 1;
 				player->ChangeHealth(-1.0f);
 				if (player->Health == 0)//health has depleted
 				{
@@ -92,7 +98,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				}
 				UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
 			}
-			else if (drainCounter >= 100 * drainRate)//AI is full
+			else if (health >= maxHealth)//AI is full
 			{
 				GetCharacterMovement()->MaxWalkSpeed = 400;
 				//drainCounter = 0;
@@ -104,8 +110,11 @@ void AAIEnemy::Tick(float DeltaTime)
 		}
 		else if (drainLight && !drainHealth && !moveAway)//drain light
 		{
-			if (drainCounter < 100 * drainRate && drainCounter % drainRate == 0)
+			if (health < maxHealth && drainCounter > drainRate)
 			{
+				// Tick the drain
+				drainCounter -= drainRate;
+				health += 1;
 				player->ChangeLight(-1.0f);
 				if (player->getLightAmount() == 0)//dont end here, just go to health
 				{
@@ -117,7 +126,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				}
 				UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->getLightAmount());
 			}
-			else if (drainCounter >= 100 * drainRate)//Ai is full
+			else if (health >= maxHealth)//Ai is full
 			{
 				GetCharacterMovement()->MaxWalkSpeed = 400;
 				//drainCounter = 0;

@@ -8,6 +8,7 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 {
 	bIsEnabled = false;
 	amount = 100.0f;
+	maxAmount = 100.0f;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->AttachTo(RootComponent);

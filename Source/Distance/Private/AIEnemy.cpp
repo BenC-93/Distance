@@ -60,7 +60,7 @@ void AAIEnemy::Tick(float DeltaTime)
 		if (drainHealth)
 		{
 			if (drainCounter < 100 * drainRate && drainCounter % drainRate == 0)
-			{
+			{ 
 				player->ChangeHealth(-1.0f);
 				if (player->Health == 0)
 				{
@@ -152,6 +152,10 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 	{
 		UE_LOG(LogTemp, Warning, TEXT("-------Exited Triggered Area fool!"));
 	}
+	// start player health regeneration
+	player = Cast<ADistanceCharacter>(OtherActor);
+	player->StartRegeneration();
+	UE_LOG(LogTemp, Warning, TEXT("Player health regeneration started"));
 }
 
 void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)

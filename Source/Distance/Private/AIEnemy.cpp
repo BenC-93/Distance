@@ -154,8 +154,11 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 	}
 	// start player health regeneration
 	player = Cast<ADistanceCharacter>(OtherActor);
-	player->StartRegeneration();
-	UE_LOG(LogTemp, Warning, TEXT("Player health regeneration started"));
+	if (player != NULL)
+	{
+		player->StartRegeneration();
+		UE_LOG(LogTemp, Warning, TEXT("Player health regeneration started"));
+	}
 }
 
 void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)

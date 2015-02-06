@@ -61,6 +61,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Health)
 	void ChangeHealth(float healthAmount);
 
+	void RegenerateHealth();
+
+	void StartRegeneration();
+
 	/** Changes player's target's health based on player attack */
 	UFUNCTION(BlueprintCallable, Category = Damage)
 	float Attack();

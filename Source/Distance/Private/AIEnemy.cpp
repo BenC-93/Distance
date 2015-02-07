@@ -106,7 +106,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				moveAway = true;
 				moveToPlayer = false;
 			}
-			drainCounter++;
+			//drainCounter++;//need to comment this out
 		}
 		else if (drainLight && !drainHealth && !moveAway)//drain light
 		{
@@ -118,11 +118,15 @@ void AAIEnemy::Tick(float DeltaTime)
 				player->ChangeLight(-1.0f);
 				if (player->getLightAmount() == 0)//dont end here, just go to health
 				{
+					drainLight = false;
+					drainHealth = true;
+					/*
 					GetCharacterMovement()->MaxWalkSpeed = 400;
 					//drainCounter = 0;
 					drainLight = false;
 					moveAway = true;
 					moveToPlayer = false;
+					*/
 				}
 				UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->getLightAmount());
 			}
@@ -134,10 +138,10 @@ void AAIEnemy::Tick(float DeltaTime)
 				moveAway = true;
 				moveToPlayer = false;
 			}
-			drainCounter++;
+			//drainCounter++;//need to comment this out
 		}
 
-		if (moveToPlayer)
+		if (moveToPlayer && !drainTrigger)
 		{
 			FRotator playerDirection = player->GetVelocity().Rotation();
 			FRotator myDirection = GetVelocity().Rotation();
@@ -210,10 +214,9 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("-----Entered Triggered Area"));
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Moving to Player"));
+			UE_LOG(LogTemp, Warning, TEXT("-----Entered Triggered Area"));
 			moveToPlayer = true;//outer trigger boolean
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
@@ -231,50 +234,59 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("-------Exited Triggered Area fool!"));
-	}
-	// start player health regeneration
-	player = Cast<ADistanceCharacter>(OtherActor);
-	if (player != NULL)
-	{
-		player->StartRegeneration();
-		UE_LOG(LogTemp, Warning, TEXT("Player health regeneration started"));
+		if (CheckIfPlayer(OtherActor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("-------Exited Triggered Area fool!"));
+			// start player health regeneration
+			player = Cast<ADistanceCharacter>(OtherActor);
+			if (player != NULL)
+			{
+				player->StartRegeneration();
+				UE_LOG(LogTemp, Warning, TEXT("Player health regeneration started"));
+			}
+		}
 	}
 }
 
 void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Entered drain trigger"));
-	if (CheckIfPlayer(OtherActor))
+	if (OtherActor && (OtherActor != this))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
-		currentPlayer = Cast<ADistanceCharacter>(OtherActor);
-		player = Cast<ADistanceCharacter>(currentPlayer);
-		player->ChangeSpeed(400);//Works, but when do we set it back to normal??
-		//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
+		if (CheckIfPlayer(OtherActor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Entered drain trigger"));
+			//UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
+			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
+			player = Cast<ADistanceCharacter>(currentPlayer);
+			player->ChangeSpeed(400);//Works, but when do we set it back to normal??
+			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
-		if (player->getLightAmount() > 0 && player->getLightEnabled())
-		{
-			drainLight = true;
-			drainHealth = false;
+			if (player->getLightAmount() > 0 && player->getLightEnabled())
+			{
+				drainLight = true;
+				drainHealth = false;
+			}
+			else
+			{
+				drainHealth = true;
+				drainLight = false;
+			}
+			drainTrigger = true;
 		}
-		else
-		{
-			drainHealth = true;
-			drainLight = false;
-		}
-		drainTrigger = true;
 	}
 }
 
 void AAIEnemy::OnExitAttackTrigger(class AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Exited drain trigger."));
-	if (CheckIfPlayer(OtherActor))
+	if (OtherActor && (OtherActor != this))
 	{
-		drainTrigger = false;
-		drainHealth = false;
-		drainLight = false;
+		if (CheckIfPlayer(OtherActor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Exited drain trigger."));
+			drainTrigger = false;
+			drainHealth = false;
+			drainLight = false;
+		}
 	}
 }
 
@@ -282,7 +294,9 @@ bool AAIEnemy::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% positive 
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-	UE_LOG(LogTemp, Warning, TEXT("Player checked is: %s"), *OtherActor->GetActorLabel());
+	//UE_LOG(LogTemp, Warning, TEXT("Player actually is: %s"), *player1->GetActorLabel());// these are messages for checking if we collide with the player or not
+	//UE_LOG(LogTemp, Warning, TEXT("Player checked is: %s"), *OtherActor->GetActorLabel());
+	//UE_LOG(LogTemp, Warning, TEXT("Are they the same?: %d"), ((player1 == OtherActor)));// ? "Yes" : "No"));
 	if (player1 != NULL && player1 == OtherActor)//player1->GetActorLabel() == OtherActor->GetActorLabel())
 	{
 		return true;

@@ -118,6 +118,11 @@ void ADistanceCharacter::ChangeLight(float lightAmount)
 				GetLight()->amount = tempLight;
 			}
 		}
+		// Send a verbose log message whenever reaching or passing light values divisible by 10
+		if (int(getLightAmount()) % 10 == 0 || abs(lightAmount) >= 10)
+		{
+			UE_LOG(LogDistance, Verbose, TEXT("Changing Light Breakpoint: %f"), getLightAmount());
+		}
 	}
 }
 

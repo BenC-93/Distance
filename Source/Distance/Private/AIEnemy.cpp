@@ -214,7 +214,7 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("-----Entered Triggered Area"));
+			UE_LOG(LogTemp, Warning, TEXT("-----Player Entered Triggered Area"));
 			moveToPlayer = true;//outer trigger boolean
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
@@ -234,7 +234,7 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("-------Exited Triggered Area fool!"));
+			UE_LOG(LogTemp, Warning, TEXT("-------Player Exited Triggered Area fool!"));
 			// start player health regeneration
 			player = Cast<ADistanceCharacter>(OtherActor);
 			if (player != NULL)
@@ -252,7 +252,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Entered drain trigger"));
+			UE_LOG(LogTemp, Warning, TEXT("Player Entered drain trigger"));
 			//UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);
@@ -280,7 +280,7 @@ void AAIEnemy::OnExitAttackTrigger(class AActor* OtherActor)
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Exited drain trigger."));
+			UE_LOG(LogTemp, Warning, TEXT("Player Exited drain trigger."));
 			drainTrigger = false;
 			drainHealth = false;
 			drainLight = false;

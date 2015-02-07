@@ -96,7 +96,7 @@ void AAIEnemy::Tick(float DeltaTime)
 					moveAway = true;
 					moveToPlayer = false;
 				}
-				UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
+				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
 			}
 			else if (health >= maxHealth)//AI is full
 			{
@@ -106,7 +106,6 @@ void AAIEnemy::Tick(float DeltaTime)
 				moveAway = true;
 				moveToPlayer = false;
 			}
-			//drainCounter++;//need to comment this out
 		}
 		else if (drainLight && !drainHealth && !moveAway)//drain light
 		{
@@ -128,7 +127,7 @@ void AAIEnemy::Tick(float DeltaTime)
 					moveToPlayer = false;
 					*/
 				}
-				UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->getLightAmount());
+				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->getLightAmount());
 			}
 			else if (health >= maxHealth)//Ai is full
 			{
@@ -138,7 +137,6 @@ void AAIEnemy::Tick(float DeltaTime)
 				moveAway = true;
 				moveToPlayer = false;
 			}
-			//drainCounter++;//need to comment this out
 		}
 
 		if (moveToPlayer && !drainTrigger)

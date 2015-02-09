@@ -50,6 +50,10 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	ItemComponent->ChildActorClass = AItem::StaticClass();
 	ItemComponent->OnComponentCreated();
 	ItemComponent->AttachTo(RootComponent);
+
+	//some C++ class constructor 
+	//Your BP of the base C++ class static ConstructorHelpers::FObjectFinder YourBPOb(TEXT("Blueprint'/Game/Characters/YourBP.YourBP'")); 
+	//if (YourBPOb.Object != NULL) { YourBPBaseClassPtr = Cast(YourBPOb.Object->GeneratedClass); }
 }
 
 /**

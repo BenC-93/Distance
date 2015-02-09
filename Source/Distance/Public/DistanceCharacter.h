@@ -63,6 +63,8 @@ public:
 
 	void RegenerateHealth();
 
+	void RegenerateLight();
+
 	void StartRegeneration();
 
 	/** Changes player's target's health based on player attack */

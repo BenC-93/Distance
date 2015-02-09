@@ -42,6 +42,9 @@ public:
 	
 	AItem* GetLight();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
+	int32 EquippedItem;
+
 	UFUNCTION(BlueprintCallable, Category = Light)
 	void ChangeLight(float lightAmount);
 

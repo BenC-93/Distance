@@ -35,6 +35,7 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ADistancePlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("UseItem", IE_Pressed, this, &ADistancePlayerController::OnUseItemPressed);
+	//InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::);
 }
 
 void ADistancePlayerController::MoveToMouseCursor()

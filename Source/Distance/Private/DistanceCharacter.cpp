@@ -12,6 +12,7 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	Health = 100.0f;
 	MaxHealth = 100.0f;
 	BaseDamage = 20.0f;
+	EquippedItem = 0;
 
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);

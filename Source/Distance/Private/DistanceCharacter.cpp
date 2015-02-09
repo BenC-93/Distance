@@ -13,11 +13,6 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	MaxHealth = 100.0f;
 	BaseDamage = 20.0f;
 
-	//Light = Cast<AItem>(ConstructObject<AItem>(AItem::StaticClass()));//Doesnt work, TODO initialize this item correctly
-
-	//Light = new AItem(ObjectInitializer);
-
-
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -55,6 +50,10 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	ItemComponent->ChildActorClass = AItem::StaticClass();
 	ItemComponent->OnComponentCreated();
 	ItemComponent->AttachTo(RootComponent);
+
+	//some C++ class constructor 
+	//Your BP of the base C++ class static ConstructorHelpers::FObjectFinder YourBPOb(TEXT("Blueprint'/Game/Characters/YourBP.YourBP'")); 
+	//if (YourBPOb.Object != NULL) { YourBPBaseClassPtr = Cast(YourBPOb.Object->GeneratedClass); }
 }
 
 /**
@@ -96,10 +95,24 @@ void ADistanceCharacter::RegenerateHealth()
 	}
 }
 
+void ADistanceCharacter::RegenerateLight()
+{
+	if (GetLight() != NULL)
+	{
+		ChangeLight(1.0);
+		if (getLightAmount() >= getMaxLightAmount())
+		{
+			GetWorldTimerManager().ClearTimer(this, &ADistanceCharacter::RegenerateLight);
+			UE_LOG(LogDistance, Verbose, TEXT("Light regeneration timer stopped, max light amount reached"));
+		}
+	}
+}
+
 void ADistanceCharacter::StartRegeneration()
 {
 	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, 1.0f, true);
-	UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer is set"));
+	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateLight, 1.0f, true);
+	UE_LOG(LogDistance, Verbose, TEXT("Health and light regeneration timers are set"));
 }
 
 void ADistanceCharacter::ChangeLight(float lightAmount)

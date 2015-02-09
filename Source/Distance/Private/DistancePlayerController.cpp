@@ -109,8 +109,7 @@ void ADistancePlayerController::OnUseItemPressed()
 		UE_LOG(LogTemp, Warning, TEXT("Light is null."));
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Light is: %d"), DistanceCharacterClass->GetLight()->bIsEnabled);
-	DistanceCharacterClass->GetLight()->bIsEnabled = !DistanceCharacterClass->GetLight()->bIsEnabled;
+	DistanceCharacterClass->GetLight()->Use();
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

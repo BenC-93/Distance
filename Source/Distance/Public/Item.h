@@ -27,6 +27,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
 	float maxAmount;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Root, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent *RootSceneComponent;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent* SpriteComponent;
 

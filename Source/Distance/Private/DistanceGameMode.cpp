@@ -16,4 +16,8 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+	if (GEngine) {
+		UE_LOG(LogDistance, Verbose, TEXT("Turning on on-screen debugging"));
+		GEngine->bEnableOnScreenDebugMessages = true;
+	}
 }

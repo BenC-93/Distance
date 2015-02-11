@@ -1,10 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Distance.h"
-#include "Engine.h"
 #include "AIBoss_Doubt.h"
-
-#define print(c, text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, c, text)
 
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -58,13 +55,13 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			{
 				currentPlayer = player1;
 				player = Cast<ADistanceCharacter>(currentPlayer);
-				UE_LOG(LogTemp, Warning, TEXT("Boss targeting: Player1"));
+				//printScreen(FColor::Red, "Boss targeting: Player1");
 			}
 			else
 			{
 				currentPlayer = player2;
 				player = Cast<ADistanceCharacter>(currentPlayer);
-				UE_LOG(LogTemp, Warning, TEXT("Boss targeting: Player2"));
+				//printScreen(FColor::Red, "Boss targeting: Player2");
 			}
 		}
 	}
@@ -167,21 +164,18 @@ bool AAIBoss_Doubt::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% posi
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-
-	GEngine->bEnableOnScreenDebugMessages = true;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Checking"));
 	//UE_LOG(LogTemp, Warning, TEXT("Player actually is: %s"), *player1->GetActorLabel());// these are messages for checking if we collide with the player or not
 	//UE_LOG(LogTemp, Warning, TEXT("Player checked is: %s"), *OtherActor->GetActorLabel());
 	//UE_LOG(LogTemp, Warning, TEXT("Are they the same?: %d"), ((player1 == OtherActor)));// ? "Yes" : "No"));
 	if (player1 != NULL && player1 == OtherActor)//player1->GetActorLabel() == OtherActor->GetActorLabel())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player 1 checked"));
+		//printScreen(FColor::Red, "Player 1 checked");
 		//UE_LOG(LogTemp, Warning, TEXT("Player 1 checked"));
 		return true;
 	}
 	else if (player2 != NULL && player2 == OtherActor)//player2->GetActorLabel() == OtherActor->GetActorLabel())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player 2 checked"));
+		//printScreen(FColor::Red, "Player 2 checked");
 		//UE_LOG(LogTemp, Warning, TEXT("Player 2 checked"));
 		return true;
 	}

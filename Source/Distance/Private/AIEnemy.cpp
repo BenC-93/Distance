@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "DistanceCharacter.h"
+#include "Engine.h"
 #include "AIEnemy.h"
 
 AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
@@ -292,6 +293,8 @@ bool AAIEnemy::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% positive 
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+	GEngine->bEnableOnScreenDebugMessages = true;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Pop poop pop boop"));
 	//UE_LOG(LogTemp, Warning, TEXT("Player actually is: %s"), *player1->GetActorLabel());// these are messages for checking if we collide with the player or not
 	//UE_LOG(LogTemp, Warning, TEXT("Player checked is: %s"), *OtherActor->GetActorLabel());
 	//UE_LOG(LogTemp, Warning, TEXT("Are they the same?: %d"), ((player1 == OtherActor)));// ? "Yes" : "No"));

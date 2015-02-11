@@ -71,6 +71,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	TArray<class AItem*> GetInventory();
 
+	/* Toggle visibility of inventory GUI */
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	void ToggleInventory();
+
 
 	UFUNCTION(BlueprintCallable, Category = Light)
 	void ChangeLight(float lightAmount);

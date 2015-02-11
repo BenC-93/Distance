@@ -22,7 +22,7 @@ public:
 	FString name;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
-	bool bIsEnabled;
+	bool isInUse;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
 	float amount;

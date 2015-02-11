@@ -30,12 +30,14 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAction("SetDestination", IE_Pressed, this, &ADistancePlayerController::OnSetDestinationPressed);
 	InputComponent->BindAction("SetDestination", IE_Released, this, &ADistancePlayerController::OnSetDestinationReleased);
 
+	InputComponent->BindAction("SetTarget", IE_Pressed, this, &ADistancePlayerController::OnSetTargetPressed);
+
 	// support touch devices 
 	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ADistancePlayerController::MoveToTouchLocation);
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ADistancePlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("UseItem", IE_Pressed, this, &ADistancePlayerController::OnUseItemPressed);
-	//InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::);
+	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
 }
 
 void ADistancePlayerController::MoveToMouseCursor()
@@ -98,6 +100,14 @@ void ADistancePlayerController::OnSetDestinationReleased()
 	bMoveToMouseCursor = false;
 }
 
+void ADistancePlayerController::OnSetTargetPressed()
+{
+	FHitResult Hit;
+	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+
+	// Handle different Hit types here!
+}
+
 void ADistancePlayerController::OnUseItemPressed()
 {
 	if (DistanceCharacterClass == NULL)
@@ -111,6 +121,11 @@ void ADistancePlayerController::OnUseItemPressed()
 		return;
 	}
 	DistanceCharacterClass->GetLight()->Use();
+}
+
+void ADistancePlayerController::OnInventoryPressed()
+{
+	DistanceCharacterClass->ToggleInventory();
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

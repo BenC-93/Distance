@@ -96,6 +96,14 @@ TArray<class AItem*> ADistanceCharacter::GetInventory()
 	return Inventory;
 }
 
+void ADistanceCharacter::ToggleInventory()
+{
+	// Toggle visibility of inventory GUI
+}
+
+/* BELOW ARE THE OLD ITEM HANDLING FUNCTIONS. THEY ARE SUBJECT TO CHANGE.
+ * PLEASE USE NEW FUNCTIONS ABOVE. */
+
 /**
 * ChangeHealth()
 * 
@@ -203,7 +211,7 @@ bool ADistanceCharacter::getLightEnabled()
 	{
 		return false;
 	}
-	return GetLight()->bIsEnabled;
+	return GetLight()->isInUse;
 }
 
 void ADistanceCharacter::ChangeSpeed(float speedAmount)

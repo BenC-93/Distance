@@ -45,3 +45,16 @@ void AItem::OnUnequip()
 {
 
 }
+
+void AItem::Pickup()
+{
+	if (SpriteComponent)
+	{
+		SpriteComponent->DestroyComponent();
+	}
+}
+
+void AItem::Drop()
+{
+
+}

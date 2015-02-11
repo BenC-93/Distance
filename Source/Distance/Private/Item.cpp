@@ -6,7 +6,7 @@
 AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	bIsEnabled = false;
+	isInUse = false;
 	amount = 100.0f;
 	maxAmount = 100.0f;
 
@@ -23,8 +23,8 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 
 void AItem::Use()
 {
-	bIsEnabled = !bIsEnabled;
-	if (bIsEnabled)//may or may not need to check this if im just toggling
+	isInUse = !isInUse;
+	if (isInUse)//may or may not need to check this if im just toggling
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Item is: Enabled"));
 		SpriteComponent->SetVisibility(true);
@@ -38,12 +38,14 @@ void AItem::Use()
 
 void AItem::OnEquip()
 {
-
+	// Do any special effects like particles, or effects to the player
+	// (that need to happen for all items)
 }
 
 void AItem::OnUnequip()
 {
-
+	// Do any special effects like particles, or effects to the player
+	// (that need to happen for all items)
 }
 
 void AItem::Pickup()
@@ -56,5 +58,7 @@ void AItem::Pickup()
 
 void AItem::Drop()
 {
-
+	// Change the input to this function to take a world location
+	// Move (teleport) this object to that location
+	// Enable the visual component
 }

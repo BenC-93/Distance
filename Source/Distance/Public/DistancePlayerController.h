@@ -37,7 +37,10 @@ protected:
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
 
+	/* Handle all mouse/touch input */
+	void OnSetTargetPressed();
 	void OnUseItemPressed();
+	void OnInventoryPressed();
 
 	UPROPERTY(transient)
 	class ADistanceCharacter* DistanceCharacterClass;

@@ -17,7 +17,10 @@ class DISTANCE_API AItem : public AActor
 public:
 
 	AItem(const FObjectInitializer& ObjectInitializer);
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	FString name;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
 	bool bIsEnabled;
 
@@ -30,9 +33,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Root, meta = (AllowPrivateAccess = "true"))
 	class USceneComponent *RootSceneComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent* SpriteComponent;
-
+	
 	UFUNCTION(BlueprintCallable, Category = Item)
 	void Use();
 
@@ -41,4 +44,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Item)
 	void OnUnequip();
+
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void Pickup();
+
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void Drop();
 };

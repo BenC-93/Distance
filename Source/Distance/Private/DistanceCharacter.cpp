@@ -12,7 +12,7 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	Health = 100.0f;
 	MaxHealth = 100.0f;
 	BaseDamage = 20.0f;
-	EquippedItem = 0;
+	EquippedSlot = 0;
 
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -55,6 +55,45 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	//some C++ class constructor 
 	//Your BP of the base C++ class static ConstructorHelpers::FObjectFinder YourBPOb(TEXT("Blueprint'/Game/Characters/YourBP.YourBP'")); 
 	//if (YourBPOb.Object != NULL) { YourBPBaseClassPtr = Cast(YourBPOb.Object->GeneratedClass); }
+}
+
+void ADistanceCharacter::PickupItem(AItem* Item)
+{
+	if (Item)
+	{
+		Inventory.Add(Item);
+		Item->Pickup();
+	}
+}
+
+void ADistanceCharacter::DropItem(int32 InvSlot)
+{
+	if (Inventory.IsValidIndex(InvSlot))
+	{
+		// Need to create the item in the world,
+		// before removing it from the array
+		Inventory.RemoveAt(InvSlot);
+	}
+}
+
+void ADistanceCharacter::EquipItem(int32 InvSlot)
+{
+	if (Inventory.IsValidIndex(InvSlot))
+	{
+		Inventory[EquippedSlot]->OnUnequip();
+		EquippedSlot = InvSlot;
+		Inventory[EquippedSlot]->OnEquip();
+	}
+}
+
+void ADistanceCharacter::UseItem()
+{
+	Inventory[EquippedSlot]->Use();
+}
+
+TArray<class AItem*> ADistanceCharacter::GetInventory()
+{
+	return Inventory;
 }
 
 /**

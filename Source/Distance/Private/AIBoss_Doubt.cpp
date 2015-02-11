@@ -1,7 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Distance.h"
+#include "Engine.h"
 #include "AIBoss_Doubt.h"
+
+#define print(c, text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, c, text)
 
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -9,6 +12,9 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	health = 0.0f;
 	maxHealth = 100.0f;//TODO: will change
 	baseDamage = 20.0f;//TODO: will change
+
+	p1InTrigger = false;
+	p2InTrigger = false;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
@@ -36,6 +42,32 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
+
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+}
+
+void AAIBoss_Doubt::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (player != NULL)
+	{
+		if (p1InTrigger && p2InTrigger)//checks and sets the current player target to the closest player
+		{
+			if (ClosestPlayer() == player1)
+			{
+				currentPlayer = player1;
+				player = Cast<ADistanceCharacter>(currentPlayer);
+				UE_LOG(LogTemp, Warning, TEXT("Boss targeting: Player1"));
+			}
+			else
+			{
+				currentPlayer = player2;
+				player = Cast<ADistanceCharacter>(currentPlayer);
+				UE_LOG(LogTemp, Warning, TEXT("Boss targeting: Player2"));
+			}
+		}
+	}
 }
 
 void AAIBoss_Doubt::ChangeHealth(float amount)
@@ -48,12 +80,43 @@ void AAIBoss_Doubt::Attack(float amount)
 
 }
 
+ACharacter* AAIBoss_Doubt::ClosestPlayer()//assuming player 1 and player 2
+{
+	float p1Dist = AbsoluteVal((GetActorLocation() - player1->GetActorLocation()).Size());
+	float p2Dist = AbsoluteVal((GetActorLocation() - player2->GetActorLocation()).Size());
+	if (p1Dist < p2Dist)
+	{
+		return player1;
+	}
+	else
+	{
+		return player2;
+	}
+}
+
+float AAIBoss_Doubt::AbsoluteVal(float amount)//fmath::abs didnt work so...
+{
+	if (amount < 0)
+	{
+		return 0 - amount;
+	}
+	return amount;
+}
+
 void AAIBoss_Doubt::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
+			if (player1 == OtherActor)
+			{
+				p1InTrigger = true;
+			}
+			else
+			{
+				p2InTrigger = true;
+			}
 			UE_LOG(LogTemp, Warning, TEXT("****Player Entered BOSS Triggered Area"));
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
@@ -68,6 +131,14 @@ void AAIBoss_Doubt::OnOverlapEnd_Implementation(class AActor* OtherActor, class 
 		if (CheckIfPlayer(OtherActor))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("****Player Exited BOSS Triggered Area"));
+			if (player1 == OtherActor)
+			{
+				p1InTrigger = false;
+			}
+			else
+			{
+				p2InTrigger = false;
+			}
 		}
 	}
 }
@@ -96,15 +167,22 @@ bool AAIBoss_Doubt::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% posi
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+
+	GEngine->bEnableOnScreenDebugMessages = true;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Checking"));
 	//UE_LOG(LogTemp, Warning, TEXT("Player actually is: %s"), *player1->GetActorLabel());// these are messages for checking if we collide with the player or not
 	//UE_LOG(LogTemp, Warning, TEXT("Player checked is: %s"), *OtherActor->GetActorLabel());
 	//UE_LOG(LogTemp, Warning, TEXT("Are they the same?: %d"), ((player1 == OtherActor)));// ? "Yes" : "No"));
 	if (player1 != NULL && player1 == OtherActor)//player1->GetActorLabel() == OtherActor->GetActorLabel())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player 1 checked"));
+		//UE_LOG(LogTemp, Warning, TEXT("Player 1 checked"));
 		return true;
 	}
 	else if (player2 != NULL && player2 == OtherActor)//player2->GetActorLabel() == OtherActor->GetActorLabel())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player 2 checked"));
+		//UE_LOG(LogTemp, Warning, TEXT("Player 2 checked"));
 		return true;
 	}
 	return false;

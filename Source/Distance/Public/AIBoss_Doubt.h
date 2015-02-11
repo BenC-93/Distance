@@ -19,6 +19,8 @@ class DISTANCE_API AAIBoss_Doubt : public ACharacter
 public:
 	AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer);
 
+	virtual void Tick(float DeltaTime) override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
 	class UPaperSpriteComponent* SpriteComponent;
 
@@ -61,8 +63,15 @@ private:
 	float maxHealth;
 	float baseDamage;
 
+	bool p1InTrigger;
+	bool p2InTrigger;
+
 	void ChangeHealth(float amount);
 
 	void Attack(float amount);
+
+	ACharacter* ClosestPlayer();
+
+	float AbsoluteVal(float amount);
 	
 };

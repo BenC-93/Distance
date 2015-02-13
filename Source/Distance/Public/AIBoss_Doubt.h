@@ -56,6 +56,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class ADistanceCharacter* player;
+
+	void PullPlayer();
+
+	float attackInterval;
+	void AttackTimer();
+	void StartAttackTimer();
 	
 private:
 
@@ -73,5 +79,4 @@ private:
 	ACharacter* ClosestPlayer();
 
 	float AbsoluteVal(float amount);
-	
 };

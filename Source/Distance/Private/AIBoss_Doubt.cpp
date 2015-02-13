@@ -6,12 +6,14 @@
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	health = 0.0f;
+	health = 100.0f;
 	maxHealth = 100.0f;//TODO: will change
 	baseDamage = 20.0f;//TODO: will change
 
 	p1InTrigger = false;
 	p2InTrigger = false;
+
+	attackInterval = -1;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
@@ -49,22 +51,63 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (player != NULL)
 	{
-		if (p1InTrigger && p2InTrigger)//checks and sets the current player target to the closest player
+		if (health > 0)
 		{
-			if (ClosestPlayer() == player1)
+			if (p1InTrigger && p2InTrigger)//checks and sets the current player target to the closest player
 			{
-				currentPlayer = player1;
-				player = Cast<ADistanceCharacter>(currentPlayer);
-				//printScreen(FColor::Red, "Boss targeting: Player1");
+				if (ClosestPlayer() == player1)
+				{
+					currentPlayer = player1;
+					player = Cast<ADistanceCharacter>(currentPlayer);
+					if (attackInterval < 0)
+					{
+						StartAttackTimer();
+					}
+					//printScreen(FColor::Red, "Boss targeting: Player1");
+				}
+				else
+				{
+					currentPlayer = player2;
+					player = Cast<ADistanceCharacter>(currentPlayer);
+					if (attackInterval < 0)
+					{
+						StartAttackTimer();
+					}
+					//printScreen(FColor::Red, "Boss targeting: Player2");
+				}
 			}
-			else
+
+			if (attackInterval == 0)//grabbed player
 			{
-				currentPlayer = player2;
-				player = Cast<ADistanceCharacter>(currentPlayer);
-				//printScreen(FColor::Red, "Boss targeting: Player2");
+				attackInterval = -1;//make sure this if statement only happens once
+				printScreen(FColor::Red, "Boss making an attack");
+				//PullPlayer();
 			}
 		}
 	}
+}
+
+void AAIBoss_Doubt::PullPlayer()
+{
+	//stop player input to movement
+	//player->GetController()->ClientSetLocation
+}
+
+void AAIBoss_Doubt::AttackTimer()
+{
+	if (attackInterval <= 0)
+	{
+		attackInterval = -1;
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
+	}
+	attackInterval -= 1;
+}
+
+void AAIBoss_Doubt::StartAttackTimer()
+{
+	attackInterval = 3;//initialization of counter in seconds to countdown
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::AttackTimer, 1.0f, true);
 }
 
 void AAIBoss_Doubt::ChangeHealth(float amount)
@@ -117,6 +160,10 @@ void AAIBoss_Doubt::OnOverlapBegin_Implementation(class AActor* OtherActor, clas
 			UE_LOG(LogTemp, Warning, TEXT("****Player Entered BOSS Triggered Area"));
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
+			if (attackInterval < 0)
+			{
+				StartAttackTimer();
+			}
 		}
 	}
 }

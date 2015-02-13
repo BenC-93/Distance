@@ -2,13 +2,17 @@
 
 #include "Distance.h"
 #include "Item.h"
+#include <cmath>
 
 AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	droppable = true;
 	isInUse = false;
 	amount = 100.0f;
 	maxAmount = 100.0f;
+	regenRate = 1.0f;
+	regenAmount = 1.0f;
 
 
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
@@ -21,19 +25,14 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	//SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite> (TEXT("/Game/Sprites/Lantern_Sprite")));
 }
 
-void AItem::Use()
+void AItem::StartUse()
 {
-	isInUse = !isInUse;
-	if (isInUse)//may or may not need to check this if im just toggling
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Item is: Enabled"));
-		SpriteComponent->SetVisibility(true);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Item is: Disabled"));
-		SpriteComponent->SetVisibility(false);
-	}
+	isInUse = true; //this should be the first thing that happens
+}
+
+void AItem::EndUse()
+{
+	isInUse = false; //this should be the last thing that happens
 }
 
 void AItem::OnEquip()
@@ -61,4 +60,27 @@ void AItem::Drop()
 	// Change the input to this function to take a world location
 	// Move (teleport) this object to that location
 	// Enable the visual component
+}
+
+
+float AItem::GetAmount()
+{
+	return amount;
+}
+
+float AItem::GetMaxAmount()
+{
+	return maxAmount;
+}
+
+void AItem::ChangeAmount(float value)
+{
+	float tempAmount = GetAmount() + value;
+	tempAmount = fmax(0.0f, fmin(100.0f, tempAmount));
+	amount = tempAmount;
+}
+
+void AItem::Regenerate()
+{
+	ChangeAmount(regenAmount);
 }

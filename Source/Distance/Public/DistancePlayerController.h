@@ -20,6 +20,8 @@ public:
 
 	bool canMove;
 
+	bool attackBoss;//Temporary Bool, for boss testing***************************************
+
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -43,6 +45,8 @@ protected:
 	void OnSetTargetPressed();
 	void OnUseItemPressed();
 	void OnInventoryPressed();
+
+	void OnAttackBoss();//Temporary Binding, for boss testing***************************************
 
 	UPROPERTY(transient)
 	class ADistanceCharacter* DistanceCharacterClass;

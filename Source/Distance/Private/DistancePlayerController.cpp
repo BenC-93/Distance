@@ -10,6 +10,8 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	canMove = true;
+
+	attackBoss = false;//Temporary Bool, for boss testing***************************************
 }
 
 void ADistancePlayerController::PlayerTick(float DeltaTime)
@@ -39,6 +41,8 @@ void ADistancePlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("UseItem", IE_Pressed, this, &ADistancePlayerController::OnUseItemPressed);
 	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
+
+	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnAttackBoss);//Temporary Binding, for boss testing***************************************
 }
 
 void ADistancePlayerController::MoveToMouseCursor()
@@ -127,6 +131,11 @@ void ADistancePlayerController::OnUseItemPressed()
 void ADistancePlayerController::OnInventoryPressed()
 {
 	DistanceCharacterClass->ToggleInventory();
+}
+
+void ADistancePlayerController::OnAttackBoss()//Temporary Binding, for boss testing***************************************
+{
+	attackBoss = true;
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

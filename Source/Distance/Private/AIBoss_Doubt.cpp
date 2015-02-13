@@ -6,9 +6,11 @@
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	health = 100.0f;
-	maxHealth = 100.0f;//TODO: will change
-	baseDamage = 20.0f;//TODO: will change
+	Health = 100.0f;
+	MaxHealth = 100.0f;//TODO: will change
+	baseDamage = -1.0f;//TODO: will change along with other vars here
+	tentacleHealth = 10.0f;
+	numTentacles = 5;
 
 	p1InTrigger = false;
 	p2InTrigger = false;
@@ -49,7 +51,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (player != NULL)
 	{
-		if (health > 0)
+		if (Health > 0)
 		{
 			if (p1InTrigger && p2InTrigger)//checks and sets the current player target to the closest player
 			{
@@ -60,45 +62,79 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 					{
 						currentPlayer = player1;
 						player = Cast<ADistanceCharacter>(currentPlayer);
+						playerController = Cast<ADistancePlayerController>(player->GetController());
 						//printScreen(FColor::Red, "Boss targeting: Player1");
 					}
 					else
 					{
 						currentPlayer = player2;
 						player = Cast<ADistanceCharacter>(currentPlayer);
+						playerController = Cast<ADistancePlayerController>(player->GetController());
 						//printScreen(FColor::Red, "Boss targeting: Player2");
 					}
 				}
 			}
 		}
+
+		//BEGIN TERRIBLENESS FOR PLAYER DEALING DAMAGE TO TENTACLE
+		player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+		if (player1 != NULL)//Temporary Check for player dealing damage to boss*********************************************
+		{
+			if (Cast<ADistancePlayerController>(player1->GetController())->attackBoss)//Players may use the '1' key/number on the keybord to attack
+			{
+				printScreen(FColor::Red, "Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
+				ChangeHealth(-5.0f);
+				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
+				Cast<ADistancePlayerController>(player1->GetController())->attackBoss = false;
+			}
+		}
+		if (player2 != NULL)
+		{
+			if (Cast<ADistancePlayerController>(player2->GetController())->attackBoss)
+			{
+				printScreen(FColor::Red, "Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
+				ChangeHealth(-5.0f);
+				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
+				Cast<ADistancePlayerController>(player2->GetController())->attackBoss = false;
+			}
+		}
+		if (player1 == NULL && player2 == NULL)
+		{
+			printScreen(FColor::Red, "What happened, Bad stuff!");
+		}
+		//END TERRIBLENESS
 	}
 }
 
 void AAIBoss_Doubt::PullPlayer()
 {
 	player->ChangeSpeed(100);
-	ADistancePlayerController* playerController = Cast<ADistancePlayerController>(player->GetController());
 	playerController->canMove = false;
 	playerController->SetNewMoveDestination(GetActorLocation());
 }
 
 void AAIBoss_Doubt::ReleasePlayer()
 {
-	ADistancePlayerController* playerController = Cast<ADistancePlayerController>(player->GetController());
+	if (!playerController->canMove)//if they were under ai control, stop moving them
+	{
+		playerController->SetNewMoveDestination(player->GetActorLocation() - FVector(121.0f, 0.0f, 0.0f));//for stopping the last forced move
+	}
 	playerController->canMove = true;
 	player->ChangeSpeed(600);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 }
 
 void AAIBoss_Doubt::DrainPlayer()
 {
 	if (player->getLightEnabled() && player->getLightAmount() > 0)
 	{
-		player->ChangeLight(-1.0f);
+		player->ChangeLight(baseDamage);
 	}
 	else
 	{
-		player->ChangeHealth(-1.0f);
+		player->ChangeHealth(baseDamage);
 	}
 }
 
@@ -108,7 +144,6 @@ void AAIBoss_Doubt::AttackTimer()
 	PullPlayer();
 	StartDrainTimer(0.25f);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
-	
 }
 
 void AAIBoss_Doubt::StartAttackTimer(float rate)
@@ -119,13 +154,12 @@ void AAIBoss_Doubt::StartAttackTimer(float rate)
 
 void AAIBoss_Doubt::DrainTimer()
 {
-	printScreen(FColor::Red, "Draining");
+	//printScreen(FColor::Red, "Draining");
 	DrainPlayer();
-	if (player->Health == 0)//we "killed" the player,
+	if (player->Health == 0)//we "killed" the player, oops lol
 	{
 		ReleasePlayer();
 	}
-
 }
 
 void AAIBoss_Doubt::StartDrainTimer(float rate)
@@ -134,9 +168,65 @@ void AAIBoss_Doubt::StartDrainTimer(float rate)
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::DrainTimer, rate, true);
 }
 
-void AAIBoss_Doubt::ChangeHealth(float amount)
+void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
 {
+	if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
+	{
+		float tempTentacleHealth = tentacleHealth + healthAmount;
+		if (tempTentacleHealth <= 0)//defeated current tentacle
+		{
+			tentacleHealth = 0;
+			float tempHealth = Health - 10;//since we defeated a tentacle, we do small amount of damage to boss too!
+			if (tempHealth <= MaxHealth)
+			{
+				if (tempHealth < 0)
+				{
+					Health = 0.0f;//Defeated boss!
+				}
+				else
+				{
+					Health = tempHealth;
+				}
+			}
+			ReleasePlayer();
+			numTentacles--;
+			if (numTentacles > 0)//there are still tentacles left 
+			{
+				tentacleHealth = 10;//reset tentacle health
+				StartAttackTimer(3.0f);
+			}
+		}
+		else //tentacle still has health
+		{
+			tentacleHealth = tempTentacleHealth;
+		}
+	}
+	else if (playerController->canMove)//else if no player is grabbed, deal damage to the actual boss
+	{
+		float tempHealth = Health + healthAmount;
+		if (tempHealth <= MaxHealth)
+		{
+			if (tempHealth < 0)
+			{
+				Health = 0.0f;//Defeated boss!
+				ReleasePlayer();
+			}
+			else
+			{
+				Health = tempHealth;
+			}
+		}
+	}
+}
 
+float AAIBoss_Doubt::GetHealth()
+{
+	return Health;
+}
+
+float AAIBoss_Doubt::GetMaxTentacleHealth()
+{
+	return tentacleHealth;
 }
 
 void AAIBoss_Doubt::Attack(float amount)
@@ -184,6 +274,7 @@ void AAIBoss_Doubt::OnOverlapBegin_Implementation(class AActor* OtherActor, clas
 			UE_LOG(LogTemp, Warning, TEXT("****Player Entered BOSS Triggered Area"));
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
+			playerController = Cast<ADistancePlayerController>(player->GetController());
 			StartAttackTimer(3.0f);
 		}
 	}

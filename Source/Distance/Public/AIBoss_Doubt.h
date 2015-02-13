@@ -58,6 +58,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class ADistanceCharacter* player;
 
+	UPROPERTY(EditAnywhere)
+	class ADistancePlayerController* playerController;
+
 	void PullPlayer();
 	void ReleasePlayer();
 	void DrainPlayer();
@@ -66,17 +69,22 @@ public:
 	void StartAttackTimer(float rate);
 	void DrainTimer();
 	void StartDrainTimer(float rate);
+
+	void ChangeHealth(float healthAmount);
+
+	float GetHealth();
+	float GetMaxTentacleHealth();
 	
 private:
 
-	float health;
-	float maxHealth;
+	float Health;
+	float MaxHealth;
+	float tentacleHealth;
+	int numTentacles;
 	float baseDamage;
 
 	bool p1InTrigger;
 	bool p2InTrigger;
-
-	void ChangeHealth(float amount);
 
 	void Attack(float amount);
 

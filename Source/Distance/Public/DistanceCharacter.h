@@ -75,7 +75,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void ToggleInventory();
 
-
+	/* The following functions are depreciated and will be removed soon:
+	   ChangeLight, getLightAmount, getMaxLightAmount, getLightEnabled,
+	   RegenerateLight */
 	UFUNCTION(BlueprintCallable, Category = Light)
 	void ChangeLight(float lightAmount);
 

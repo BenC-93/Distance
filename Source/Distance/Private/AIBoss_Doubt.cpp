@@ -13,8 +13,6 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	p1InTrigger = false;
 	p2InTrigger = false;
 
-	attackInterval = -1;
-
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
 	SpriteComponent->AttachTo(RootComponent);
@@ -55,33 +53,22 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		{
 			if (p1InTrigger && p2InTrigger)//checks and sets the current player target to the closest player
 			{
-				if (ClosestPlayer() == player1)
+				ACharacter *closestPlayer = ClosestPlayer();
+				if (closestPlayer != player)
 				{
-					currentPlayer = player1;
-					player = Cast<ADistanceCharacter>(currentPlayer);
-					if (attackInterval < 0)
+					if (ClosestPlayer() == player1)
 					{
-						StartAttackTimer();
+						currentPlayer = player1;
+						player = Cast<ADistanceCharacter>(currentPlayer);
+						//printScreen(FColor::Red, "Boss targeting: Player1");
 					}
-					//printScreen(FColor::Red, "Boss targeting: Player1");
-				}
-				else
-				{
-					currentPlayer = player2;
-					player = Cast<ADistanceCharacter>(currentPlayer);
-					if (attackInterval < 0)
+					else
 					{
-						StartAttackTimer();
+						currentPlayer = player2;
+						player = Cast<ADistanceCharacter>(currentPlayer);
+						//printScreen(FColor::Red, "Boss targeting: Player2");
 					}
-					//printScreen(FColor::Red, "Boss targeting: Player2");
 				}
-			}
-
-			if (attackInterval == 0)//grabbed player
-			{
-				attackInterval = -1;//make sure this if statement only happens once
-				printScreen(FColor::Red, "Boss making an attack");
-				//PullPlayer();
 			}
 		}
 	}
@@ -89,25 +76,62 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 
 void AAIBoss_Doubt::PullPlayer()
 {
-	//stop player input to movement
-	//player->GetController()->ClientSetLocation
+	player->ChangeSpeed(100);
+	ADistancePlayerController* playerController = Cast<ADistancePlayerController>(player->GetController());
+	playerController->canMove = false;
+	playerController->SetNewMoveDestination(GetActorLocation());
+}
+
+void AAIBoss_Doubt::ReleasePlayer()
+{
+	ADistancePlayerController* playerController = Cast<ADistancePlayerController>(player->GetController());
+	playerController->canMove = true;
+	player->ChangeSpeed(600);
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+}
+
+void AAIBoss_Doubt::DrainPlayer()
+{
+	if (player->getLightEnabled() && player->getLightAmount() > 0)
+	{
+		player->ChangeLight(-1.0f);
+	}
+	else
+	{
+		player->ChangeHealth(-1.0f);
+	}
 }
 
 void AAIBoss_Doubt::AttackTimer()
 {
-	if (attackInterval <= 0)
-	{
-		attackInterval = -1;
-		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
-	}
-	attackInterval -= 1;
+	printScreen(FColor::Red, "Boss making an attack");
+	PullPlayer();
+	StartDrainTimer(0.25f);
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
+	
 }
 
-void AAIBoss_Doubt::StartAttackTimer()
+void AAIBoss_Doubt::StartAttackTimer(float rate)
 {
-	attackInterval = 3;//initialization of counter in seconds to countdown
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
-	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::AttackTimer, 1.0f, true);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::AttackTimer, rate, true);
+}
+
+void AAIBoss_Doubt::DrainTimer()
+{
+	printScreen(FColor::Red, "Draining");
+	DrainPlayer();
+	if (player->Health == 0)//we "killed" the player,
+	{
+		ReleasePlayer();
+	}
+
+}
+
+void AAIBoss_Doubt::StartDrainTimer(float rate)
+{
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::DrainTimer, rate, true);
 }
 
 void AAIBoss_Doubt::ChangeHealth(float amount)
@@ -160,10 +184,7 @@ void AAIBoss_Doubt::OnOverlapBegin_Implementation(class AActor* OtherActor, clas
 			UE_LOG(LogTemp, Warning, TEXT("****Player Entered BOSS Triggered Area"));
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
-			if (attackInterval < 0)
-			{
-				StartAttackTimer();
-			}
+			StartAttackTimer(3.0f);
 		}
 	}
 }

@@ -9,6 +9,7 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+	canMove = true;
 }
 
 void ADistancePlayerController::PlayerTick(float DeltaTime)
@@ -46,7 +47,7 @@ void ADistancePlayerController::MoveToMouseCursor()
 	FHitResult Hit;
 	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 
-	if (Hit.bBlockingHit)
+	if (Hit.bBlockingHit && canMove)
 	{
 		// We hit something, move there
 		SetNewMoveDestination(Hit.ImpactPoint);
@@ -60,7 +61,7 @@ void ADistancePlayerController::MoveToTouchLocation(const ETouchIndex::Type Fing
 	// Trace to see what is under the touch location
 	FHitResult HitResult;
 	GetHitResultAtScreenPosition(ScreenSpaceLocation, CurrentClickTraceChannel, true, HitResult);
-	if (HitResult.bBlockingHit)
+	if (HitResult.bBlockingHit && canMove)
 	{
 		// We hit something, move there
 		SetNewMoveDestination(HitResult.ImpactPoint);

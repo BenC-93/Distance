@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "DistanceCharacter.h"
+#include "DistancePlayerController.h"
 #include "Classes/PaperSpriteComponent.h"
 #include "AIBoss_Doubt.generated.h"
 
@@ -58,10 +59,13 @@ public:
 	class ADistanceCharacter* player;
 
 	void PullPlayer();
+	void ReleasePlayer();
+	void DrainPlayer();
 
-	float attackInterval;
 	void AttackTimer();
-	void StartAttackTimer();
+	void StartAttackTimer(float rate);
+	void DrainTimer();
+	void StartDrainTimer(float rate);
 	
 private:
 

@@ -12,6 +12,7 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	canMove = true;
 
 	attackBoss = false;//Temporary Bool, for boss testing***************************************
+	switchedItem = false;//Temporary Bool, for boss testing***************************************
 }
 
 void ADistancePlayerController::PlayerTick(float DeltaTime)
@@ -43,6 +44,7 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
 
 	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnAttackBoss);//Temporary Binding, for boss testing***************************************
+	InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnSwitchItem);//Temporary Binding, for boss testing***************************************
 }
 
 void ADistancePlayerController::MoveToMouseCursor()
@@ -136,6 +138,12 @@ void ADistancePlayerController::OnInventoryPressed()
 void ADistancePlayerController::OnAttackBoss()//Temporary Binding, for boss testing***************************************
 {
 	attackBoss = true;
+}
+
+void ADistancePlayerController::OnSwitchItem()//Temporary Binding, for boss testing***************************************
+{
+	printScreen(FColor::Red, "Switched Items");
+	switchedItem = true;
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

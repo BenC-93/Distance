@@ -21,6 +21,7 @@ public:
 	bool canMove;
 
 	bool attackBoss;//Temporary Bool, for boss testing***************************************
+	bool switchedItem;//Temporary Bool, for boss testing***************************************
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -47,6 +48,7 @@ protected:
 	void OnInventoryPressed();
 
 	void OnAttackBoss();//Temporary Binding, for boss testing***************************************
+	void OnSwitchItem();//Temporary Binding, for boss testing***************************************
 
 	UPROPERTY(transient)
 	class ADistanceCharacter* DistanceCharacterClass;

@@ -9,8 +9,11 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	Health = 100.0f;
 	MaxHealth = 100.0f;//TODO: will change
 	baseDamage = -1.0f;//TODO: will change along with other vars here
+	drainRate = 0.25f;
 	tentacleHealth = 10.0f;
 	numTentacles = 5;
+
+	swallowedPlayer = NULL;
 
 	p1InTrigger = false;
 	p2InTrigger = false;
@@ -29,7 +32,7 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 
 	AITriggerAttack = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerAttack"));
 	AITriggerAttack->Mobility = EComponentMobility::Movable;
-	AITriggerAttack->SetBoxExtent(FVector(300.0f, 300.0f, 60.0f), true);
+	AITriggerAttack->SetBoxExtent(FVector(150.0f, 100.0f, 60.0f), true);
 	AITriggerAttack->AttachTo(RootComponent);
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -58,7 +61,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 				ACharacter *closestPlayer = ClosestPlayer();
 				if (closestPlayer != player)
 				{
-					if (ClosestPlayer() == player1)
+					if (closestPlayer == player1)
 					{
 						currentPlayer = player1;
 						player = Cast<ADistanceCharacter>(currentPlayer);
@@ -73,6 +76,27 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 						//printScreen(FColor::Red, "Boss targeting: Player2");
 					}
 				}
+				//if swallowedPlayer == player -> then currentPlayer needs to be other player
+				if (swallowedPlayer != NULL)
+				{
+					if (swallowedPlayer == player)
+					{
+						printScreen(FColor::Red, "Resetting Target, one player has been swallowed");
+						if (player == player1)
+						{
+							currentPlayer = player2;
+							player = Cast<ADistanceCharacter>(currentPlayer);
+							playerController = Cast<ADistancePlayerController>(player->GetController());
+						}
+						else
+						{
+							currentPlayer = player1;
+							player = Cast<ADistanceCharacter>(currentPlayer);
+							playerController = Cast<ADistancePlayerController>(player->GetController());
+						}
+						StartAttackTimer(3.0f);//attack the new target
+					}
+				}
 			}
 		}
 
@@ -81,22 +105,42 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
 		if (player1 != NULL)//Temporary Check for player dealing damage to boss*********************************************
 		{
-			if (Cast<ADistancePlayerController>(player1->GetController())->attackBoss)//Players may use the '1' key/number on the keybord to attack
+			class ADistancePlayerController* tPController1 = Cast<ADistancePlayerController>(player1->GetController());
+			if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack
 			{
 				printScreen(FColor::Red, "Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
-				Cast<ADistancePlayerController>(player1->GetController())->attackBoss = false;
+				tPController1->attackBoss = false;
+			}
+			if (tPController1->switchedItem)//shield on = when this is false
+			{
+				if (!tPController1->canMove)
+				{
+					printScreen(FColor::Red, "Player1 was Released by switching Items");
+					ReleasePlayer(player1);
+				}
+				tPController1->switchedItem = false;
 			}
 		}
 		if (player2 != NULL)
 		{
-			if (Cast<ADistancePlayerController>(player2->GetController())->attackBoss)
+			class ADistancePlayerController* tPController2 = Cast<ADistancePlayerController>(player2->GetController());
+			if (tPController2->attackBoss)
 			{
 				printScreen(FColor::Red, "Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
-				Cast<ADistancePlayerController>(player2->GetController())->attackBoss = false;
+				tPController2->attackBoss = false;
+			}
+			if (tPController2->switchedItem)
+			{
+				if (!tPController2->canMove)
+				{
+					printScreen(FColor::Red, "Player2 was Released by switching Items");
+					ReleasePlayer(player2);
+				}
+				tPController2->switchedItem = false;
 			}
 		}
 		if (player1 == NULL && player2 == NULL)
@@ -107,42 +151,82 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 	}
 }
 
-void AAIBoss_Doubt::PullPlayer()
+void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 {
-	player->ChangeSpeed(100);
-	playerController->canMove = false;
-	playerController->SetNewMoveDestination(GetActorLocation());
-}
-
-void AAIBoss_Doubt::ReleasePlayer()
-{
-	if (!playerController->canMove)//if they were under ai control, stop moving them
+	if (tempChar == NULL)
 	{
-		playerController->SetNewMoveDestination(player->GetActorLocation() - FVector(121.0f, 0.0f, 0.0f));//for stopping the last forced move
+		UE_LOG(LogTemp, Error, TEXT("Error: PullPlayer, tempChar is Null."));
+		return;
 	}
-	playerController->canMove = true;
-	player->ChangeSpeed(600);
-	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
-	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
-}
 
-void AAIBoss_Doubt::DrainPlayer()
-{
-	if (player->getLightEnabled() && player->getLightAmount() > 0)
+	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
+	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
+
+	if (tempPlayer->getLightEnabled() && tempPlayer->getLightAmount() > 0)
 	{
-		player->ChangeLight(baseDamage);
+		tempPlayer->ChangeSpeed(50);//shield is enabled
 	}
 	else
 	{
-		player->ChangeHealth(baseDamage);
+		tempPlayer->ChangeSpeed(100);
+	}
+
+	tempPlayerController->canMove = false;
+	tempPlayerController->SetNewMoveDestination(GetActorLocation());
+}
+
+void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)
+{
+	if (tempChar == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: ReleasePlayer, tempChar is Null."));
+		return;
+	}
+
+	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
+	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
+
+	if (!tempPlayerController->canMove)//if they were under ai control, stop moving them
+	{
+		tempPlayerController->SetNewMoveDestination(tempPlayer->GetActorLocation() - FVector(121.0f, 0.0f, 0.0f));//for stopping the last forced move
+	}
+	tempPlayerController->canMove = true;
+	tempPlayer->ChangeSpeed(600);
+	if (tempPlayer == swallowedPlayer)//if releasing swallowed player -> stop its timer, and reset swallowed player to null so we can get a current closest player again (might happen instantly, idk)
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);
+		swallowedPlayer = NULL;
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+	}
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
+	//printScreen(FColor::Red, "Player was Released Normally");
+}
+
+void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
+{
+	if (tempPlayer == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: DrainPlayer, tempPlayer is Null."));
+		return;
+	}
+	if (tempPlayer->getLightEnabled() && tempPlayer->getLightAmount() > 0)
+	{
+		tempPlayer->ChangeLight(baseDamage);//shield is enabled
+	}
+	else
+	{
+		tempPlayer->ChangeHealth(baseDamage);
 	}
 }
 
 void AAIBoss_Doubt::AttackTimer()
 {
 	printScreen(FColor::Red, "Boss making an attack");
-	PullPlayer();
-	StartDrainTimer(0.25f);
+	PullPlayer(player);
+	StartDrainTimer(drainRate);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 }
 
@@ -155,10 +239,10 @@ void AAIBoss_Doubt::StartAttackTimer(float rate)
 void AAIBoss_Doubt::DrainTimer()
 {
 	//printScreen(FColor::Red, "Draining");
-	DrainPlayer();
+	DrainPlayer(player);
 	if (player->Health == 0)//we "killed" the player, oops lol
 	{
-		ReleasePlayer();
+		ReleasePlayer(player);
 	}
 }
 
@@ -168,27 +252,68 @@ void AAIBoss_Doubt::StartDrainTimer(float rate)
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::DrainTimer, rate, true);
 }
 
-void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
+void AAIBoss_Doubt::SwallowedTimer()
 {
+	if (swallowedPlayer == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: SwallowedTimer, swallowedPlayer is Null."));
+		return;
+	}
+	//printScreen(FColor::Red, "Draining Swallowed Player");
+	DrainPlayer(swallowedPlayer);
+	if (swallowedPlayer->Health == 0)//we "killed" the player, oops lol
+	{
+		ReleasePlayer(swallowedPlayer);
+	}
+}
+
+void AAIBoss_Doubt::StartSwallowedTimer(float rate)
+{
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::SwallowedTimer, rate, true);
+}
+
+void AAIBoss_Doubt::EndOfBoss()
+{
+	if (swallowedPlayer != NULL)
+	{
+		ReleasePlayer(swallowedPlayer);
+	}
+	if (!playerController->canMove)
+	{
+		ReleasePlayer(player);
+		player = NULL;
+	}
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
+	printScreen(FColor::Red, "End of Boss");
+}
+
+void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
+{//TODO: something weird is happening where if player1 does damage its fine, but then if player2 does damage, its as if the boss has full health again, and when the boss has 0 health it still does stuff
 	if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
 	{
 		float tempTentacleHealth = tentacleHealth + healthAmount;
 		if (tempTentacleHealth <= 0)//defeated current tentacle
 		{
 			tentacleHealth = 0;
+			//begin extra boss dmg-----
 			float tempHealth = Health - 10;//since we defeated a tentacle, we do small amount of damage to boss too!
 			if (tempHealth <= MaxHealth)
 			{
 				if (tempHealth < 0)
 				{
 					Health = 0.0f;//Defeated boss!
+					EndOfBoss();
 				}
 				else
 				{
 					Health = tempHealth;
 				}
 			}
-			ReleasePlayer();
+			//end extra boss dmg-----
+			ReleasePlayer(player);
 			numTentacles--;
 			if (numTentacles > 0)//there are still tentacles left 
 			{
@@ -209,7 +334,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 			if (tempHealth < 0)
 			{
 				Health = 0.0f;//Defeated boss!
-				ReleasePlayer();
+				EndOfBoss();
 			}
 			else
 			{
@@ -305,6 +430,13 @@ void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
+			if (!playerController->canMove && swallowedPlayer == NULL)//Can't move, therefore, i've dragged them in, and swallowed them
+			{
+				//set swallowed player
+				printScreen(FColor::Red, "Beginning Draining Swallowed Player.");
+				swallowedPlayer = player;
+				StartSwallowedTimer(drainRate / 1.5f);//drainRate = 0.25f normally
+			}
 		}
 	}
 }

@@ -56,19 +56,26 @@ public:
 	class ACharacter* currentPlayer;
 
 	UPROPERTY(EditAnywhere)
+	class ADistanceCharacter* swallowedPlayer;
+
+	UPROPERTY(EditAnywhere)
 	class ADistanceCharacter* player;
 
 	UPROPERTY(EditAnywhere)
 	class ADistancePlayerController* playerController;
 
-	void PullPlayer();
-	void ReleasePlayer();
-	void DrainPlayer();
+	void PullPlayer(class ACharacter* tempChar);
+	void ReleasePlayer(class ACharacter* tempChar);
+	void DrainPlayer(class ADistanceCharacter* tempPlayer);
 
 	void AttackTimer();
 	void StartAttackTimer(float rate);
 	void DrainTimer();
 	void StartDrainTimer(float rate);
+	void SwallowedTimer();
+	void StartSwallowedTimer(float rate);
+
+	void EndOfBoss();
 
 	void ChangeHealth(float healthAmount);
 
@@ -82,6 +89,7 @@ private:
 	float tentacleHealth;
 	int numTentacles;
 	float baseDamage;
+	float drainRate;
 
 	bool p1InTrigger;
 	bool p2InTrigger;

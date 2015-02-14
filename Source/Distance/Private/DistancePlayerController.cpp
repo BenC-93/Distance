@@ -125,7 +125,7 @@ void ADistancePlayerController::OnUseItemPressed()
 		UE_LOG(LogTemp, Warning, TEXT("Light is null."));
 		return;
 	}
-	DistanceCharacterClass->GetLight()->Use();
+	DistanceCharacterClass->GetLight()->StartUse();
 }
 
 void ADistancePlayerController::OnInventoryPressed()

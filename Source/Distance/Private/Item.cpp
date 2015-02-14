@@ -39,12 +39,14 @@ void AItem::OnEquip()
 {
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
+	GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
 }
 
 void AItem::OnUnequip()
 {
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
+	GetWorldTimerManager().ClearTimer(this, &AItem::Regenerate);
 }
 
 void AItem::Pickup()
@@ -60,6 +62,7 @@ void AItem::Drop()
 	// Change the input to this function to take a world location
 	// Move (teleport) this object to that location
 	// Enable the visual component
+	isInUse = false;
 }
 
 

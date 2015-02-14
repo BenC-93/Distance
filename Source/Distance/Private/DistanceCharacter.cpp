@@ -88,7 +88,7 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 
 void ADistanceCharacter::UseItem()
 {
-	Inventory[EquippedSlot]->Use();
+	Inventory[EquippedSlot]->StartUse();
 }
 
 TArray<class AItem*> ADistanceCharacter::GetInventory()

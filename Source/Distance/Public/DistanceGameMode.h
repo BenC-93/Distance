@@ -10,7 +10,9 @@ class ADistanceGameMode : public AGameMode
 	GENERATED_BODY()
 
 	UPROPERTY(Category=Items, EditAnywhere)
-	TSubclassOf<UItemDataList> ItemList;
+	TSubclassOf<class UItemDataList> ItemList;
+	
+	UItemDataList* ActualItemList;
 public:
 	ADistanceGameMode(const FObjectInitializer& ObjectInitializer);
 

@@ -18,6 +18,6 @@ public:
 	UPROPERTY(Category=Items, EditAnywhere)
 	TArray<TSubclassOf<AItem>> ItemTypes;
 	
-	UFUNCTION(BlueprintCallable, Category = Item List)
+	UFUNCTION(BlueprintCallable, Category = ItemList)
 	class TSubclassOf<AItem> ItemAtIndex(uint32 index);
 };

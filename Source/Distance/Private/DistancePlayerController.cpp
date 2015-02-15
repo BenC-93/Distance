@@ -183,13 +183,7 @@ void ADistancePlayerController::OnAttackBoss()//Temporary Binding, for boss test
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
 {
-	FHitResult Hit;
-	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
-	if (Hit.bBlockingHit)
-	{
-		FVector blah = FVector(Hit.ImpactPoint.X, Hit.ImpactPoint.Y, Hit.ImpactPoint.Z+100.0f);
-		GetWorld()->SpawnActor<AItemLantern>(LanternClass, blah, FRotator(0,0,0));
-	}
+	((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnItem();
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

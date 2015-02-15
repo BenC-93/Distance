@@ -22,12 +22,12 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 	}
 }
 
-void ADistanceGameMode::SpawnItem()
+class AItem* ADistanceGameMode::SpawnItem()
 {
 	printScreen(FColor::Red, "Spawning The thing");
 	TSubclassOf<class AItem> ItemClass;
 	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
 	ACharacter* player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation()));
+	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
 }

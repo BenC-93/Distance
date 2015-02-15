@@ -2,6 +2,7 @@
 #pragma once
 #include "GameFramework/GameMode.h"
 #include "ItemDataList.h"
+#include "Item.h"
 #include "DistanceGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -16,5 +17,5 @@ public:
 	TArray<TSubclassOf<AItem>> ItemTypes;
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
-	void SpawnItem();
+	class AItem* SpawnItem();
 };

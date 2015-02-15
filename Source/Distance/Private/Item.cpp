@@ -13,6 +13,7 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	maxAmount = 100.0f;
 	regenRate = 1.0f;
 	regenAmount = 1.0f;
+	name = "Default";
 
 
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));

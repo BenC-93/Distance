@@ -80,15 +80,24 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 {
 	if (Inventory.IsValidIndex(InvSlot))
 	{
+		//TODO: determine if this is where we stop item regeneration**********************************************
 		Inventory[EquippedSlot]->OnUnequip();
 		EquippedSlot = InvSlot;
 		Inventory[EquippedSlot]->OnEquip();
+		//TODO: determine if this is where we begin Item regeneration**********************************************
 	}
 }
 
 void ADistanceCharacter::UseItem()
 {
-	Inventory[EquippedSlot]->StartUse();
+	if (Inventory.IsValidIndex(EquippedSlot))
+	{
+		Inventory[EquippedSlot]->StartUse();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: UseItem, Invalid Item."));
+	}
 }
 
 TArray<class AItem*> ADistanceCharacter::GetInventory()
@@ -99,6 +108,15 @@ TArray<class AItem*> ADistanceCharacter::GetInventory()
 void ADistanceCharacter::ToggleInventory()
 {
 	// Toggle visibility of inventory GUI
+}
+
+FString ADistanceCharacter::GetItemName()
+{
+	if (Inventory.IsValidIndex(EquippedSlot))
+	{
+		return Inventory[EquippedSlot]->name;
+	}
+	return "Default";
 }
 
 /* BELOW ARE THE OLD ITEM HANDLING FUNCTIONS. THEY ARE SUBJECT TO CHANGE.
@@ -143,6 +161,7 @@ void ADistanceCharacter::RegenerateHealth()
 	}
 }
 
+//Will nolonger be used
 void ADistanceCharacter::RegenerateLight()
 {
 	if (GetLight() != NULL)
@@ -156,13 +175,31 @@ void ADistanceCharacter::RegenerateLight()
 	}
 }
 
+void ADistanceCharacter::RegenerateItem()
+{
+	if (GetEquippedItem() != NULL)
+	{
+		ChangeItemAmount(1.0);
+		if (GetItemAmount() >= GetMaxItemAmount())
+		{
+			GetWorldTimerManager().ClearTimer(this, &ADistanceCharacter::RegenerateItem);
+			UE_LOG(LogDistance, Verbose, TEXT("Light regeneration timer stopped, max light amount reached"));
+		}
+	}
+}
+
+void ADistanceCharacter::StartItemRegeneration()
+{
+	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateItem, 1.0f, true);
+}
+
 void ADistanceCharacter::StartRegeneration()
 {
 	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, 1.0f, true);
-	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateLight, 1.0f, true);
+	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateLight, 1.0f, true);//TODO: comment this out when ready
 	UE_LOG(LogDistance, Verbose, TEXT("Health and light regeneration timers are set"));
 }
-
+//*************************************************************************************************************Begin
 void ADistanceCharacter::ChangeLight(float lightAmount)
 {
 	if (GetLight() != NULL)
@@ -213,6 +250,57 @@ bool ADistanceCharacter::getLightEnabled()
 	}
 	return GetLight()->isInUse;
 }
+//*************************************************************************************************************End
+void ADistanceCharacter::ChangeItemAmount(float lightAmount)
+{
+	if (GetEquippedItem() != NULL)
+	{
+		float tempLight = GetItemAmount() + lightAmount;
+		if (tempLight <= GetMaxItemAmount())
+		{
+			if (tempLight < 0)
+			{
+				GetEquippedItem()->amount = 0.0f;
+			}
+			else
+			{
+				GetEquippedItem()->amount = tempLight;
+			}
+		}
+		// Send a verbose log message whenever reaching or passing light values divisible by 10
+		if (int(GetItemAmount()) % 10 == 0 || abs(lightAmount) >= 10)
+		{
+			UE_LOG(LogDistance, Verbose, TEXT("Changing Light Breakpoint: %f"), GetItemAmount());
+		}
+	}
+}
+
+float ADistanceCharacter::GetItemAmount()
+{
+	if (GetEquippedItem() == NULL)
+	{
+		return -1;
+	}
+	return GetEquippedItem()->amount;
+}
+
+float ADistanceCharacter::GetMaxItemAmount()
+{
+	if (GetEquippedItem() == NULL)
+	{
+		return -1;
+	}
+	return GetEquippedItem()->maxAmount;
+}
+
+bool ADistanceCharacter::GetItemEnabled()
+{
+	if (GetEquippedItem() == NULL)
+	{
+		return false;
+	}
+	return GetEquippedItem()->isInUse;
+}
 
 void ADistanceCharacter::ChangeSpeed(float speedAmount)
 {
@@ -222,6 +310,15 @@ void ADistanceCharacter::ChangeSpeed(float speedAmount)
 AItem* ADistanceCharacter::GetLight()
 {
 	return (AItem *)ItemComponent->ChildActor;
+}
+
+class AItem* ADistanceCharacter::GetEquippedItem()
+{
+	if (Inventory.IsValidIndex(EquippedSlot))
+	{
+		return Inventory[EquippedSlot];
+	}
+	return NULL;
 }
 
 /**

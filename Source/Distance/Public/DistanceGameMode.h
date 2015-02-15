@@ -9,13 +9,12 @@ class ADistanceGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category=Items, EditAnywhere)
-	TSubclassOf<class UItemDataList> ItemList;
-	
-	UItemDataList* ActualItemList;
 public:
 	ADistanceGameMode(const FObjectInitializer& ObjectInitializer);
 
+	UPROPERTY(Category=Items, EditAnywhere)
+	TArray<TSubclassOf<AItem>> ItemTypes;
+	
 	UFUNCTION(BlueprintCallable, Category = Items)
 	void SpawnItem();
 };

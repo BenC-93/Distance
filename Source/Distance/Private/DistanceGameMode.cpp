@@ -20,19 +20,13 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 		UE_LOG(LogDistance, Verbose, TEXT("Turning on on-screen debugging"));
 		GEngine->bEnableOnScreenDebugMessages = true;
 	}
-	if (ItemList) {
-		UE_LOG(LogDistance, Verbose, TEXT("Creating Item List"));
-		ActualItemList = ConstructObject<UItemDataList>(ItemList);
-	}
 }
 
 void ADistanceGameMode::SpawnItem()
 {
 	printScreen(FColor::Red, "Spawning The thing");
 	TSubclassOf<class AItem> ItemClass;
-	// Data wont cast, it's just the class?
-	//UItemDataList* data = Cast<UItemDataList>(ItemList);
-	ItemClass = ActualItemList->ItemAtIndex(0);
+	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
 	ACharacter* player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation()));

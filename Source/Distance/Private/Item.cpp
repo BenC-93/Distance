@@ -24,6 +24,11 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite> (TEXT("/Game/Sprites/Lantern_Sprite")));
+
+	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
+	TriggerBox->Mobility = EComponentMobility::Movable;
+	TriggerBox->SetBoxExtent(FVector(50.0f, 50.0f, 50.0f), true);
+	TriggerBox->AttachTo(RootComponent);
 }
 
 void AItem::StartUse()

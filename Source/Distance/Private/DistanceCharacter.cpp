@@ -63,6 +63,7 @@ void ADistanceCharacter::PickupItem(AItem* Item)
 	{
 		Inventory.Add(Item);
 		Item->Pickup();
+		printScreen(FColor::Red, TEXT("Pickup happened!"));
 	}
 }
 

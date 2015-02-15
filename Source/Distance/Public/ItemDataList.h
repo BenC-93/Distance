@@ -10,12 +10,14 @@
  * 
  */
 UCLASS()
-class DISTANCE_API UItemDataList : public UDataAsset
+class UItemDataList : public UDataAsset
 {
 	GENERATED_BODY()
 	
+public:
 	UPROPERTY(Category=Items, EditAnywhere)
 	TArray<TSubclassOf<AItem>> ItemTypes;
 	
-	
+	UFUNCTION(BlueprintCallable, Category = ItemList)
+	class TSubclassOf<AItem> ItemAtIndex(uint32 index);
 };

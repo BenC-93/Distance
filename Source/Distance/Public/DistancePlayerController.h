@@ -44,11 +44,13 @@ protected:
 
 	/* Handle all mouse/touch input */
 	void OnSetTargetPressed();
+	void OnSetTargetReleased();
 	void OnUseItemPressed();
 	void OnInventoryPressed();
 
 	void OnAttackBoss();//Temporary Binding, for boss testing***************************************
 	void OnSwitchItem();//Temporary Binding, for boss testing***************************************
+	void PleaseSpawnItem();//Temp for testing *******
 
 	UPROPERTY(transient)
 	class ADistanceCharacter* DistanceCharacterClass;

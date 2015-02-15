@@ -7,6 +7,7 @@
 // We probably shouldn't be importing the entire engine here, but fast debugging.
 // TODO: remove for real builds
 #include "Engine.h"
+#include "DistanceGameMode.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogDistance, Log, All);
 

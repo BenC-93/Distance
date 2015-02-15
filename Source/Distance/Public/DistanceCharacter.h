@@ -63,6 +63,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void EquipItem(int32 InvSlot);
 
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	void EquipItemComponent(int32 itemIndex);
+
 	/* Use the current equipped item (calls Item's Use() function) */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void UseItem();

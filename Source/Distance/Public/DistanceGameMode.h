@@ -14,7 +14,7 @@ public:
 	ADistanceGameMode(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(Category=Items, EditAnywhere)
-	TArray<TSubclassOf<AItem>> ItemTypes;
+	TArray<TSubclassOf<AItem>> ItemTypes;//maybe convert to TMap, inport from Engine/source/runtime/core/public/containers/Map.h
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
 	class AItem* SpawnItem();

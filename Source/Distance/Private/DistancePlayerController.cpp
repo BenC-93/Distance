@@ -123,7 +123,7 @@ void ADistancePlayerController::OnSetTargetPressed()
 
 	// Handle different Hit types here!
 	AActor* hitActor = Hit.GetActor();
-	if (hitActor->IsA(AItem::StaticClass()))
+	if (hitActor && hitActor->IsA(AItem::StaticClass()))
 	{
 		printScreen(FColor::Red, TEXT("Clicked an Item"));
 		AItem* item = Cast<AItem>(hitActor);
@@ -191,7 +191,8 @@ void ADistancePlayerController::OnSwitchItem()//Temporary Binding, for boss test
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
 {
-	((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnItem();
+	// Equip an item test binding just borrows the other test thingy now that we know both works
+	DistanceCharacterClass->EquipItem(0);
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

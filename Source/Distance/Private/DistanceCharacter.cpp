@@ -87,6 +87,12 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 		Inventory[EquippedSlot]->OnEquip();
 		//TODO: determine if this is where we begin Item regeneration**********************************************
 	}
+	//TODO: Fix this to use the actual inventory, this just automagically equips the lantern
+	ItemComponent->OnComponentDestroyed();
+	ItemComponent->ChildActorClass = ((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemTypes[0];
+	ItemComponent->CreateChildActor();
+	ItemComponent->OnComponentCreated();
+	ItemComponent->ChildActor->AttachRootComponentToActor(this);
 }
 
 void ADistanceCharacter::UseItem()

@@ -21,3 +21,12 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 		GEngine->bEnableOnScreenDebugMessages = true;
 	}
 }
+
+void ADistanceGameMode::SpawnItem()
+{
+	TSubclassOf<class AItem> ItemClass;
+	UItemDataList* data = Cast<UItemDataList>(ItemList);
+	ItemClass = data->ItemAtIndex(0);
+	ACharacter* player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	GetWorld()->SpawnActor<ItemClass>(FVector(player->GetActorLocation()), FRotator(player->GetActorRotation()));
+}

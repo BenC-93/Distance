@@ -28,15 +28,15 @@ public:
 	bool droppable;
 
 	/* Whether the item is currently being used by the player. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Use)
 	bool isInUse;
 
 	/* An abstract value used for various values, depending on item. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Amount)
 	float amount;
 
 	/* Item defined maximum value for arbitrary 'amount' value. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Amount)
 	float maxAmount;
 
 	/* Time in seconds that passes before regenerating. */
@@ -51,13 +51,16 @@ public:
 	class USceneComponent *RootSceneComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Sprite, meta = (AllowPrivateAccess = "true"))
-	class UPaperSpriteComponent* SpriteComponent;
+	class UPaperSpriteComponent *SpriteComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Triggers)
+	class UBoxComponent *TriggerBox;
 	
 	/* Item's primary action for when it is use by the player. */
-	UFUNCTION(BlueprintCallable, Category = Item)
+	UFUNCTION(BlueprintCallable, Category = Use)
 	void StartUse();
 
-	UFUNCTION(BlueprintCallable, Category = Item)
+	UFUNCTION(BlueprintCallable, Category = Use)
 	void EndUse();
 
 	/* What happens when the player equips the item. */

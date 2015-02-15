@@ -3,6 +3,9 @@
 #include "Distance.h"
 #include "ItemDataList.h"
 
-
+class TSubclassOf<AItem> ItemAtIndex(uint32 index)
+{
+	return ItemTypes[index];
+}
 
 

@@ -13,7 +13,7 @@ class ADistanceGameMode : public AGameMode
 	TSubclassOf<UItemDataList> ItemList;
 public:
 	ADistanceGameMode(const FObjectInitializer& ObjectInitializer);
+
+	UFUNCTION(BlueprintCallable, Category = Items)
+	void SpawnItem();
 };
-
-
-

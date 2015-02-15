@@ -2,7 +2,12 @@
 
 #include "Distance.h"
 #include "DistancePlayerController.h"
+#include "AIEnemy.h"
+#include "AIBoss_Doubt.h"
 #include "AI/Navigation/NavigationSystem.h"
+
+//this is here for testing the spawning of items
+#include "ItemLantern.h"
 
 ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -30,11 +35,15 @@ void ADistancePlayerController::SetupInputComponent()
 	// set up gameplay key bindings
 	Super::SetupInputComponent();
 
-	InputComponent->BindAction("SetDestination", IE_Pressed, this, &ADistancePlayerController::OnSetDestinationPressed);
-	InputComponent->BindAction("SetDestination", IE_Released, this, &ADistancePlayerController::OnSetDestinationReleased);
+	//DEPRECIATED
+	//InputComponent->BindAction("SetDestination", IE_Pressed, this, &ADistancePlayerController::OnSetDestinationPressed);
+	//InputComponent->BindAction("SetDestination", IE_Released, this, &ADistancePlayerController::OnSetDestinationReleased);
+
+	//This is for testing the spawning of items
+	InputComponent->BindAction("SpawnItem", IE_Pressed, this, &ADistancePlayerController::PleaseSpawnItem);
 
 	InputComponent->BindAction("SetTarget", IE_Pressed, this, &ADistancePlayerController::OnSetTargetPressed);
-
+	InputComponent->BindAction("SetTarget", IE_Released, this, &ADistancePlayerController::OnSetTargetReleased);
 	// support touch devices 
 	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ADistancePlayerController::MoveToTouchLocation);
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ADistancePlayerController::MoveToTouchLocation);
@@ -111,6 +120,40 @@ void ADistancePlayerController::OnSetTargetPressed()
 	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 
 	// Handle different Hit types here!
+	AActor* hitActor = Hit.GetActor();
+	if (hitActor->IsA(AItem::StaticClass()))
+	{
+		printScreen(FColor::Red, TEXT("Clicked an Item"));
+		AItem* item = Cast<AItem>(hitActor);
+		if (DistanceCharacterClass->GetDistanceTo(item) < 250.0f)
+		{
+			DistanceCharacterClass->PickupItem(item);
+		}
+		else
+		{
+			SetNewMoveDestination(Hit.ImpactPoint);
+		}
+	}
+	else if (hitActor->IsA(AAIEnemy::StaticClass()))
+	{
+		printScreen(FColor::Red, TEXT("Clicked an enemy"));
+		SetNewMoveDestination(Hit.ImpactPoint);
+	}
+	else if (hitActor->IsA(AAIBoss_Doubt::StaticClass()))
+	{
+		printScreen(FColor::Red, TEXT("Clicked a boss"));
+		OnAttackBoss();
+	}
+	else if (Hit.bBlockingHit && canMove)
+	{
+		SetNewMoveDestination(Hit.ImpactPoint);
+		bMoveToMouseCursor = true;
+	}
+}
+
+void ADistancePlayerController::OnSetTargetReleased()
+{
+	bMoveToMouseCursor = false;
 }
 
 void ADistancePlayerController::OnUseItemPressed()
@@ -136,6 +179,17 @@ void ADistancePlayerController::OnInventoryPressed()
 void ADistancePlayerController::OnAttackBoss()//Temporary Binding, for boss testing***************************************
 {
 	attackBoss = true;
+}
+
+void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
+{
+	FHitResult Hit;
+	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+	if (Hit.bBlockingHit)
+	{
+		FVector blah = FVector(Hit.ImpactPoint.X, Hit.ImpactPoint.Y, Hit.ImpactPoint.Z+100.0f);
+		GetWorld()->SpawnActor<AItemLantern>(LanternClass, blah, FRotator(0,0,0));
+	}
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

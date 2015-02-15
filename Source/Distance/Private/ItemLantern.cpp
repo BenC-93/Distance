@@ -3,6 +3,8 @@
 #include "Distance.h"
 #include "ItemLantern.h"
 
-
-
-
+AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite>(TEXT("/Game/Sprites/Lantern_Sprite")));
+}

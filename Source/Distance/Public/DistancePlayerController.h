@@ -2,6 +2,10 @@
 #pragma once
 #include "GameFramework/PlayerController.h"
 #include "DistanceCharacter.h"
+
+//for tesrting
+#include "ItemLantern.h"
+
 #include "DistancePlayerController.generated.h"
 
 UCLASS()
@@ -43,10 +47,13 @@ protected:
 
 	/* Handle all mouse/touch input */
 	void OnSetTargetPressed();
+	void OnSetTargetReleased();
 	void OnUseItemPressed();
 	void OnInventoryPressed();
 
 	void OnAttackBoss();//Temporary Binding, for boss testing***************************************
+	void PleaseSpawnItem();//Temp for testing *******
+	TSubclassOf<class AItemLantern> LanternClass;
 
 	UPROPERTY(transient)
 	class ADistanceCharacter* DistanceCharacterClass;

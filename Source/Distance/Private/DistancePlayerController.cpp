@@ -199,4 +199,5 @@ void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
+	DistanceCharacterClass->EquipItem(0);
 }

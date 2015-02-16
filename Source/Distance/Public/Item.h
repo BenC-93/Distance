@@ -4,6 +4,7 @@
 
 #include "GameFramework/Actor.h"
 #include "Classes/PaperSpriteComponent.h"
+#include "InventoryItem.h"
 #include "Item.generated.h"
 
 /**
@@ -58,10 +59,10 @@ public:
 	
 	/* Item's primary action for when it is use by the player. */
 	UFUNCTION(BlueprintCallable, Category = Use)
-	void StartUse();
+	virtual void StartUse();
 
 	UFUNCTION(BlueprintCallable, Category = Use)
-	void EndUse();
+	virtual void EndUse();
 
 	/* What happens when the player equips the item. */
 	UFUNCTION(BlueprintCallable, Category = Item)
@@ -94,4 +95,6 @@ public:
 	/* Adds to 'amount' at rate 'rate'. */
 	UFUNCTION(BlueprintCallable, Category = Regen)
 	void Regenerate();
+
+	void Update(class InventoryItem* invItem);
 };

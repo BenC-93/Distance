@@ -4,6 +4,7 @@
 #include "Classes/PaperSpriteComponent.h"
 #include "Classes/Components/ChildActorComponent.h"
 #include "Item.h"
+#include "InventoryItem.h"
 #include "DistanceCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -41,11 +42,10 @@ public:
 	float BaseDamage;
 	
 	/* Temporary function for implementing the light(lantern) item */
-	AItem* GetLight();
+	AItem* GetItem();
 
 	/* Inventory array */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
-	TArray<class AItem*> Inventory;
+	TArray<InventoryItem*> Inventory;//was tarray of class aitem*
 
 	/* Array index of currently equipped item */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
@@ -54,6 +54,9 @@ public:
 	/* Pick up nearby item object in the world */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void PickupItem(AItem* Item);
+
+	/* Add an item to your inventory from the Item class */
+	void AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass);
 
 	/* Drop currently equipped item */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -71,8 +74,7 @@ public:
 	void UseItem();
 
 	/* Returns the inventory array */
-	UFUNCTION(BlueprintCallable, Category = Inventory)
-	TArray<class AItem*> GetInventory();
+	TArray<class InventoryItem*> GetInventory();
 
 	/* Toggle visibility of inventory GUI */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -85,32 +87,18 @@ public:
 	/* The following functions are depreciated and will be removed soon:
 	   ChangeLight, getLightAmount, getMaxLightAmount, getLightEnabled,
 	   RegenerateLight */
-	UFUNCTION(BlueprintCallable, Category = Light)
-	void ChangeLight(float lightAmount);
-
-	UFUNCTION(BlueprintCallable, Category = Light)
-	float getLightAmount();
-
-	UFUNCTION(BlueprintCallable, Category = Light)
-	float getMaxLightAmount();
-
-	UFUNCTION(BlueprintCallable, Category = Light)//TODO: need to be able to enable this by some input
-	bool getLightEnabled();
 
 	UFUNCTION(BlueprintCallable, Category = Item)
-		void ChangeItemAmount(float lightAmount);
+	void ChangeItemAmount(float lightAmount);
 
 	UFUNCTION(BlueprintCallable, Category = Item)
-		float GetItemAmount();
+	float GetItemAmount();
 
 	UFUNCTION(BlueprintCallable, Category = Item)
-		float GetMaxItemAmount();
+	float GetMaxItemAmount();
 
 	UFUNCTION(BlueprintCallable, Category = Item)//TODO: need to be able to enable this by some input
-		bool GetItemEnabled();
-
-	UFUNCTION(BlueprintCallable, Category = Item)//TODO: need to be able to enable this by some input
-		class AItem* GetEquippedItem();
+	bool GetItemEnabled();
 
 	UFUNCTION(BlueprintCallable, Category = Speed)
 	void ChangeSpeed(float speedAmount);
@@ -122,9 +110,6 @@ public:
 
 	/* Regeneration functions */
 	void RegenerateHealth();
-	void RegenerateLight();
-	void RegenerateItem();
-	void StartItemRegeneration();
 	void StartRegeneration();
 
 	/** Changes player's target's health based on player attack */

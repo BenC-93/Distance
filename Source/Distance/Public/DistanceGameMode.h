@@ -18,4 +18,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
 	class AItem* SpawnItem();
+
+	class TSubclassOf<class AItem> ItemFromIndex(uint32 ItemIndex);
 };

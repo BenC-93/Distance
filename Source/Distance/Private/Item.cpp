@@ -19,11 +19,12 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
 	RootComponent = RootSceneComponent;
 
+	//static ConstructorHelpers::FClassFinder<UPaperSpriteComponent> SpriteComponentObj(TEXT("/Game/Sprites/Lantern_Sprite.Lantern_Sprite"));
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->AttachTo(RootComponent);
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite> (TEXT("/Game/Sprites/Lantern_Sprite")));
+	//SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite> ("/Game/Sprites/Lantern_Sprite.Lantern_Sprite"));
 
 	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
 	TriggerBox->Mobility = EComponentMobility::Movable;
@@ -57,20 +58,23 @@ void AItem::OnUnequip()
 
 void AItem::Pickup()
 {
-	if (SpriteComponent)
+	/*if (SpriteComponent)
 	{
 		SpriteComponent->DestroyComponent();
-	}
+	}*/
+	Destroy();
 }
 
 void AItem::Drop()
 {
-	// Change the input to this function to take a world location
-	// Move (teleport) this object to that location
-	// Enable the visual component
-	isInUse = false;
+	if (droppable)
+	{
+		// Change the input to this function to take a world location
+		// Move (teleport) this object to that location
+		// Enable the visual component
+		isInUse = false;
+	}
 }
-
 
 float AItem::GetAmount()
 {
@@ -92,4 +96,11 @@ void AItem::ChangeAmount(float value)
 void AItem::Regenerate()
 {
 	ChangeAmount(regenAmount);
+}
+
+void AItem::Update(class InventoryItem* invItem)
+{
+	name = invItem->name;
+	amount = invItem->currentValue;
+	maxAmount = invItem->maxValue;
 }

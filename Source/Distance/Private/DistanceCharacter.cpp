@@ -57,11 +57,20 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	//if (YourBPOb.Object != NULL) { YourBPBaseClassPtr = Cast(YourBPOb.Object->GeneratedClass); }
 }
 
+void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass)
+{
+	InventoryItem* NewItem = new InventoryItem();
+	NewItem->ItemClass = ItemClass;
+	// TODO: fix Jordan's terrible assumption
+	NewItem->name = TEXT("Lantern");
+	Inventory.Add(NewItem);
+}
+
 void ADistanceCharacter::PickupItem(AItem* Item)
 {
 	if (Item)
 	{
-		Inventory.Add(Item);
+		Inventory.Add(new InventoryItem(Item));
 		Item->Pickup();
 		printScreen(FColor::Red, TEXT("Pickup happened!"));
 	}
@@ -81,24 +90,26 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 {
 	if (Inventory.IsValidIndex(InvSlot))
 	{
-		//TODO: determine if this is where we stop item regeneration**********************************************
-		Inventory[EquippedSlot]->OnUnequip();
+		//Inventory[EquippedSlot]->OnUnequip();
+		GetItem()->OnUnequip();
+		Inventory[EquippedSlot]->Update(GetItem());
 		EquippedSlot = InvSlot;
-		Inventory[EquippedSlot]->OnEquip();
-		//TODO: this is where we call EquipItemComponent
-		//TODO: determine if this is where we begin Item regeneration**********************************************
+		//Inventory[EquippedSlot]->OnEquip();
+		EquipItemComponent(EquippedSlot);
+		GetItem()->OnEquip();
+		GetItem()->Update(Inventory[EquippedSlot]);
 	}
 	//TODO: Fix this to use the actual inventory, this just automagically equips the lantern
 	
 }
 
-void ADistanceCharacter::EquipItemComponent(int32 itemIndex)
+void ADistanceCharacter::EquipItemComponent(int32 InvSlot)
 {
-	ADistanceGameMode* gameMode = (ADistanceGameMode*)GetWorld()->GetAuthGameMode();
-	if (gameMode->ItemTypes.IsValidIndex(itemIndex))
+	if (Inventory.IsValidIndex(InvSlot))
 	{
+		class TSubclassOf<AItem> ComponentClass = Inventory[InvSlot]->ItemClass;
 		ItemComponent->OnComponentDestroyed();
-		ItemComponent->ChildActorClass = gameMode->ItemTypes[itemIndex];
+		ItemComponent->ChildActorClass = ComponentClass;
 		ItemComponent->OnComponentCreated();
 		ItemComponent->ChildActor->AttachRootComponentToActor(this);
 	}
@@ -108,7 +119,8 @@ void ADistanceCharacter::UseItem()
 {
 	if (Inventory.IsValidIndex(EquippedSlot))
 	{
-		Inventory[EquippedSlot]->StartUse();
+		//Inventory[EquippedSlot]->StartUse();
+		GetItem()->StartUse();
 	}
 	else
 	{
@@ -116,7 +128,7 @@ void ADistanceCharacter::UseItem()
 	}
 }
 
-TArray<class AItem*> ADistanceCharacter::GetInventory()
+TArray<class InventoryItem*> ADistanceCharacter::GetInventory()
 {
 	return Inventory;
 }
@@ -177,145 +189,61 @@ void ADistanceCharacter::RegenerateHealth()
 	}
 }
 
-//Will nolonger be used
-void ADistanceCharacter::RegenerateLight()
-{
-	if (GetLight() != NULL)
-	{
-		ChangeLight(1.0);
-		if (getLightAmount() >= getMaxLightAmount())
-		{
-			GetWorldTimerManager().ClearTimer(this, &ADistanceCharacter::RegenerateLight);
-			UE_LOG(LogDistance, Verbose, TEXT("Light regeneration timer stopped, max light amount reached"));
-		}
-	}
-}
-
-void ADistanceCharacter::RegenerateItem()
-{
-	if (GetEquippedItem() != NULL)
-	{
-		ChangeItemAmount(1.0);
-		if (GetItemAmount() >= GetMaxItemAmount())
-		{
-			GetWorldTimerManager().ClearTimer(this, &ADistanceCharacter::RegenerateItem);
-			UE_LOG(LogDistance, Verbose, TEXT("Light regeneration timer stopped, max light amount reached"));
-		}
-	}
-}
-
-void ADistanceCharacter::StartItemRegeneration()
-{
-	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateItem, 1.0f, true);
-}
-
 void ADistanceCharacter::StartRegeneration()
 {
 	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, 1.0f, true);
-	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateLight, 1.0f, true);//TODO: comment this out when ready
-	UE_LOG(LogDistance, Verbose, TEXT("Health and light regeneration timers are set"));
+	UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer is set"));
 }
-//*************************************************************************************************************Begin
-void ADistanceCharacter::ChangeLight(float lightAmount)
+
+void ADistanceCharacter::ChangeItemAmount(float itemAmount)
 {
-	if (GetLight() != NULL)
+	if (GetItem() != NULL)
 	{
-		float tempLight = getLightAmount() + lightAmount;
-		if (tempLight <= getMaxLightAmount())
+		float tempItemAmount = GetItemAmount() + itemAmount;
+		if (tempItemAmount <= GetMaxItemAmount())
 		{
-			if (tempLight < 0)
+			if (tempItemAmount < 0)
 			{
-				GetLight()->amount = 0.0f;
+				GetItem()->amount = 0.0f;
 			}
 			else
 			{
-				GetLight()->amount = tempLight;
+				GetItem()->amount = tempItemAmount;
 			}
 		}
-		// Send a verbose log message whenever reaching or passing light values divisible by 10
-		if (int(getLightAmount()) % 10 == 0 || abs(lightAmount) >= 10)
+		// Send a verbose log message whenever reaching or passing Item values divisible by 10
+		if (int(GetItemAmount()) % 10 == 0 || abs(itemAmount) >= 10)
 		{
-			UE_LOG(LogDistance, Verbose, TEXT("Changing Light Breakpoint: %f"), getLightAmount());
-		}
-	}
-}
-
-float ADistanceCharacter::getLightAmount()
-{
-	if (GetLight() == NULL)
-	{
-		return -1;
-	}
-	return GetLight()->amount;
-}
-
-float ADistanceCharacter::getMaxLightAmount()
-{
-	if (GetLight() == NULL)
-	{
-		return -1;
-	}
-	return GetLight()->maxAmount;
-}
-
-bool ADistanceCharacter::getLightEnabled()
-{
-	if (GetLight() == NULL)
-	{
-		return false;
-	}
-	return GetLight()->isInUse;
-}
-//*************************************************************************************************************End
-void ADistanceCharacter::ChangeItemAmount(float lightAmount)
-{
-	if (GetEquippedItem() != NULL)
-	{
-		float tempLight = GetItemAmount() + lightAmount;
-		if (tempLight <= GetMaxItemAmount())
-		{
-			if (tempLight < 0)
-			{
-				GetEquippedItem()->amount = 0.0f;
-			}
-			else
-			{
-				GetEquippedItem()->amount = tempLight;
-			}
-		}
-		// Send a verbose log message whenever reaching or passing light values divisible by 10
-		if (int(GetItemAmount()) % 10 == 0 || abs(lightAmount) >= 10)
-		{
-			UE_LOG(LogDistance, Verbose, TEXT("Changing Light Breakpoint: %f"), GetItemAmount());
+			UE_LOG(LogDistance, Verbose, TEXT("Changing Item Breakpoint: %f"), GetItemAmount());
 		}
 	}
 }
 
 float ADistanceCharacter::GetItemAmount()
 {
-	if (GetEquippedItem() == NULL)
+	if (GetItem() == NULL)
 	{
 		return -1;
 	}
-	return GetEquippedItem()->amount;
+	return GetItem()->amount;
 }
 
 float ADistanceCharacter::GetMaxItemAmount()
 {
-	if (GetEquippedItem() == NULL)
+	if (GetItem() == NULL)
 	{
 		return -1;
 	}
-	return GetEquippedItem()->maxAmount;
+	return GetItem()->maxAmount;
 }
 
 bool ADistanceCharacter::GetItemEnabled()
 {
-	if (GetEquippedItem() == NULL)
+	if (GetItem() == NULL)
 	{
 		return false;
 	}
-	return GetEquippedItem()->isInUse;
+	return GetItem()->isInUse;
 }
 
 void ADistanceCharacter::ChangeSpeed(float speedAmount)
@@ -323,18 +251,9 @@ void ADistanceCharacter::ChangeSpeed(float speedAmount)
 	GetCharacterMovement()->MaxWalkSpeed = speedAmount;
 }
 
-AItem* ADistanceCharacter::GetLight()
+AItem* ADistanceCharacter::GetItem()
 {
 	return (AItem *)ItemComponent->ChildActor;
-}
-
-class AItem* ADistanceCharacter::GetEquippedItem()
-{
-	if (Inventory.IsValidIndex(EquippedSlot))
-	{
-		return Inventory[EquippedSlot];
-	}
-	return NULL;
 }
 
 /**

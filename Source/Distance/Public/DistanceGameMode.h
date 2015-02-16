@@ -18,6 +18,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
 	class AItem* SpawnItem();
+	
+	UFUNCTION(BlueprintCallable, Category = Items)
+	void SpawnRandomItemAtLocation(FVector location);
 
 	class TSubclassOf<class AItem> ItemFromIndex(uint32 ItemIndex);
 };

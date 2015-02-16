@@ -110,6 +110,14 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)//No clue
 	{
 		UE_LOG(LogTemp, Warning, TEXT("new location path: IDK"));
 	}
+	// Drop an item
+	DropRandomItem();
+}
+
+void AEnemyAIController::DropRandomItem()
+{
+	FVector Position = AIEnemyClass->GetActorLocation();
+	GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnRandomItemAtLocation(Position);
 }
 
 void AEnemyAIController::ReactToPlayer()

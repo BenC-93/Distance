@@ -57,10 +57,11 @@ void AItem::OnUnequip()
 
 void AItem::Pickup()
 {
-	if (SpriteComponent)
+	/*if (SpriteComponent)
 	{
 		SpriteComponent->DestroyComponent();
-	}
+	}*/
+	Destroy();
 }
 
 void AItem::Drop()
@@ -92,4 +93,11 @@ void AItem::ChangeAmount(float value)
 void AItem::Regenerate()
 {
 	ChangeAmount(regenAmount);
+}
+
+void AItem::Update(class InventoryItem* invItem)
+{
+	name = invItem->name;
+	amount = invItem->currentValue;
+	maxAmount = invItem->maxValue;
 }

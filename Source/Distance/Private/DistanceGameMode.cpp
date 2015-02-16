@@ -31,3 +31,15 @@ class AItem* ADistanceGameMode::SpawnItem()
 	ACharacter* player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
 }
+
+class TSubclassOf<class AItem> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex)
+{
+	if (ItemTypes.IsValidIndex(ItemIndex))
+	{
+		return ItemTypes[ItemIndex];
+	}
+	else 
+	{
+		return NULL;
+	}
+}

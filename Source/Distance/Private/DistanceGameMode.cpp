@@ -32,6 +32,15 @@ class AItem* ADistanceGameMode::SpawnItem()
 	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
 }
 
+void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
+{
+	printScreen(FColor::Red, "Spawning Random Item");
+	TSubclassOf<class AItem> ItemClass;
+	uint32 ItemIndex = FMath::FloorToInt(FMath::FRand() * ItemTypes.Num());
+	ItemClass = ItemFromIndex(ItemIndex);
+	GetWorld()->SpawnActor<AItem>(ItemClass, location, FRotator());
+}
+
 class TSubclassOf<class AItem> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex)
 {
 	if (ItemTypes.IsValidIndex(ItemIndex))
@@ -40,6 +49,7 @@ class TSubclassOf<class AItem> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex
 	}
 	else 
 	{
+		UE_LOG(LogDistance, Error, TEXT("Invalid item index in GameMode: %d"), ItemIndex);
 		return NULL;
 	}
 }

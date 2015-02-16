@@ -24,6 +24,8 @@ public:
 	void AIMoveAwayFromPlayer(class ACharacter* player);
 
 	void ReactToPlayer();
+	
+	void DropRandomItem();
 
 	void Despawn();
 

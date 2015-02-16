@@ -13,7 +13,9 @@ class DISTANCE_API AItemLantern : public AItem
 {
 	GENERATED_BODY()
 
+public:
 
+	AItemLantern(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
 	
 };

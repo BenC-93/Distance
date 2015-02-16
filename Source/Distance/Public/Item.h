@@ -62,7 +62,7 @@ public:
 	virtual void StartUse();
 
 	UFUNCTION(BlueprintCallable, Category = Use)
-	void EndUse();
+	virtual void EndUse();
 
 	/* What happens when the player equips the item. */
 	UFUNCTION(BlueprintCallable, Category = Item)

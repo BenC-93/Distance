@@ -76,7 +76,6 @@ void AItem::Drop()
 	}
 }
 
-
 float AItem::GetAmount()
 {
 	return amount;

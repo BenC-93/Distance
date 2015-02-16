@@ -8,6 +8,7 @@ AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
 {
 //	SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite>(TEXT("/Game/Sprites/Lantern_Sprite")));
 
+	name = "Lantern";
 	droppable = false;
 }
 

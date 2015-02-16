@@ -191,14 +191,13 @@ void ADistancePlayerController::OnSwitchItem()//Temporary Binding, for boss test
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
 {
-	// Equip an item test binding just borrows the other test thingy now that we know both works
-	DistanceCharacterClass->EquipItem(0);
+	((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnItem();
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
-	DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
+	//DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
 	DistanceCharacterClass->EquipItemComponent(0);
 }

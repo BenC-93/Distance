@@ -4,6 +4,7 @@
 
 #include "GameFramework/Actor.h"
 #include "Classes/PaperSpriteComponent.h"
+#include "InventoryItem.h"
 #include "Item.generated.h"
 
 /**
@@ -94,4 +95,6 @@ public:
 	/* Adds to 'amount' at rate 'rate'. */
 	UFUNCTION(BlueprintCallable, Category = Regen)
 	void Regenerate();
+
+	void Update(class InventoryItem* invItem);
 };

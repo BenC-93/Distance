@@ -165,12 +165,12 @@ void ADistancePlayerController::OnUseItemPressed()
 		UE_LOG(LogTemp, Warning, TEXT("DistanceCharacter is null."));
 		return;
 	}
-	if (DistanceCharacterClass->GetLight() == NULL)
+	if (DistanceCharacterClass->GetItem() == NULL)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Light is null."));
 		return;
 	}
-	DistanceCharacterClass->GetLight()->StartUse();
+	DistanceCharacterClass->GetItem()->StartUse();
 }
 
 void ADistancePlayerController::OnInventoryPressed()
@@ -199,5 +199,6 @@ void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
+	DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
 	DistanceCharacterClass->EquipItemComponent(0);
 }

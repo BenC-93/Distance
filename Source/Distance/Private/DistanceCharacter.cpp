@@ -189,116 +189,32 @@ void ADistanceCharacter::RegenerateHealth()
 	}
 }
 
-//Will nolonger be used
-void ADistanceCharacter::RegenerateLight()
-{
-	if (GetItem() != NULL)
-	{
-		ChangeLight(1.0);
-		if (getLightAmount() >= getMaxLightAmount())
-		{
-			GetWorldTimerManager().ClearTimer(this, &ADistanceCharacter::RegenerateLight);
-			UE_LOG(LogDistance, Verbose, TEXT("Light regeneration timer stopped, max light amount reached"));
-		}
-	}
-}
-
-void ADistanceCharacter::RegenerateItem()
-{
-	if (GetItem() != NULL)
-	{
-		ChangeItemAmount(1.0);
-		if (GetItemAmount() >= GetMaxItemAmount())
-		{
-			GetWorldTimerManager().ClearTimer(this, &ADistanceCharacter::RegenerateItem);
-			UE_LOG(LogDistance, Verbose, TEXT("Light regeneration timer stopped, max light amount reached"));
-		}
-	}
-}
-
-void ADistanceCharacter::StartItemRegeneration()
-{
-	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateItem, 1.0f, true);
-}
-
 void ADistanceCharacter::StartRegeneration()
 {
 	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, 1.0f, true);
-	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateLight, 1.0f, true);//TODO: comment this out when ready
-	UE_LOG(LogDistance, Verbose, TEXT("Health and light regeneration timers are set"));
+	UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer is set"));
 }
-//*************************************************************************************************************Begin
-void ADistanceCharacter::ChangeLight(float lightAmount)
+
+void ADistanceCharacter::ChangeItemAmount(float itemAmount)
 {
 	if (GetItem() != NULL)
 	{
-		float tempLight = getLightAmount() + lightAmount;
-		if (tempLight <= getMaxLightAmount())
+		float tempItemAmount = GetItemAmount() + itemAmount;
+		if (tempItemAmount <= GetMaxItemAmount())
 		{
-			if (tempLight < 0)
+			if (tempItemAmount < 0)
 			{
 				GetItem()->amount = 0.0f;
 			}
 			else
 			{
-				GetItem()->amount = tempLight;
+				GetItem()->amount = tempItemAmount;
 			}
 		}
-		// Send a verbose log message whenever reaching or passing light values divisible by 10
-		if (int(getLightAmount()) % 10 == 0 || abs(lightAmount) >= 10)
+		// Send a verbose log message whenever reaching or passing Item values divisible by 10
+		if (int(GetItemAmount()) % 10 == 0 || abs(itemAmount) >= 10)
 		{
-			UE_LOG(LogDistance, Verbose, TEXT("Changing Light Breakpoint: %f"), getLightAmount());
-		}
-	}
-}
-
-float ADistanceCharacter::getLightAmount()
-{
-	if (GetItem() == NULL)
-	{
-		return -1;
-	}
-	return GetItem()->amount;
-}
-
-float ADistanceCharacter::getMaxLightAmount()
-{
-	if (GetItem() == NULL)
-	{
-		return -1;
-	}
-	return GetItem()->maxAmount;
-}
-
-bool ADistanceCharacter::getLightEnabled()
-{
-	if (GetItem() == NULL)
-	{
-		return false;
-	}
-	return GetItem()->isInUse;
-}
-//*************************************************************************************************************End
-void ADistanceCharacter::ChangeItemAmount(float lightAmount)
-{
-	if (GetItem() != NULL)
-	{
-		float tempLight = GetItemAmount() + lightAmount;
-		if (tempLight <= GetMaxItemAmount())
-		{
-			if (tempLight < 0)
-			{
-				GetItem()->amount = 0.0f;
-			}
-			else
-			{
-				GetItem()->amount = tempLight;
-			}
-		}
-		// Send a verbose log message whenever reaching or passing light values divisible by 10
-		if (int(GetItemAmount()) % 10 == 0 || abs(lightAmount) >= 10)
-		{
-			UE_LOG(LogDistance, Verbose, TEXT("Changing Light Breakpoint: %f"), GetItemAmount());
+			UE_LOG(LogDistance, Verbose, TEXT("Changing Item Breakpoint: %f"), GetItemAmount());
 		}
 	}
 }

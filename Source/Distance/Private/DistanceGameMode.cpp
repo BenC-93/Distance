@@ -36,7 +36,7 @@ void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
 	printScreen(FColor::Red, "Spawning Random Item");
 	TSubclassOf<class AItem> ItemClass;
-	uint32 ItemIndex = FMath::FloorToInt(FMath::FRand() * ItemTypes.Num());
+	uint32 ItemIndex = FMath::RandRange(1, ItemTypes.Num()-1);
 	ItemClass = ItemFromIndex(ItemIndex);
 	GetWorld()->SpawnActor<AItem>(ItemClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }

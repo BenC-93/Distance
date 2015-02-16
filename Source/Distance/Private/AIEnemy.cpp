@@ -15,7 +15,7 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	player1 = NULL;
 	player2 = NULL;
 
-	timeToDie = false;
+	prepareToDie = false;
 
 	health = 0.0f;
 	maxHealth = 100.0f;
@@ -65,7 +65,7 @@ void AAIEnemy::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("Delta Time, %f"), DeltaTime);
 	
 	//UE_LOG(LogTemp, Warning, TEXT("Speed: %f"), GetVelocity().Size());
-	if (timeToDie && GetVelocity().Size() == 0)
+	if (prepareToDie && GetVelocity().Size() == 0)
 	{
 		Destroy();
 	}

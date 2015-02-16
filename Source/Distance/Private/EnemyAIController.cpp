@@ -143,7 +143,8 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)//No clue
 	loc = myPos + dir;
 	DropRandomItem(loc);
 
-	AIEnemyClass->timeToDie = true;
+	// You killed my father
+	AIEnemyClass->prepareToDie = true;
 }
 
 void AEnemyAIController::DropRandomItem(FVector loc)

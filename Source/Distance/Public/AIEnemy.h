@@ -58,7 +58,7 @@ public:
 	bool moveAway;
 
 	UPROPERTY(EditAnywhere)
-	bool timeToDie;
+	bool prepareToDie;
 
 	float runAwaySpeed = 1000.0f;
 

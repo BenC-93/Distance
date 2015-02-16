@@ -2,6 +2,7 @@
 #pragma once
 #include "GameFramework/PlayerController.h"
 #include "DistanceCharacter.h"
+#include "ItemLightBeam.h"
 #include "DistancePlayerController.generated.h"
 
 UCLASS()
@@ -46,6 +47,7 @@ protected:
 	void OnSetTargetPressed();
 	void OnSetTargetReleased();
 	void OnUseItemPressed();
+	void OnUseItemReleased();
 	void OnInventoryPressed();
 
 	void OnAttackBoss();//Temporary Binding, for boss testing***************************************

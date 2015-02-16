@@ -114,7 +114,7 @@ public:
 
 	/** Changes player's target's health based on player attack */
 	UFUNCTION(BlueprintCallable, Category = Damage)
-	float Attack();
+	float Attack(float extra);
 
 	/** Returns TopDownCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }

@@ -136,6 +136,9 @@ TArray<class InventoryItem*> ADistanceCharacter::GetInventory()
 void ADistanceCharacter::ToggleInventory()
 {
 	// Toggle visibility of inventory GUI
+	uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
+	EquipItem(tempIndex);
+	UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 }
 
 FString ADistanceCharacter::GetItemName()
@@ -260,10 +263,11 @@ AItem* ADistanceCharacter::GetItem()
 * Attack()
 *
 * calculates and returns player damage
+  Also, deal damage to the current target
 *
 */
-float ADistanceCharacter::Attack()
+float ADistanceCharacter::Attack(float extra)//TODO: get a target and deal damage to it
 {
-	float damage = BaseDamage;
+	float damage = BaseDamage + extra;
 	return damage;
 }

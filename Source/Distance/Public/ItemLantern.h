@@ -17,5 +17,6 @@ public:
 
 	AItemLantern(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
+	virtual void EndUse() override;
 	
 };

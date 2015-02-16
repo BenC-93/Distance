@@ -10,17 +10,23 @@ AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
 
 	name = "Lantern";
 	droppable = false;
+	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AItemLantern::StartUse()
 {
 	if (isInUse)
 	{
-		EndUse();
+		isInUse = false;
 		return;
 	}
 	else
 	{
 		isInUse = true;
 	}
+}
+
+void AItemLantern::EndUse()
+{
+
 }

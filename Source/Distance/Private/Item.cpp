@@ -23,7 +23,6 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->AttachTo(RootComponent);
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
-	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite> ("/Game/Sprites/Lantern_Sprite.Lantern_Sprite"));
 
 	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
@@ -44,6 +43,7 @@ void AItem::EndUse()
 
 void AItem::OnEquip()
 {
+	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
 	GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
@@ -56,13 +56,17 @@ void AItem::OnUnequip()
 	GetWorldTimerManager().ClearTimer(this, &AItem::Regenerate);
 }
 
-void AItem::Pickup()
+void AItem::Pickup()//TODO: object is still there invisibly somehow
 {
 	/*if (SpriteComponent)
 	{
 		SpriteComponent->DestroyComponent();
 	}*/
+	//TriggerBox->DestroyComponent();
+	//SpriteComponent->DestroyComponent();
+	//RootComponent->DestroyComponent();
 	Destroy();
+	//K2_DestroyActor();
 }
 
 void AItem::Drop()

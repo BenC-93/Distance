@@ -8,7 +8,7 @@ AItemShield::AItemShield(const FObjectInitializer& ObjectInitializer)
 {
 	name = "Shield";
 	drainRate = 1.0f;
-	drainAmount = 2.0f;
+	drainAmount = -2.0f;
 }
 
 void AItemShield::StartUse()

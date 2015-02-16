@@ -50,6 +50,8 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ADistancePlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("UseItem", IE_Pressed, this, &ADistancePlayerController::OnUseItemPressed);
+	InputComponent->BindAction("UseItem", IE_Released, this, &ADistancePlayerController::OnUseItemReleased);
+
 	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
 
 	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnAttackBoss);//Temporary Binding, for boss testing***************************************
@@ -162,15 +164,40 @@ void ADistancePlayerController::OnUseItemPressed()
 {
 	if (DistanceCharacterClass == NULL)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DistanceCharacter is null."));
+		UE_LOG(LogTemp, Error, TEXT("DistanceCharacter is null."));
 		return;
 	}
 	if (DistanceCharacterClass->GetItem() == NULL)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Light is null."));
+		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
 	DistanceCharacterClass->GetItem()->StartUse();
+	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+}
+
+void ADistancePlayerController::OnUseItemReleased()
+{
+	if (DistanceCharacterClass == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DistanceCharacter is null."));
+		return;
+	}
+	AItem* item = DistanceCharacterClass->GetItem();
+	if (item == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Light is null."));
+		return;
+	}
+	item->EndUse();
+	UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+	if (item->GetName() == "LightBeam")
+	{
+		printScreen(FColor::Red, "Used Light Beam");
+		//class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
+		//DistanceCharacterClass->Attack(lightBeam->totalChargedAmount);//get totalChargedAmount, then after, set it to zero
+		//lightBeam->totalChargedAmount = 0.0f;
+	}
 }
 
 void ADistancePlayerController::OnInventoryPressed()
@@ -187,6 +214,7 @@ void ADistancePlayerController::OnSwitchItem()//Temporary Binding, for boss test
 {
 	printScreen(FColor::Red, "Switched Items");
 	switchedItem = true;
+	DistanceCharacterClass->EquipItem(switchedItem);
 }
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
@@ -198,6 +226,6 @@ void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
-	//DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
+	DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
 	DistanceCharacterClass->EquipItemComponent(0);
 }

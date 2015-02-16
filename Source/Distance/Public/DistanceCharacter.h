@@ -30,11 +30,11 @@ public:
 	ADistanceCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** Player's current health */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Health)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = Health)
 	float Health;
 	
 	/** Player's maximum allowed health */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Health)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = Health)
 	float MaxHealth;
 
 	/** Player's base damage level */

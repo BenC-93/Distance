@@ -162,7 +162,7 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
 	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
 
-	if (tempPlayer->GetItemName() == "Default" && tempPlayer->getLightEnabled() && tempPlayer->getLightAmount() > 0)//TODO: change 'Default' to "Shield"
+	if (tempPlayer->GetItemName() == "Default" && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)//TODO: change 'Default' to "Shield"
 	{
 		tempPlayer->ChangeSpeed(50);//shield is enabled
 	}
@@ -212,9 +212,9 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 		UE_LOG(LogTemp, Error, TEXT("Error: DrainPlayer, tempPlayer is Null."));
 		return;
 	}
-	if (tempPlayer->GetItemName() == "Default" && tempPlayer->getLightEnabled() && tempPlayer->getLightAmount() > 0)//TODO: change 'Default' to "Shield"
+	if (tempPlayer->GetItemName() == "Default" && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)//TODO: change 'Default' to "Shield"
 	{
-		tempPlayer->ChangeLight(baseDamage);//shield is enabled
+		tempPlayer->ChangeItemAmount(baseDamage);//shield is enabled
 	}
 	else
 	{

@@ -68,7 +68,7 @@ void AAIEnemy::Tick(float DeltaTime)
 		{
 			// Add time to drain tick
 			drainCounter += DeltaTime;
-			if (player->getLightAmount() > 0 && player->getLightEnabled())
+			if (player->GetItemAmount() > 0 && player->GetItemEnabled())
 			{
 				drainLight = true;
 				drainHealth = false;
@@ -114,8 +114,8 @@ void AAIEnemy::Tick(float DeltaTime)
 				// Tick the drain
 				drainCounter -= drainRate;
 				health += 1;
-				player->ChangeLight(-1.0f);
-				if (player->getLightAmount() == 0)//dont end here, just go to health
+				player->ChangeItemAmount(-1.0f);
+				if (player->GetItemAmount() == 0)//dont end here, just go to health
 				{
 					drainLight = false;
 					drainHealth = true;
@@ -127,7 +127,7 @@ void AAIEnemy::Tick(float DeltaTime)
 					moveToPlayer = false;
 					*/
 				}
-				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->getLightAmount());
+				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->GetItemAmount());
 			}
 			else if (health >= maxHealth)//Ai is full
 			{
@@ -218,7 +218,7 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 			moveToPlayer = true;//outer trigger boolean
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
-			/*if (player->getLightAmount() > 0 && player->getLightEnabled())//This is where the enemy is supposed to run away
+			/*if (player->GetItemAmount() > 0 && player->GetItemEnabled())//This is where the enemy is supposed to run away
 			{
 				moveToPlayer = false;
 				moveAway = true;
@@ -259,7 +259,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 			player->ChangeSpeed(400);//Works, but when do we set it back to normal??
 			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
-			if (player->getLightAmount() > 0 && player->getLightEnabled())
+			if (player->GetItemAmount() > 0 && player->GetItemEnabled())
 			{
 				drainLight = true;
 				drainHealth = false;

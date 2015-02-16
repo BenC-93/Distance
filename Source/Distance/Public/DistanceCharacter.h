@@ -87,32 +87,18 @@ public:
 	/* The following functions are depreciated and will be removed soon:
 	   ChangeLight, getLightAmount, getMaxLightAmount, getLightEnabled,
 	   RegenerateLight */
-	UFUNCTION(BlueprintCallable, Category = Light)
-	void ChangeLight(float lightAmount);
-
-	UFUNCTION(BlueprintCallable, Category = Light)
-	float getLightAmount();
-
-	UFUNCTION(BlueprintCallable, Category = Light)
-	float getMaxLightAmount();
-
-	UFUNCTION(BlueprintCallable, Category = Light)//TODO: need to be able to enable this by some input
-	bool getLightEnabled();
 
 	UFUNCTION(BlueprintCallable, Category = Item)
-		void ChangeItemAmount(float lightAmount);
+	void ChangeItemAmount(float lightAmount);
 
 	UFUNCTION(BlueprintCallable, Category = Item)
-		float GetItemAmount();
+	float GetItemAmount();
 
 	UFUNCTION(BlueprintCallable, Category = Item)
-		float GetMaxItemAmount();
+	float GetMaxItemAmount();
 
 	UFUNCTION(BlueprintCallable, Category = Item)//TODO: need to be able to enable this by some input
-		bool GetItemEnabled();
-
-	//UFUNCTION(BlueprintCallable, Category = Item)//TODO: need to be able to enable this by some input
-	//	class AItem* GetEquippedItem();
+	bool GetItemEnabled();
 
 	UFUNCTION(BlueprintCallable, Category = Speed)
 	void ChangeSpeed(float speedAmount);
@@ -124,9 +110,6 @@ public:
 
 	/* Regeneration functions */
 	void RegenerateHealth();
-	void RegenerateLight();
-	void RegenerateItem();
-	void StartItemRegeneration();
 	void StartRegeneration();
 
 	/** Changes player's target's health based on player attack */

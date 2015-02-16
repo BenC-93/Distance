@@ -235,13 +235,6 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 		if (CheckIfPlayer(OtherActor))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("-------Player Exited Triggered Area fool!"));
-			// start player health regeneration
-			player = Cast<ADistanceCharacter>(OtherActor);
-			if (player != NULL)
-			{
-				player->StartRegeneration();
-				UE_LOG(LogTemp, Warning, TEXT("Player health regeneration started"));
-			}
 		}
 	}
 }

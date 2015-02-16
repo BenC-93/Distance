@@ -109,6 +109,8 @@ public:
 
 
 	/* Regeneration functions */
+	virtual void BeginPlay();
+	
 	void RegenerateHealth();
 	void StartRegeneration();
 

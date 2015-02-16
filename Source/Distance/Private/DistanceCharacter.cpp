@@ -61,6 +61,13 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	//if (YourBPOb.Object != NULL) { YourBPBaseClassPtr = Cast(YourBPOb.Object->GeneratedClass); }
 }
 
+void ADistanceCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	printScreen(FColor::Red, "Begin Play");
+	StartRegeneration();
+}
+
 void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -196,17 +203,17 @@ void ADistanceCharacter::ChangeHealth(float healthAmount)
 
 void ADistanceCharacter::RegenerateHealth()
 {
-	ChangeHealth(1.0);
-	if (Health >= MaxHealth)
+	float RegenAmount = 1.0f;
+	if (Health < MaxHealth)
 	{
-		GetWorldTimerManager().ClearTimer(this, &ADistanceCharacter::RegenerateHealth);
-		UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer stopped, max health reached"));
+		ChangeHealth(RegenAmount);
 	}
 }
 
 void ADistanceCharacter::StartRegeneration()
 {
-	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, 1.0f, true);
+	float RegenInterval = 1.0f;
+	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, RegenInterval, true);
 	UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer is set"));
 }
 

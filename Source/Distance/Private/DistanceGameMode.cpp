@@ -38,7 +38,7 @@ void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 	TSubclassOf<class AItem> ItemClass;
 	uint32 ItemIndex = FMath::FloorToInt(FMath::FRand() * ItemTypes.Num());
 	ItemClass = ItemFromIndex(ItemIndex);
-	GetWorld()->SpawnActor<AItem>(ItemClass, location, FRotator());
+	GetWorld()->SpawnActor<AItem>(ItemClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
 class TSubclassOf<class AItem> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex)

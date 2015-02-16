@@ -15,6 +15,7 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	canMove = true;
+	hitActor = NULL;
 
 	attackBoss = false;//Temporary Bool, for boss testing***************************************
 	switchedItem = false;//Temporary Bool, for boss testing***************************************
@@ -124,7 +125,7 @@ void ADistancePlayerController::OnSetTargetPressed()
 	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 
 	// Handle different Hit types here!
-	AActor* hitActor = Hit.GetActor();
+	hitActor = Hit.GetActor();
 	if (hitActor && hitActor->IsA(AItem::StaticClass()))
 	{
 		printScreen(FColor::Red, TEXT("Clicked an Item"));
@@ -137,11 +138,13 @@ void ADistancePlayerController::OnSetTargetPressed()
 		{
 			SetNewMoveDestination(Hit.ImpactPoint);
 		}
+		attackBoss = false;
 	}
 	else if (hitActor->IsA(AAIEnemy::StaticClass()))
 	{
 		printScreen(FColor::Red, TEXT("Clicked an enemy"));
 		SetNewMoveDestination(Hit.ImpactPoint);
+		attackBoss = false;
 	}
 	else if (hitActor->IsA(AAIBoss_Doubt::StaticClass()))
 	{
@@ -152,6 +155,7 @@ void ADistancePlayerController::OnSetTargetPressed()
 	{
 		SetNewMoveDestination(Hit.ImpactPoint);
 		bMoveToMouseCursor = true;
+		attackBoss = false;
 	}
 }
 
@@ -191,13 +195,20 @@ void ADistancePlayerController::OnUseItemReleased()
 	}
 	item->EndUse();
 	UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
-	if (item->GetName() == "LightBeam")
+	UE_LOG(LogTemp, Warning, TEXT("Item name: %s"), *DistanceCharacterClass->GetItemName());
+	if (DistanceCharacterClass->GetItemName() == "LightBeam")
 	{
-		printScreen(FColor::Red, "Used Light Beam");
-		//class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
-		//DistanceCharacterClass->Attack(lightBeam->totalChargedAmount);//get totalChargedAmount, then after, set it to zero
-		//lightBeam->totalChargedAmount = 0.0f;
+		//printScreen(FColor::Red, "Used Light Beam");
+		if (hitActor != NULL && hitActor->IsA(AAIBoss_Doubt::StaticClass()) && attackBoss)
+		{
+			printScreen(FColor::Red, "Attacking the boss woooooooo");
+			//class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
+			//DistanceCharacterClass->Attack(lightBeam->totalChargedAmount);//get totalChargedAmount, then after, set it to zero
+			//lightBeam->totalChargedAmount = 0.0f;
+			//Cast<AAIBoss_Doubt>(hitActor)->ChangeHealth(5.0f);
+		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("AttackBoss is true?: %d, and hitActor is: %s"), attackBoss, *hitActor->GetName());
 }
 
 void ADistancePlayerController::OnInventoryPressed()

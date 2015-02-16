@@ -342,6 +342,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 			}
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 }
 
 float AAIBoss_Doubt::GetHealth()

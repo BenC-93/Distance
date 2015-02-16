@@ -15,6 +15,8 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	player1 = NULL;
 	player2 = NULL;
 
+	timeToDie = false;
+
 	health = 0.0f;
 	maxHealth = 100.0f;
 	baseDamage = 20.0f;
@@ -61,6 +63,13 @@ void AAIEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//UE_LOG(LogTemp, Warning, TEXT("Delta Time, %f"), DeltaTime);
+	
+	//UE_LOG(LogTemp, Warning, TEXT("Speed: %f"), GetVelocity().Size());
+	if (timeToDie && GetVelocity().Size() == 0)
+	{
+		Destroy();
+	}
+
 	if (player != NULL)
 	{
 		// Player is in range of close trigger and Enemy is not "full"
@@ -90,7 +99,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				player->ChangeHealth(-1.0f);
 				if (player->Health == 0)//player health has depleted, move away
 				{
-					GetCharacterMovement()->MaxWalkSpeed = 400;
+					GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
 					//drainCounter = 0;
 					drainHealth = false;
 					moveAway = true;
@@ -100,7 +109,7 @@ void AAIEnemy::Tick(float DeltaTime)
 			}
 			else if (health >= maxHealth)//AI is full, move away
 			{
-				GetCharacterMovement()->MaxWalkSpeed = 400;
+				GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
 				//drainCounter = 0;
 				drainHealth = false;
 				moveAway = true;
@@ -131,7 +140,7 @@ void AAIEnemy::Tick(float DeltaTime)
 			}
 			else if (health >= maxHealth)//Ai is full, move away
 			{
-				GetCharacterMovement()->MaxWalkSpeed = 400;
+				GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
 				//drainCounter = 0;
 				drainLight = false;
 				moveAway = true;
@@ -176,7 +185,7 @@ void AAIEnemy::Tick(float DeltaTime)
 			else if (myDirection.Yaw > playerRevDir.Yaw - range && myDirection.Yaw < playerRevDir.Yaw + range)//going in opposite directions
 			{//this is where if light is not enabled (maybe light doesnt matter, dont know), but player slowly moves slower until he cannot escape
 				//UE_LOG(LogTemp, Warning, TEXT("Opposite direction"));
-				GetCharacterMovement()->MaxWalkSpeed = 400;
+				GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
 				speedCounter = 1.0f;
 				moveToPlayer = false;
 				moveAway = true;

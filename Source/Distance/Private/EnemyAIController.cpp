@@ -30,7 +30,7 @@ void AEnemyAIController::Tick(float DeltaTime)
 
 	if (AIEnemyClass->moveAway)
 	{
-		if (AIEnemyClass->currentPlayer != NULL)//method for clostest todo!!!!
+		if (AIEnemyClass->currentPlayer != NULL)
 		{
 			AIMoveAwayFromPlayer(AIEnemyClass->currentPlayer);
 		}
@@ -102,7 +102,7 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)//No clue
 	//myPos = playerDirection.RotateVector(myPos);//getting a vector of the opposite direction from the player
 	FVector dir = playerDirection.Vector();
 	//UE_LOG(LogTemp, Warning, TEXT("vector of rotation after: %s"), *dir.ToString());
-	float lengthDir = 900.0f;
+	float lengthDir = 1100.0f;
 	//dir.ToDirectionAndLength(dir, lengthDir);
 	dir *= lengthDir;
 	//UE_LOG(LogTemp, Warning, TEXT("vector of rotation with length: %s"), *dir.ToString());
@@ -138,10 +138,12 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)//No clue
 		playerDirection.Yaw += 180;//chaning it to the opposite direction
 	}
 	dir = playerDirection.Vector();
-	lengthDir = 150.0f;
+	lengthDir = 200.0f;
 	dir *= lengthDir;
 	loc = myPos + dir;
 	DropRandomItem(loc);
+
+	AIEnemyClass->timeToDie = true;
 }
 
 void AEnemyAIController::DropRandomItem(FVector loc)

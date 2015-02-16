@@ -58,6 +58,11 @@ public:
 	bool moveAway;
 
 	UPROPERTY(EditAnywhere)
+	bool timeToDie;
+
+	float runAwaySpeed = 1000.0f;
+
+	UPROPERTY(EditAnywhere)
 	bool drainTrigger;
 
 	UPROPERTY(EditAnywhere)

@@ -3,17 +3,17 @@
 #pragma once
 
 #include "Item.h"
-#include "ItemLantern.generated.h"
+#include "ItemShield.generated.h"
 
 /**
  * 
  */
-UCLASS(Blueprintable)
-class DISTANCE_API AItemLantern : public AItem
+UCLASS()
+class DISTANCE_API AItemShield : public AItem
 {
 	GENERATED_BODY()
-
-
-	virtual void StartUse() override;
+	
+	
+	
 	
 };

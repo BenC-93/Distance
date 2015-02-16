@@ -58,7 +58,7 @@ public:
 	
 	/* Item's primary action for when it is use by the player. */
 	UFUNCTION(BlueprintCallable, Category = Use)
-	void StartUse();
+	virtual void StartUse();
 
 	UFUNCTION(BlueprintCallable, Category = Use)
 	void EndUse();

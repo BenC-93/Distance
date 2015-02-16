@@ -4,11 +4,15 @@
 #include "DistanceCharacter.h"
 #include "Item.h"
 #include "Engine.h"
+#include "UnrealNetwork.h"
 #include <cmath>
 
 ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	//Networking
+	bReplicates = true;
+
 	Health = 100.0f;
 	MaxHealth = 100.0f;
 	BaseDamage = 20.0f;
@@ -55,6 +59,14 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	//some C++ class constructor 
 	//Your BP of the base C++ class static ConstructorHelpers::FObjectFinder YourBPOb(TEXT("Blueprint'/Game/Characters/YourBP.YourBP'")); 
 	//if (YourBPOb.Object != NULL) { YourBPBaseClassPtr = Cast(YourBPOb.Object->GeneratedClass); }
+}
+
+void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ADistanceCharacter, Health);
+	DOREPLIFETIME(ADistanceCharacter, MaxHealth);
 }
 
 void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass)

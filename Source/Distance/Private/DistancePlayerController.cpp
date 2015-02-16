@@ -138,24 +138,22 @@ void ADistancePlayerController::OnSetTargetPressed()
 		{
 			SetNewMoveDestination(Hit.ImpactPoint);
 		}
-		attackBoss = false;
 	}
 	else if (hitActor->IsA(AAIEnemy::StaticClass()))
 	{
 		printScreen(FColor::Red, TEXT("Clicked an enemy"));
+		enemyActor = hitActor;
 		SetNewMoveDestination(Hit.ImpactPoint);
-		attackBoss = false;
 	}
 	else if (hitActor->IsA(AAIBoss_Doubt::StaticClass()))
 	{
 		printScreen(FColor::Red, TEXT("Clicked a boss"));
-		OnAttackBoss();
+		enemyActor = hitActor;
 	}
 	else if (Hit.bBlockingHit && canMove)
 	{
 		SetNewMoveDestination(Hit.ImpactPoint);
 		bMoveToMouseCursor = true;
-		attackBoss = false;
 	}
 }
 
@@ -195,20 +193,25 @@ void ADistancePlayerController::OnUseItemReleased()
 	}
 	item->EndUse();
 	UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
-	UE_LOG(LogTemp, Warning, TEXT("Item name: %s"), *DistanceCharacterClass->GetItemName());
+	//UE_LOG(LogTemp, Warning, TEXT("Item name: %s"), *DistanceCharacterClass->GetItemName());
 	if (DistanceCharacterClass->GetItemName() == "LightBeam")
 	{
 		//printScreen(FColor::Red, "Used Light Beam");
-		if (hitActor != NULL && hitActor->IsA(AAIBoss_Doubt::StaticClass()) && attackBoss)
+		if (enemyActor != NULL && enemyActor->IsA(AAIBoss_Doubt::StaticClass()))
 		{
-			printScreen(FColor::Red, "Attacking the boss woooooooo");
-			//class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
-			//DistanceCharacterClass->Attack(lightBeam->totalChargedAmount);//get totalChargedAmount, then after, set it to zero
-			//lightBeam->totalChargedAmount = 0.0f;
-			//Cast<AAIBoss_Doubt>(hitActor)->ChangeHealth(5.0f);
+			//printScreen(FColor::Red, "Attacking the boss woooooooo");
+			class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
+			Cast<AAIBoss_Doubt>(enemyActor)->ChangeHealth(DistanceCharacterClass->Attack(lightBeam->totalChargedAmount));
+			UE_LOG(LogTemp, Error, TEXT("totalChargedAmount before: %d"), lightBeam->totalChargedAmount);
+			lightBeam->totalChargedAmount = 0.0f;
+			UE_LOG(LogTemp, Error, TEXT("totalChargedAmount  after: %d"), lightBeam->totalChargedAmount);
+			if (Cast<AAIBoss_Doubt>(enemyActor)->GetHealth() <= 0)
+			{
+				enemyActor = NULL;
+			}
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("AttackBoss is true?: %d, and hitActor is: %s"), attackBoss, *hitActor->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("AttackBoss is true?: %d, and hitActor is: %s"), attackBoss, *hitActor->GetName());
 }
 
 void ADistancePlayerController::OnInventoryPressed()

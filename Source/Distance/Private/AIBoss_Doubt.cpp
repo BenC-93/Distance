@@ -292,14 +292,45 @@ void AAIBoss_Doubt::EndOfBoss()
 
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
 {//TODO: something weird is happening where if player1 does damage its fine, but then if player2 does damage, its as if the boss has full health again, and when the boss has 0 health it still does stuff
-	if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
+	if (playerController)
 	{
-		float tempTentacleHealth = tentacleHealth + healthAmount;
-		if (tempTentacleHealth <= 0)//defeated current tentacle
+		if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
 		{
-			tentacleHealth = 0;
-			//begin extra boss dmg-----
-			float tempHealth = Health - 10;//since we defeated a tentacle, we do small amount of damage to boss too!
+			float tempTentacleHealth = tentacleHealth + healthAmount;
+			if (tempTentacleHealth <= 0)//defeated current tentacle
+			{
+				tentacleHealth = 0;
+				//begin extra boss dmg-----
+				float tempHealth = Health - 10;//since we defeated a tentacle, we do small amount of damage to boss too!
+				if (tempHealth <= MaxHealth)
+				{
+					if (tempHealth < 0)
+					{
+						Health = 0.0f;//Defeated boss!
+						EndOfBoss();
+					}
+					else
+					{
+						Health = tempHealth;
+					}
+				}
+				//end extra boss dmg-----
+				ReleasePlayer(player);
+				numTentacles--;
+				if (numTentacles > 0)//there are still tentacles left 
+				{
+					tentacleHealth = 10;//reset tentacle health
+					StartAttackTimer(3.0f);
+				}
+			}
+			else //tentacle still has health
+			{
+				tentacleHealth = tempTentacleHealth;
+			}
+		}
+		else if (playerController->canMove)//else if no player is grabbed, deal damage to the actual boss
+		{
+			float tempHealth = Health + healthAmount;
 			if (tempHealth <= MaxHealth)
 			{
 				if (tempHealth < 0)
@@ -312,37 +343,9 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 					Health = tempHealth;
 				}
 			}
-			//end extra boss dmg-----
-			ReleasePlayer(player);
-			numTentacles--;
-			if (numTentacles > 0)//there are still tentacles left 
-			{
-				tentacleHealth = 10;//reset tentacle health
-				StartAttackTimer(3.0f);
-			}
 		}
-		else //tentacle still has health
-		{
-			tentacleHealth = tempTentacleHealth;
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 	}
-	else if (playerController->canMove)//else if no player is grabbed, deal damage to the actual boss
-	{
-		float tempHealth = Health + healthAmount;
-		if (tempHealth <= MaxHealth)
-		{
-			if (tempHealth < 0)
-			{
-				Health = 0.0f;//Defeated boss!
-				EndOfBoss();
-			}
-			else
-			{
-				Health = tempHealth;
-			}
-		}
-	}
-	UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 }
 
 float AAIBoss_Doubt::GetHealth()

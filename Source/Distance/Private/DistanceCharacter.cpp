@@ -15,7 +15,7 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 
 	Health = 100.0f;
 	MaxHealth = 100.0f;
-	BaseDamage = 20.0f;
+	BaseDamage = 1.0f;
 	EquippedSlot = 0;
 
 	// Set size for player capsule
@@ -275,11 +275,10 @@ AItem* ADistanceCharacter::GetItem()
 * Attack()
 *
 * calculates and returns player damage
-  Also, deal damage to the current target
 *
 */
-float ADistanceCharacter::Attack(float extra)//TODO: get a target and deal damage to it
+float ADistanceCharacter::Attack(float extra)
 {
 	float damage = BaseDamage + extra;
-	return damage;
+	return damage * -1;
 }

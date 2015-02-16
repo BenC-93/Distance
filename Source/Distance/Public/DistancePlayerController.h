@@ -22,6 +22,7 @@ public:
 	bool canMove;
 
 	class AActor* hitActor;
+	class AActor* enemyActor;
 
 	bool attackBoss;//Temporary Bool, for boss testing***************************************
 	bool switchedItem;//Temporary Bool, for boss testing***************************************

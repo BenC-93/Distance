@@ -68,7 +68,7 @@ void AAIEnemy::Tick(float DeltaTime)
 		{
 			// Add time to drain tick
 			drainCounter += DeltaTime;
-			if (player->GetItemAmount() > 0 && player->GetItemEnabled())
+			if (player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
 			{
 				drainLight = true;
 				drainHealth = false;
@@ -88,7 +88,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				drainCounter -= drainRate;
 				health += 1;
 				player->ChangeHealth(-1.0f);
-				if (player->Health == 0)//health has depleted
+				if (player->Health == 0)//player health has depleted, move away
 				{
 					GetCharacterMovement()->MaxWalkSpeed = 400;
 					//drainCounter = 0;
@@ -98,7 +98,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				}
 				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
 			}
-			else if (health >= maxHealth)//AI is full
+			else if (health >= maxHealth)//AI is full, move away
 			{
 				GetCharacterMovement()->MaxWalkSpeed = 400;
 				//drainCounter = 0;
@@ -129,7 +129,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				}
 				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->GetItemAmount());
 			}
-			else if (health >= maxHealth)//Ai is full
+			else if (health >= maxHealth)//Ai is full, move away
 			{
 				GetCharacterMovement()->MaxWalkSpeed = 400;
 				//drainCounter = 0;
@@ -139,7 +139,7 @@ void AAIEnemy::Tick(float DeltaTime)
 			}
 		}
 
-		if (moveToPlayer && !drainTrigger)
+		if (moveToPlayer && !drainTrigger)//Determines if ai moves faster towards player or player moves slower trying to escape
 		{
 			FRotator playerDirection = player->GetVelocity().Rotation();
 			FRotator myDirection = GetVelocity().Rotation();
@@ -163,7 +163,7 @@ void AAIEnemy::Tick(float DeltaTime)
 			}
 
 			float range = 10.0f;
-			if (myDirection.Yaw > playerDirection.Yaw - range && myDirection.Yaw < playerDirection.Yaw + range)
+			if (myDirection.Yaw > playerDirection.Yaw - range && myDirection.Yaw < playerDirection.Yaw + range)//going in same direction
 			{//this is where if light is enabled, player should be slowly moving faster and killing the monster
 				//UE_LOG(LogTemp, Warning, TEXT("Same direction"));//speed up ai
 				float aiSpeed = GetCharacterMovement()->MaxWalkSpeed;
@@ -173,7 +173,7 @@ void AAIEnemy::Tick(float DeltaTime)
 					//UE_LOG(LogTemp, Warning, TEXT("AI speed: %f"), GetCharacterMovement()->MaxWalkSpeed);
 				}
 			}
-			else if (myDirection.Yaw > playerRevDir.Yaw - range && myDirection.Yaw < playerRevDir.Yaw + range)
+			else if (myDirection.Yaw > playerRevDir.Yaw - range && myDirection.Yaw < playerRevDir.Yaw + range)//going in opposite directions
 			{//this is where if light is not enabled (maybe light doesnt matter, dont know), but player slowly moves slower until he cannot escape
 				//UE_LOG(LogTemp, Warning, TEXT("Opposite direction"));
 				GetCharacterMovement()->MaxWalkSpeed = 400;
@@ -259,7 +259,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 			player->ChangeSpeed(400);//Works, but when do we set it back to normal??
 			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
-			if (player->GetItemAmount() > 0 && player->GetItemEnabled())
+			if (player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
 			{
 				drainLight = true;
 				drainHealth = false;

@@ -51,7 +51,23 @@ void AEnemyAIController::Possess(class APawn *InPawn)
 
 void AEnemyAIController::AIMoveToPlayer(class ACharacter* player)
 {
-	MoveToActor(player);
+	EPathFollowingRequestResult::Type newLocPath = MoveToActor(player, 0.1f);
+	if (newLocPath == EPathFollowingRequestResult::Failed)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Moving to player: new location path: Failed"));
+	}
+	else if (newLocPath == EPathFollowingRequestResult::RequestSuccessful)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Moving to player: new location path: Success"));
+	}
+	else if (newLocPath == EPathFollowingRequestResult::AlreadyAtGoal)
+	{
+		//UE_LOG(LogTemp, Error, TEXT("Moving to player: new location path: Already At Goal"));
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Error, TEXT("Moving to player: new location path: IDK"));
+	}
 }
 
 void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)//No clue if this works yet
@@ -80,44 +96,58 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)//No clue
 		playerDirection.Yaw += 180;//chaning it to the opposite direction
 	}*/
 
-	UE_LOG(LogTemp, Warning, TEXT("Rotation after: %s"), *playerDirection.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Rotation after: %s"), *playerDirection.ToString());
 	//FVector myPos = AIEnemyClass->GetVelocity();//my position
 	FVector myPos = AIEnemyClass->GetActorLocation();
 	//myPos = playerDirection.RotateVector(myPos);//getting a vector of the opposite direction from the player
 	FVector dir = playerDirection.Vector();
-	UE_LOG(LogTemp, Warning, TEXT("vector of rotation after: %s"), *dir.ToString());
-	float lengthDir = 600.0f;
+	//UE_LOG(LogTemp, Warning, TEXT("vector of rotation after: %s"), *dir.ToString());
+	float lengthDir = 900.0f;
 	//dir.ToDirectionAndLength(dir, lengthDir);
 	dir *= lengthDir;
-	UE_LOG(LogTemp, Warning, TEXT("vector of rotation with length: %s"), *dir.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("vector of rotation with length: %s"), *dir.ToString());
 	UE_LOG(LogTemp, Warning, TEXT("old location: %s"), *myPos.ToString());
 	FVector loc = myPos + dir;
 	UE_LOG(LogTemp, Warning, TEXT("new location: %s"), *loc.ToString());
-	EPathFollowingRequestResult::Type newLocPath = MoveToLocation(loc, 0.5f);
+	EPathFollowingRequestResult::Type newLocPath = MoveToLocation(loc, 0.1f);
 	if (newLocPath == EPathFollowingRequestResult::Failed)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("new location path: Failed"));
+		UE_LOG(LogTemp, Error, TEXT("Moving away from player: new location path: Failed"));
 	}
 	else if (newLocPath == EPathFollowingRequestResult::RequestSuccessful)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("new location path: Success"));
+		//UE_LOG(LogTemp, Warning, TEXT("Moving away from player: new location path: Success"));
 	}
 	else if (newLocPath == EPathFollowingRequestResult::AlreadyAtGoal)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("new location path: Already At Goal"));
+		//UE_LOG(LogTemp, Error, TEXT("Moving away from player: new location path: Already At Goal"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("new location path: IDK"));
+		//UE_LOG(LogTemp, Error, TEXT("Moving away from player: new location path: IDK"));
 	}
 	// Drop an item
-	DropRandomItem();
+
+	//reverse player direction
+	if (playerDirection.Yaw > 0)//positive
+	{
+		playerDirection.Yaw -= 180;
+	}
+	else if (playerDirection.Yaw <= 0)//negative
+	{
+		playerDirection.Yaw += 180;//chaning it to the opposite direction
+	}
+	dir = playerDirection.Vector();
+	lengthDir = 150.0f;
+	dir *= lengthDir;
+	loc = myPos + dir;
+	DropRandomItem(loc);
 }
 
-void AEnemyAIController::DropRandomItem()
+void AEnemyAIController::DropRandomItem(FVector loc)
 {
-	FVector Position = AIEnemyClass->GetActorLocation();
-	GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnRandomItemAtLocation(Position);
+	//FVector Position = AIEnemyClass->GetActorLocation();
+	GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnRandomItemAtLocation(loc);
 }
 
 void AEnemyAIController::ReactToPlayer()

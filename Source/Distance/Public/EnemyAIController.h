@@ -25,7 +25,7 @@ public:
 
 	void ReactToPlayer();
 	
-	void DropRandomItem();
+	void DropRandomItem(FVector loc);
 
 	void Despawn();
 

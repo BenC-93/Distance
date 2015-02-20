@@ -24,7 +24,7 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 
 class AItem* ADistanceGameMode::SpawnItem()
 {
-	printScreen(FColor::Red, "Spawning The thing");
+	printScreen(FColor::Red, TEXT("Spawning The thing"));
 	TSubclassOf<class AItem> ItemClass;
 	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
@@ -34,7 +34,7 @@ class AItem* ADistanceGameMode::SpawnItem()
 
 void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
-	printScreen(FColor::Red, "Spawning Random Item");
+	printScreen(FColor::Red, TEXT("Spawning Random Item"));
 	TSubclassOf<class AItem> ItemClass;
 	uint32 ItemIndex = FMath::RandRange(1, ItemTypes.Num()-1);
 	ItemClass = ItemFromIndex(ItemIndex);

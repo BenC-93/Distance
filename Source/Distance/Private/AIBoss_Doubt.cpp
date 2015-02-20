@@ -81,7 +81,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 				{
 					if (swallowedPlayer == player)
 					{
-						printScreen(FColor::Red, "Resetting Target, one player has been swallowed");
+						printScreen(FColor::Red, TEXT("Resetting Target, one player has been swallowed"));
 						if (player == player1)
 						{
 							currentPlayer = player2;
@@ -108,7 +108,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			class ADistancePlayerController* tPController1 = Cast<ADistancePlayerController>(player1->GetController());
 			if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack
 			{
-				printScreen(FColor::Red, "Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
+				printScreen(FColor::Red, TEXT("Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!"));
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 				tPController1->attackBoss = false;
@@ -117,7 +117,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			{
 				if (!tPController1->canMove)
 				{
-					printScreen(FColor::Red, "Player1 was Released by switching Items");
+					printScreen(FColor::Red, TEXT("Player1 was Released by switching Items"));
 					ReleasePlayer(player1);
 				}
 				tPController1->switchedItem = false;
@@ -128,7 +128,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			class ADistancePlayerController* tPController2 = Cast<ADistancePlayerController>(player2->GetController());
 			if (tPController2->attackBoss)
 			{
-				printScreen(FColor::Red, "Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
+				printScreen(FColor::Red, TEXT("Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!"));
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 				tPController2->attackBoss = false;
@@ -137,7 +137,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			{
 				if (!tPController2->canMove)
 				{
-					printScreen(FColor::Red, "Player2 was Released by switching Items");
+					printScreen(FColor::Red, TEXT("Player2 was Released by switching Items"));
 					ReleasePlayer(player2);
 				}
 				tPController2->switchedItem = false;
@@ -145,7 +145,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		}
 		if (player1 == NULL && player2 == NULL)
 		{
-			printScreen(FColor::Red, "What happened, Bad stuff!");
+			printScreen(FColor::Red, TEXT("What happened, Bad stuff!"));
 		}
 		//END TERRIBLENESS
 	}
@@ -224,7 +224,7 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 
 void AAIBoss_Doubt::AttackTimer()
 {
-	printScreen(FColor::Red, "Boss making an attack");
+	printScreen(FColor::Red, TEXT("Boss making an attack"));
 	PullPlayer(player);
 	StartDrainTimer(drainRate);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
@@ -287,7 +287,7 @@ void AAIBoss_Doubt::EndOfBoss()
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
-	printScreen(FColor::Red, "End of Boss");
+	printScreen(FColor::Red, TEXT("End of Boss"));
 }
 
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
@@ -437,7 +437,7 @@ void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 			if (!playerController->canMove && swallowedPlayer == NULL)//Can't move, therefore, i've dragged them in, and swallowed them
 			{
 				//set swallowed player
-				printScreen(FColor::Red, "Beginning Draining Swallowed Player.");
+				printScreen(FColor::Red, TEXT("Beginning Draining Swallowed Player."));
 				swallowedPlayer = player;
 				StartSwallowedTimer(drainRate / 1.5f);//drainRate = 0.25f normally
 			}

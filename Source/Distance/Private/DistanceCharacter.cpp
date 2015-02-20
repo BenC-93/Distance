@@ -64,7 +64,7 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 void ADistanceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	printScreen(FColor::Red, "Begin Play");
+	printScreen(FColor::Red, TEXT("Begin Play"));
 	StartRegeneration();
 }
 

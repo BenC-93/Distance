@@ -226,7 +226,7 @@ void ADistancePlayerController::OnAttackBoss()//Temporary Binding, for boss test
 
 void ADistancePlayerController::OnSwitchItem()//Temporary Binding, for boss testing***************************************
 {
-	printScreen(FColor::Red, "Switched Items");
+	printScreen(FColor::Red, TEXT("Switched Items"));
 	switchedItem = true;
 	DistanceCharacterClass->EquipItem(switchedItem);
 }

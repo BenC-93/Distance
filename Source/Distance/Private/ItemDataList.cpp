@@ -11,7 +11,7 @@ class TSubclassOf<AItem> UItemDataList::ItemAtIndex(uint32 index)
 	}
 	else
 	{
-		printScreen(FColor::Red, "Not valid index in Data List");
+		printScreen(FColor::Red, TEXT("Not valid index in Data List"));
 		return NULL;
 	}
 }

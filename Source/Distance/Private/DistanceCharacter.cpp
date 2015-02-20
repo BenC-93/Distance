@@ -66,6 +66,7 @@ void ADistanceCharacter::BeginPlay()
 	Super::BeginPlay();
 	printScreen(FColor::Red, TEXT("Begin Play"));
 	StartRegeneration();
+	ItemPickedUp();
 }
 
 void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
@@ -76,32 +77,41 @@ void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &O
 	DOREPLIFETIME(ADistanceCharacter, MaxHealth);
 }
 
-void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass)
+void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass)//called at the beginning only once
 {
 	InventoryItem* NewItem = new InventoryItem();
 	NewItem->ItemClass = ItemClass;
 	// TODO: fix Jordan's terrible assumption
 	NewItem->name = TEXT("Lantern");
 	Inventory.Add(NewItem);
+	spriteInventory.Add(Inventory.Last()->GetItemSprite());
+	//ItemPickedUp();
 }
 
-void ADistanceCharacter::PickupItem(AItem* Item)
+void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items within the game HUD on click and drag potentially?
 {
 	if (Item)
 	{
 		Inventory.Add(new InventoryItem(Item));
+		spriteInventory.Add(Inventory.Last()->GetItemSprite());
 		Item->Pickup();
 		printScreen(FColor::Red, TEXT("Pickup happened!"));
+		ItemPickedUp();
+		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
 	}
 }
 
-void ADistanceCharacter::DropItem(int32 InvSlot)
+void ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you drop an item that isn't the last item, we get array index out of bounds (can only drop last item)
 {
 	if (Inventory.IsValidIndex(InvSlot))
 	{
 		// Need to create the item in the world,
 		// before removing it from the array
+		uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
+		EquipItem(tempIndex);
+		UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 		Inventory.RemoveAt(InvSlot);
+		spriteInventory.RemoveAt(InvSlot);
 	}
 }
 
@@ -147,6 +157,11 @@ void ADistanceCharacter::UseItem()
 	}
 }
 
+TArray<class UTexture2D*> ADistanceCharacter::GetSpriteInventory()
+{
+	return spriteInventory;
+}
+
 TArray<class InventoryItem*> ADistanceCharacter::GetInventory()
 {
 	return Inventory;
@@ -167,6 +182,15 @@ FString ADistanceCharacter::GetItemName()
 		return Inventory[EquippedSlot]->name;
 	}
 	return "Default";
+}
+
+bool ADistanceCharacter::GetIsItemDroppable()
+{
+	if (GetItem())
+	{
+		return GetItem()->droppable;
+	}
+	return false;
 }
 
 /* BELOW ARE THE OLD ITEM HANDLING FUNCTIONS. THEY ARE SUBJECT TO CHANGE.
@@ -287,5 +311,6 @@ AItem* ADistanceCharacter::GetItem()
 float ADistanceCharacter::Attack(float extra)
 {
 	float damage = BaseDamage + extra;
+	UE_LOG(LogTemp, Error, TEXT("Total Attack Damage: %f"), damage);
 	return damage * -1;
 }

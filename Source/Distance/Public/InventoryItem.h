@@ -15,9 +15,11 @@ public:
 	FString name;
 	float maxValue;
 	float currentValue;
+	UTexture2D* sprite;
 
 	InventoryItem();
 	InventoryItem(class AItem* item);
+	UTexture2D* GetItemSprite();
 	void Update(class AItem* item);
 	~InventoryItem();
 };

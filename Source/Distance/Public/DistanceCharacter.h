@@ -47,6 +47,8 @@ public:
 	/* Temporary function for implementing the light(lantern) item */
 	AItem* GetItem();
 
+	TArray<class UTexture2D*> spriteInventory;
+
 	/* Inventory array */
 	TArray<InventoryItem*> Inventory;//was tarray of class aitem*
 
@@ -57,6 +59,9 @@ public:
 	/* Pick up nearby item object in the world */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void PickupItem(AItem* Item);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Inventory)
+	void ItemPickedUp();
 
 	/* Add an item to your inventory from the Item class */
 	void AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass);
@@ -76,6 +81,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void UseItem();
 
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	TArray<class UTexture2D*> GetSpriteInventory();
+
 	/* Returns the inventory array */
 	TArray<class InventoryItem*> GetInventory();
 
@@ -86,6 +94,9 @@ public:
 	/* Grabs the Name of the Item for comparison for Bosses*/
 	UFUNCTION(BlueprintCallable, Category = Light)
 	FString GetItemName();
+
+	UFUNCTION(BlueprintCallable, Category = Light)
+	bool GetIsItemDroppable();
 
 	/* The following functions are depreciated and will be removed soon:
 	   ChangeLight, getLightAmount, getMaxLightAmount, getLightEnabled,

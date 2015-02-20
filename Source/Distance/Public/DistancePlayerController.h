@@ -24,8 +24,9 @@ public:
 	class AActor* hitActor;
 	class AActor* enemyActor;
 
-	bool attackBoss;//Temporary Bool, for boss testing***************************************
 	bool switchedItem;//Temporary Bool, for boss testing***************************************
+
+	void OnConvergenceEnd();
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -53,8 +54,9 @@ protected:
 	void OnUseItemReleased();
 	void OnInventoryPressed();
 
-	void OnAttackBoss();//Temporary Binding, for boss testing***************************************
-	void OnSwitchItem();//Temporary Binding, for boss testing***************************************
+	void OnGetLocation();//Temporary Binding, for location testing***************************************
+	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************
+	
 	void PleaseSpawnItem();//Temp for testing *******
 
 	UPROPERTY(transient)

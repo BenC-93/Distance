@@ -22,7 +22,7 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 	}
 }
 
-class AItem* ADistanceGameMode::SpawnItem()
+class AItem* ADistanceGameMode::SpawnLantern()
 {
 	printScreen(FColor::Red, TEXT("Spawning The thing"));
 	TSubclassOf<class AItem> ItemClass;

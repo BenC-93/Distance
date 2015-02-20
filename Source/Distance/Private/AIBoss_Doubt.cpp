@@ -106,13 +106,13 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		if (player1 != NULL)//Temporary Check for player dealing damage to boss*********************************************
 		{
 			class ADistancePlayerController* tPController1 = Cast<ADistancePlayerController>(player1->GetController());
-			if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack
+			/*if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack*******Not needed anymore
 			{
 				printScreen(FColor::Red, TEXT("Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!"));
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 				tPController1->attackBoss = false;
-			}
+			}*/
 			if (tPController1->switchedItem)//shield on = when this is false
 			{
 				if (!tPController1->canMove)
@@ -126,13 +126,13 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		if (player2 != NULL)
 		{
 			class ADistancePlayerController* tPController2 = Cast<ADistancePlayerController>(player2->GetController());
-			if (tPController2->attackBoss)
+			/*if (tPController2->attackBoss)//*******Not needed anymore
 			{
 				printScreen(FColor::Red, TEXT("Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!"));
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 				tPController2->attackBoss = false;
-			}
+			}*/
 			if (tPController2->switchedItem)
 			{
 				if (!tPController2->canMove)
@@ -243,6 +243,7 @@ void AAIBoss_Doubt::DrainTimer()
 	if (player->Health == 0)//we "killed" the player, oops lol
 	{
 		ReleasePlayer(player);
+		EndOfBoss();
 	}
 }
 
@@ -279,7 +280,7 @@ void AAIBoss_Doubt::EndOfBoss()
 	{
 		ReleasePlayer(swallowedPlayer);
 	}
-	if (!playerController->canMove)
+	if (playerController && !playerController->canMove)
 	{
 		ReleasePlayer(player);
 		player = NULL;
@@ -288,12 +289,26 @@ void AAIBoss_Doubt::EndOfBoss()
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 	printScreen(FColor::Red, TEXT("End of Boss"));
+	//TODO: call convergence end
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player = Cast<ADistanceCharacter>(currentPlayer);
+	playerController = Cast<ADistancePlayerController>(player->GetController());
+	if (playerController)
+	{
+		playerController->OnConvergenceEnd();
+		Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: End of Boss, playerController is null"));
+	}
 }
 
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
 {//TODO: something weird is happening where if player1 does damage its fine, but then if player2 does damage, its as if the boss has full health again, and when the boss has 0 health it still does stuff
 	if (playerController)
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("Total Attack Damage: %f"), healthAmount);
 		if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
 		{
 			float tempTentacleHealth = tentacleHealth + healthAmount;

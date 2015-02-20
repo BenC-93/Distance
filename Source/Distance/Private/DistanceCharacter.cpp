@@ -158,6 +158,7 @@ void ADistanceCharacter::ToggleInventory()
 	uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 	EquipItem(tempIndex);
 	UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
+	UE_LOG(LogTemp, Error, TEXT("Location is = %s"), *GetActorLocation().ToString());
 }
 
 FString ADistanceCharacter::GetItemName()

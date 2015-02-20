@@ -280,7 +280,7 @@ void AAIBoss_Doubt::EndOfBoss()
 	{
 		ReleasePlayer(swallowedPlayer);
 	}
-	if (!playerController->canMove)
+	if (playerController && !playerController->canMove)
 	{
 		ReleasePlayer(player);
 		player = NULL;
@@ -290,6 +290,18 @@ void AAIBoss_Doubt::EndOfBoss()
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 	printScreen(FColor::Red, "End of Boss");
 	//TODO: call convergence end
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player = Cast<ADistanceCharacter>(currentPlayer);
+	playerController = Cast<ADistancePlayerController>(player->GetController());
+	if (playerController)
+	{
+		playerController->OnConvergenceEnd();
+		Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: End of Boss, playerController is null"));
+	}
 }
 
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any

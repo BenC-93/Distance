@@ -27,6 +27,8 @@ public:
 	bool attackBoss;//Temporary Bool, for boss testing***************************************
 	bool switchedItem;//Temporary Bool, for boss testing***************************************
 
+	void OnConvergenceEnd();
+
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -55,6 +57,7 @@ protected:
 
 	void OnAttackBoss();//Temporary Binding, for boss testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************
+	
 	void PleaseSpawnItem();//Temp for testing *******
 
 	UPROPERTY(transient)

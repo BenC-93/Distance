@@ -228,6 +228,14 @@ void ADistancePlayerController::OnAttackBoss()//Temporary Binding, for boss test
 void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for convergence start***************************************
 {
 	printScreen(FColor::Red, "Beginning Convergence");
+	DistanceCharacterClass->TeleportTo(FVector(500, 0, 0) + DistanceCharacterClass->GetActorLocation(), DistanceCharacterClass->GetActorRotation());//moves 500 upwards
+}
+
+void ADistancePlayerController::OnConvergenceEnd()
+{
+	printScreen(FColor::Red, "Ending Convergence");
+	DistanceCharacterClass->TeleportTo(FVector(-502, -341, DistanceCharacterClass->GetActorLocation().Z), DistanceCharacterClass->GetActorRotation());
+	SetNewMoveDestination(DistanceCharacterClass->GetActorLocation() - FVector(121.0f, 0.0f, 0.0f));
 }
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****

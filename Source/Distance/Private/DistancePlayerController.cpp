@@ -202,9 +202,9 @@ void ADistancePlayerController::OnUseItemReleased()
 			//printScreen(FColor::Red, "Attacking the boss woooooooo");
 			class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
 			Cast<AAIBoss_Doubt>(enemyActor)->ChangeHealth(DistanceCharacterClass->Attack(lightBeam->totalChargedAmount));
-			UE_LOG(LogTemp, Error, TEXT("totalChargedAmount before: %d"), lightBeam->totalChargedAmount);
+			//UE_LOG(LogTemp, Error, TEXT("totalChargedAmount before: %f"), lightBeam->totalChargedAmount);
 			lightBeam->totalChargedAmount = 0.0f;
-			UE_LOG(LogTemp, Error, TEXT("totalChargedAmount  after: %d"), lightBeam->totalChargedAmount);
+			//UE_LOG(LogTemp, Error, TEXT("totalChargedAmount  after: %d"), lightBeam->totalChargedAmount);
 			if (Cast<AAIBoss_Doubt>(enemyActor)->GetHealth() <= 0)
 			{
 				enemyActor = NULL;
@@ -216,6 +216,7 @@ void ADistancePlayerController::OnUseItemReleased()
 
 void ADistancePlayerController::OnInventoryPressed()
 {
+	switchedItem = true;
 	DistanceCharacterClass->ToggleInventory();
 }
 

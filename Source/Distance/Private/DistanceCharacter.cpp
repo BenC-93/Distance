@@ -287,5 +287,6 @@ AItem* ADistanceCharacter::GetItem()
 float ADistanceCharacter::Attack(float extra)
 {
 	float damage = BaseDamage + extra;
+	UE_LOG(LogTemp, Error, TEXT("Total Attack Damage: %f"), damage);
 	return damage * -1;
 }

@@ -106,9 +106,9 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		if (player1 != NULL)//Temporary Check for player dealing damage to boss*********************************************
 		{
 			class ADistancePlayerController* tPController1 = Cast<ADistancePlayerController>(player1->GetController());
-			if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack
+			if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack*******Not needed anymore
 			{
-				printScreen(FColor::Red, "Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
+				printScreen(FColor::Red, "Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!Like a Boss");
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 				tPController1->attackBoss = false;
@@ -126,7 +126,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		if (player2 != NULL)
 		{
 			class ADistancePlayerController* tPController2 = Cast<ADistancePlayerController>(player2->GetController());
-			if (tPController2->attackBoss)
+			if (tPController2->attackBoss)//*******Not needed anymore
 			{
 				printScreen(FColor::Red, "Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
 				ChangeHealth(-5.0f);
@@ -243,6 +243,7 @@ void AAIBoss_Doubt::DrainTimer()
 	if (player->Health == 0)//we "killed" the player, oops lol
 	{
 		ReleasePlayer(player);
+		EndOfBoss();
 	}
 }
 
@@ -288,12 +289,14 @@ void AAIBoss_Doubt::EndOfBoss()
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 	printScreen(FColor::Red, "End of Boss");
+	//TODO: call convergence end
 }
 
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
 {//TODO: something weird is happening where if player1 does damage its fine, but then if player2 does damage, its as if the boss has full health again, and when the boss has 0 health it still does stuff
 	if (playerController)
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("Total Attack Damage: %f"), healthAmount);
 		if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
 		{
 			float tempTentacleHealth = tentacleHealth + healthAmount;

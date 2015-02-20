@@ -41,6 +41,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Damage)
 	float BaseDamage;
 	
+	/** Player's convergence state */
+	ConvergenceState PlayerConvergenceState;
+	
 	/* Temporary function for implementing the light(lantern) item */
 	AItem* GetItem();
 

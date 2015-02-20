@@ -15,6 +15,8 @@ const float DEFAULT_SPRITE_PITCH = 0.0f;
 const float DEFAULT_SPRITE_YAW = 90.0f;
 const float DEFAULT_SPRITE_ROLL = -65.0f;
 
+enum ConvergenceState { CONVERGENCE, DIVERGENCE1, DIVERGENCE2 };
+
 #define printScreen(c, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0, c, FString::Printf(__VA_ARGS__));
 
 #endif

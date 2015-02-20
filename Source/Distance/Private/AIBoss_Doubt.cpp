@@ -126,7 +126,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		if (player2 != NULL)
 		{
 			class ADistancePlayerController* tPController2 = Cast<ADistancePlayerController>(player2->GetController());
-			/*if (tPController2->attackBoss)//*******Not needed anymore
+			/*if (tPController2->attackBoss)//Not needed anymore
 			{
 				printScreen(FColor::Red, TEXT("Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!"));
 				ChangeHealth(-5.0f);

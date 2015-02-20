@@ -56,7 +56,7 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
 
 	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnAttackBoss);//Temporary Binding, for boss testing***************************************
-	InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnSwitchItem);//Temporary Binding, for boss testing***************************************
+	InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnConvergenceBegin);//Temporary Binding, for starting convergence***************************************
 }
 
 void ADistancePlayerController::MoveToMouseCursor()
@@ -225,11 +225,9 @@ void ADistancePlayerController::OnAttackBoss()//Temporary Binding, for boss test
 	attackBoss = true;
 }
 
-void ADistancePlayerController::OnSwitchItem()//Temporary Binding, for boss testing***************************************
+void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for convergence start***************************************
 {
-	printScreen(FColor::Red, "Switched Items");
-	switchedItem = true;
-	DistanceCharacterClass->EquipItem(switchedItem);
+	printScreen(FColor::Red, "Beginning Convergence");
 }
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****

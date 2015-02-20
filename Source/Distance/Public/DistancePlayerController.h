@@ -54,7 +54,7 @@ protected:
 	void OnInventoryPressed();
 
 	void OnAttackBoss();//Temporary Binding, for boss testing***************************************
-	void OnSwitchItem();//Temporary Binding, for boss testing***************************************
+	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************
 	void PleaseSpawnItem();//Temp for testing *******
 
 	UPROPERTY(transient)

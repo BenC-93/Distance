@@ -106,13 +106,13 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		if (player1 != NULL)//Temporary Check for player dealing damage to boss*********************************************
 		{
 			class ADistancePlayerController* tPController1 = Cast<ADistancePlayerController>(player1->GetController());
-			if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack*******Not needed anymore
+			/*if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack*******Not needed anymore
 			{
 				printScreen(FColor::Red, "Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!Like a Boss");
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 				tPController1->attackBoss = false;
-			}
+			}*/
 			if (tPController1->switchedItem)//shield on = when this is false
 			{
 				if (!tPController1->canMove)
@@ -126,13 +126,13 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		if (player2 != NULL)
 		{
 			class ADistancePlayerController* tPController2 = Cast<ADistancePlayerController>(player2->GetController());
-			if (tPController2->attackBoss)//*******Not needed anymore
+			/*if (tPController2->attackBoss)//*******Not needed anymore
 			{
 				printScreen(FColor::Red, "Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!");
 				ChangeHealth(-5.0f);
 				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
 				tPController2->attackBoss = false;
-			}
+			}*/
 			if (tPController2->switchedItem)
 			{
 				if (!tPController2->canMove)

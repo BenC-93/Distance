@@ -97,4 +97,6 @@ public:
 	void Regenerate();
 
 	void Update(class InventoryItem* invItem);
+
+	UTexture2D* GetTheSprite();
 };

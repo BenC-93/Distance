@@ -17,7 +17,7 @@ public:
 	TArray<TSubclassOf<AItem>> ItemTypes;//maybe convert to TMap, inport from Engine/source/runtime/core/public/containers/Map.h
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
-	class AItem* SpawnItem();
+	class AItem* SpawnLantern();
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
 	void SpawnRandomItemAtLocation(FVector location);

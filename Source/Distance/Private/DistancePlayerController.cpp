@@ -17,7 +17,6 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	canMove = true;
 	hitActor = NULL;
 
-	attackBoss = false;//Temporary Bool, for boss testing***************************************
 	switchedItem = false;//Temporary Bool, for boss testing***************************************
 }
 
@@ -55,7 +54,7 @@ void ADistancePlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
 
-	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnAttackBoss);//Temporary Binding, for boss testing***************************************
+	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnGetLocation);//Temporary Binding, for location testing***************************************
 	InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnConvergenceBegin);//Temporary Binding, for starting convergence***************************************
 }
 
@@ -126,18 +125,27 @@ void ADistancePlayerController::OnSetTargetPressed()
 
 	// Handle different Hit types here!
 	hitActor = Hit.GetActor();
-	if (hitActor && hitActor->IsA(AItem::StaticClass()))
+	if (hitActor && hitActor->IsA(AItem::StaticClass()))//if we click on an Item
 	{
 		printScreen(FColor::Red, TEXT("Clicked an Item"));
 		AItem* item = Cast<AItem>(hitActor);
 		if (DistanceCharacterClass->GetDistanceTo(item) < 250.0f)
 		{
-			DistanceCharacterClass->PickupItem(item);
+			//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), DistanceCharacterClass->GetInventory().Num());
+			if (DistanceCharacterClass->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
+			{
+				DistanceCharacterClass->PickupItem(item);
+			}
+			else
+			{
+				printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+			}
 		}
 		else
 		{
 			SetNewMoveDestination(Hit.ImpactPoint);
 		}
+
 	}
 	else if (hitActor->IsA(AAIEnemy::StaticClass()))
 	{
@@ -220,9 +228,9 @@ void ADistancePlayerController::OnInventoryPressed()
 	DistanceCharacterClass->ToggleInventory();
 }
 
-void ADistancePlayerController::OnAttackBoss()//Temporary Binding, for boss testing***************************************
+void ADistancePlayerController::OnGetLocation()//Temporary Binding, for location testing***************************************
 {
-	attackBoss = true;
+	UE_LOG(LogTemp, Error, TEXT("Location is = %s"), *DistanceCharacterClass->GetActorLocation().ToString());
 }
 
 void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for convergence start***************************************
@@ -240,13 +248,16 @@ void ADistancePlayerController::OnConvergenceEnd()
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
 {
-	((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnItem();
+	((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnLantern();
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
-	DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
+	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern());
+	//DistanceCharacterClass->EquipItem(0);
+	//DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
 	DistanceCharacterClass->EquipItemComponent(0);
+	DistanceCharacterClass->ItemPickedUp();
 }

@@ -20,6 +20,9 @@ public:
 	class AItem* SpawnLantern();
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
+	class AItem* SpawnItemAtLocation(TSubclassOf<class AItem> indexClass, FVector location);
+
+	UFUNCTION(BlueprintCallable, Category = Items)
 	void SpawnRandomItemAtLocation(FVector location);
 
 	class TSubclassOf<class AItem> ItemFromIndex(uint32 ItemIndex);

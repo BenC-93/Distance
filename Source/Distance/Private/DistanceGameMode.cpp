@@ -32,6 +32,12 @@ class AItem* ADistanceGameMode::SpawnLantern()
 	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
 }
 
+class AItem* ADistanceGameMode::SpawnItemAtLocation(TSubclassOf<class AItem> indexClass, FVector location)
+{
+	printScreen(FColor::Red, TEXT("Spawning Item"));
+	return GetWorld()->SpawnActor<AItem>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+}
+
 void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
 	printScreen(FColor::Red, "Spawning Random Item");

@@ -4,8 +4,8 @@
 #include "ConvergenceManager.h"
 #include <map>
 
-const float HorizontalOffset = 10.0f;	// y-offset, should be reflected as the offset to divergence1
-const float VerticalOffset = 10.0f;		// x-offset, should be reflected as the offset to divergence2
+const float HorizontalOffset = 10000.0f;	// y-offset, should be reflected as the offset to divergence1
+const float VerticalOffset = -10000.0f;		// x-offset, should be reflected as the offset to divergence2
 
 std::map<ConvergenceState,FVector> OffsetFromConvergenceState = {
 	{ConvergenceState::CONVERGENCE, FVector(0.0, 0.0, 0.0)},
@@ -34,12 +34,15 @@ void TransitionPlayerToState(ADistanceCharacter* player, ConvergenceState NewSta
 		{
 			// No state transition just log a message and stop
 			printScreen(FColor::Red, TEXT("Attempted to transition player to current state"));
+			// Temporary for debugging transition back to divergence
+			ConvergenceManager::EndConvergence();
 		}
 		else
 		{
 			FVector currentLocation = player->GetActorLocation();
 			// Shift player location to convergence state then to the desired state
 			FVector newLocation = currentLocation - OffsetFromConvergenceState.at(CurrentState) + OffsetFromConvergenceState.at(NewState);
+			printLog(TEXT("State transition from location %s to location %s"), *currentLocation.ToString(), *newLocation.ToString());
 			player->GetController()->StopMovement();
 			player->TeleportTo(newLocation, player->GetActorRotation());
 			player->PlayerConvergenceState = NewState;
@@ -54,9 +57,17 @@ void TransitionPlayerToState(ADistanceCharacter* player, ConvergenceState NewSta
 void ConvergenceManager::InitializeWithPlayers(ADistanceCharacter *p1, ADistanceCharacter *p2)
 {
 	player1 = p1;
-	if (player1) player1->PlayerConvergenceState = ConvergenceState::DIVERGENCE1;
+	if (player1)
+	{
+		player1->PlayerConvergenceState = ConvergenceState::DIVERGENCE1;
+		printLog(TEXT("Player 1 assigned divergence 1 at location: %s"), *player1->GetActorLocation().ToString());
+	}
 	player2 = p2;
-	if (player2) player2->PlayerConvergenceState = ConvergenceState::DIVERGENCE2;
+	if (player2)
+	{
+		player2->PlayerConvergenceState = ConvergenceState::DIVERGENCE2;
+		printLog(TEXT("Player 2 assigned divergence 2 at location: %s"), *player1->GetActorLocation().ToString());
+	}
 }
 
 void ConvergenceManager::StartConvergence()
@@ -65,4 +76,12 @@ void ConvergenceManager::StartConvergence()
 	TransitionPlayerToState(player1, ConvergenceState::CONVERGENCE);
 	printScreen(FColor::Red, TEXT("Start for player 2"));
 	TransitionPlayerToState(player2, ConvergenceState::CONVERGENCE);
+}
+
+void ConvergenceManager::EndConvergence()
+{
+	printScreen(FColor::Red, TEXT("End for player 1"));
+	TransitionPlayerToState(player1, ConvergenceState::DIVERGENCE1);
+	printScreen(FColor::Red, TEXT("End for player 2"));
+	TransitionPlayerToState(player2, ConvergenceState::DIVERGENCE2);
 }

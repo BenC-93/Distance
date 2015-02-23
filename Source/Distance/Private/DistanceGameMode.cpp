@@ -4,6 +4,7 @@
 #include "DistanceGameMode.h"
 #include "DistancePlayerController.h"
 #include "DistanceCharacter.h"
+#include "ConvergenceManager.h"
 
 ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -20,6 +21,26 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 		UE_LOG(LogDistance, Verbose, TEXT("Turning on on-screen debugging"));
 		GEngine->bEnableOnScreenDebugMessages = true;
 	}
+}
+
+void ADistanceGameMode::StartPlay()
+{
+	Super::StartPlay();
+	ADistanceCharacter *p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	ADistanceCharacter *p2 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 1));
+	//ConvergenceManager::InitializeWithPlayers(p1, p2);
+}
+
+void ADistanceGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+	printLog(TEXT("Player post login"));
+	// This is probably going to be incredibly messy... Try to find another way.
+	// Grab the remote player from login and the server player from gameplay statics, blech
+	ADistancePlayerController *remoteController = Cast<ADistancePlayerController>(NewPlayer);
+	ADistanceCharacter *p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	ADistanceCharacter *p2 = Cast<ADistanceCharacter>(remoteController->GetDistanceCharacter());
+	ConvergenceManager::InitializeWithPlayers(p1, p2);
 }
 
 class AItem* ADistanceGameMode::SpawnLantern()

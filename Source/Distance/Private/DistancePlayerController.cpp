@@ -5,6 +5,7 @@
 #include "AIEnemy.h"
 #include "AIBoss_Doubt.h"
 #include "AI/Navigation/NavigationSystem.h"
+#include "ConvergenceManager.h"
 
 //this is here for testing the spawning of items
 #include "ItemLantern.h"
@@ -236,7 +237,7 @@ void ADistancePlayerController::OnGetLocation()//Temporary Binding, for location
 void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for convergence start***************************************
 {
 	printScreen(FColor::Red, TEXT("Beginning Convergence"));
-	DistanceCharacterClass->TeleportTo(FVector(500, 0, 0) + DistanceCharacterClass->GetActorLocation(), DistanceCharacterClass->GetActorRotation());//moves 500 upwards
+	ConvergenceManager::StartConvergence();
 }
 
 void ADistancePlayerController::OnConvergenceEnd()

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#import "Distance.h"
 #import "DistanceCharacter.h"
 
 /**

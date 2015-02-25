@@ -7,6 +7,8 @@
 #include "InventoryItem.h"
 #include "DistanceCharacter.generated.h"
 
+enum ConvergenceState : uint32 { CONVERGENCE, DIVERGENCE1, DIVERGENCE2 };
+
 UCLASS(Blueprintable)
 class ADistanceCharacter : public ACharacter
 {

@@ -2,8 +2,6 @@
 
 #pragma once
 
-#import "DistanceCharacter.h"
-
 /**
  * 
  */
@@ -13,11 +11,11 @@ class DISTANCE_API ConvergenceManager
 private:
 	// Intentional, don't allow instance of Convergence Manager
 	ConvergenceManager();
-	static ADistanceCharacter* player1;
-	static ADistanceCharacter* player2;
+	static class ADistanceCharacter* player1;
+	static class ADistanceCharacter* player2;
 public:
 	
-	static void InitializeWithPlayers(ADistanceCharacter* p1, ADistanceCharacter* p2);
+	static void InitializeWithPlayers(class ADistanceCharacter* p1, class ADistanceCharacter* p2);
 	
 	static void StartConvergence();
 	

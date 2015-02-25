@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Distance.h"
+#include "DistanceCharacter.h"
 #include "ConvergenceManager.h"
 #include <map>
 
@@ -42,7 +43,6 @@ void TransitionPlayerToState(ADistanceCharacter* player, ConvergenceState NewSta
 			FVector currentLocation = player->GetActorLocation();
 			// Shift player location to convergence state then to the desired state
 			FVector newLocation = currentLocation - OffsetFromConvergenceState.at(CurrentState) + OffsetFromConvergenceState.at(NewState);
-			printLog(TEXT("State transition from location %s to location %s"), *currentLocation.ToString(), *newLocation.ToString());
 			player->GetController()->StopMovement();
 			player->TeleportTo(newLocation, player->GetActorRotation());
 			player->PlayerConvergenceState = NewState;
@@ -60,13 +60,11 @@ void ConvergenceManager::InitializeWithPlayers(ADistanceCharacter *p1, ADistance
 	if (player1)
 	{
 		player1->PlayerConvergenceState = ConvergenceState::DIVERGENCE1;
-		printLog(TEXT("Player 1 assigned divergence 1 at location: %s"), *player1->GetActorLocation().ToString());
 	}
 	player2 = p2;
 	if (player2)
 	{
 		player2->PlayerConvergenceState = ConvergenceState::DIVERGENCE2;
-		printLog(TEXT("Player 2 assigned divergence 2 at location: %s"), *player1->GetActorLocation().ToString());
 	}
 }
 

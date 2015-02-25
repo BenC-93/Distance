@@ -109,28 +109,48 @@ void ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more tha
 		// before removing it from the array
 		GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
 		uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
-		EquipItem(tempIndex);
+		EquipItem(0);//default equip lantern
 		UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 		Inventory.RemoveAt(InvSlot);
 		spriteInventory.RemoveAt(InvSlot);
-		ItemPickedUp();//refresh gui inventory after drop
+		ItemPickedUp();//refresh gui inventory after drop, but not needed if i keep the one in equip item
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
 }
 
 void ADistanceCharacter::EquipItem(int32 InvSlot)
 {
-	if (Inventory.IsValidIndex(InvSlot))//TODO: fix bug that happens because of drop item
+	UE_LOG(LogTemp, Warning, TEXT("Inventory length: %d"), Inventory.Num());
+	UE_LOG(LogTemp, Warning, TEXT("InvSlot to be equipped: %d"), InvSlot);
+	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot))//TODO: fix bug that happens because of drop item
 	{
 		//Inventory[EquippedSlot]->OnUnequip();
-		GetItem()->OnUnequip();
-		Inventory[EquippedSlot]->Update(GetItem());
+		if (GetItem() != NULL)
+		{
+			GetItem()->OnUnequip();
+			if (Inventory.IsValidIndex(EquippedSlot))
+			{
+				Inventory[EquippedSlot]->Update(GetItem());
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Previous Item is Null!"));
+		}
 		EquippedSlot = InvSlot;
 		//Inventory[EquippedSlot]->OnEquip();
 		EquipItemComponent(EquippedSlot);
-		GetItem()->OnEquip();
-		GetItem()->Update(Inventory[EquippedSlot]);
+		if (GetItem() != NULL)
+		{
+			GetItem()->OnEquip();
+			GetItem()->Update(Inventory[EquippedSlot]);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Equipped Item is Null!"));
+		}
 		//Refresh gui inventory with ItemPickedUp()???? if we want some glow thing on current item then id say yes
+		ItemPickedUp();
 	}
 }
 
@@ -148,7 +168,7 @@ void ADistanceCharacter::EquipItemComponent(int32 InvSlot)
 
 void ADistanceCharacter::UseItem()
 {
-	if (Inventory.IsValidIndex(EquippedSlot))
+	if (Inventory.IsValidIndex(EquippedSlot) && GetItem() != NULL)
 	{
 		//Inventory[EquippedSlot]->StartUse();
 		GetItem()->StartUse();

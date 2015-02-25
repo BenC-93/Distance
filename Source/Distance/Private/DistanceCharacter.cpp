@@ -12,6 +12,7 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 {
 	//Networking
 	bReplicates = true;
+	bReplicateMovement = true;
 
 	Health = 100.0f;
 	MaxHealth = 100.0f;
@@ -50,11 +51,13 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	SpriteComponent->AttachTo(RootComponent);
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SpriteComponent->SetIsReplicated(true);
 
 	ItemComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("ItemComponent"));
 	ItemComponent->ChildActorClass = AItem::StaticClass();
 	ItemComponent->OnComponentCreated();
 	ItemComponent->AttachTo(RootComponent);
+	ItemComponent->SetIsReplicated(true);
 
 	//some C++ class constructor 
 	//Your BP of the base C++ class static ConstructorHelpers::FObjectFinder YourBPOb(TEXT("Blueprint'/Game/Characters/YourBP.YourBP'")); 

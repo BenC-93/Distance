@@ -27,6 +27,8 @@ public:
 	bool switchedItem;//Temporary Bool, for boss testing***************************************
 
 	void OnConvergenceEnd();
+	
+	FORCEINLINE class ADistanceCharacter* GetDistanceCharacter() const { return DistanceCharacterClass; }
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */

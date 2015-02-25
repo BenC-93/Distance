@@ -24,6 +24,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Items)
 	void SpawnRandomItemAtLocation(FVector location);
+	
+	virtual void StartPlay();
+	
+	virtual void PostLogin(APlayerController* NewPlayer);
 
 	class TSubclassOf<class AItem> ItemFromIndex(uint32 ItemIndex);
 };

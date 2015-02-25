@@ -19,4 +19,6 @@ enum ConvergenceState { CONVERGENCE, DIVERGENCE1, DIVERGENCE2 };
 
 #define printScreen(c, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0, c, FString::Printf(__VA_ARGS__));
 
+#define printLog(...) UE_LOG(LogDistance, Warning, __VA_ARGS__);
+
 #endif

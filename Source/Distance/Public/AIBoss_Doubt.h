@@ -7,6 +7,7 @@
 #include "DistanceCharacter.h"
 #include "DistancePlayerController.h"
 #include "Classes/PaperSpriteComponent.h"
+#include "Tentacle.h"
 #include "AIBoss_Doubt.generated.h"
 
 /**
@@ -63,6 +64,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class ADistancePlayerController* playerController;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Tentacle")
+	TArray<class ATentacle*> tentacleArray;
 
 	void PullPlayer(class ACharacter* tempChar);
 	void ReleasePlayer(class ACharacter* tempChar);

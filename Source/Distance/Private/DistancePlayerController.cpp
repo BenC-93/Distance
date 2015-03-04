@@ -98,6 +98,21 @@ void ADistancePlayerController::SetNewMoveDestination_Implementation(const FVect
 		if (NavSys && (Distance > 120.0f))
 		{
 			NavSys->SimpleMoveToLocation(this, DestLocation);
+
+			if (DestLocation.Y >= DistanceCharacterClass->GetActorLocation().Y)
+			{
+				FRotator newRot = FRotator(0.f, -65.f, -90.f);
+				FRotator Rot = DistanceCharacterClass->GetMesh()->GetComponentRotation();
+				Rot.Yaw += 180.0f;
+				DistanceCharacterClass->GetMesh()->SetRelativeRotation(newRot);
+			}
+			else
+			{
+				FRotator newRot = FRotator(0.f, -65.f, 90.0f);
+				FRotator Rot = DistanceCharacterClass->GetMesh()->GetComponentRotation();
+				Rot.Yaw += 180.0f;
+				DistanceCharacterClass->GetMesh()->SetRelativeRotation(newRot);
+			}
 		}
 	}
 }

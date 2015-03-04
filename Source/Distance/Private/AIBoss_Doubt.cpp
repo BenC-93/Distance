@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "AIBoss_Doubt.h"
+#include "UnrealNetwork.h"
 
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -47,6 +48,13 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+}
+
+void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AAIBoss_Doubt, tentacleArray);
 }
 
 void AAIBoss_Doubt::Tick(float DeltaTime)

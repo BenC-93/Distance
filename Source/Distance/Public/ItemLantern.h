@@ -15,6 +15,12 @@ class DISTANCE_API AItemLantern : public AItem
 
 public:
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Light")
+	float LightIntensity;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Light")
+	class UPointLightComponent* LightSource;
+
 	AItemLantern(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
 	virtual void EndUse() override;

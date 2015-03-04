@@ -90,7 +90,7 @@ public:
 
 	/* Changes 'amount' variable by value, within the bounds [0.0, maxAmount]. */
 	UFUNCTION(BlueprintCallable, Category = Amount)
-	void ChangeAmount(float value);
+	virtual void ChangeAmount(float value);
 
 	/* Adds to 'amount' at rate 'rate'. */
 	UFUNCTION(BlueprintCallable, Category = Regen)

@@ -12,12 +12,12 @@ AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
 	droppable = false;
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	LightIntensity = 10000.0f;
+	LightIntensity = 100.0f * amount;
 
 	LightSource = ObjectInitializer.CreateDefaultSubobject<UPointLightComponent>(this, "LightSource");
 	LightSource->AttachTo(RootComponent);
 	LightSource->Intensity = LightIntensity;
-	LightSource->bVisible = true;
+	LightSource->bVisible = false;
 
 
 }
@@ -27,18 +27,24 @@ void AItemLantern::StartUse()
 	if (isInUse)
 	{
 		isInUse = false;
-		return;
+		LightSource->SetVisibility(false);
 	}
 	else
 	{
 		isInUse = true;
-		//LightSource->bVisible = isInUse;
+		LightSource->SetVisibility(true);
+
 	}
-	LightSource->ToggleVisibility();
-	printScreen(FColor::Red, TEXT("Light visibility = %d"), LightSource->bVisible);
 }
 
 void AItemLantern::EndUse()
 {
 	return;
+}
+
+void AItemLantern::ChangeAmount(float value)
+{
+	Super::ChangeAmount(value);
+	LightIntensity = 100.0f * amount;
+	LightSource->SetIntensity(LightIntensity);
 }

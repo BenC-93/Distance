@@ -270,23 +270,7 @@ void ADistanceCharacter::ChangeItemAmount(float itemAmount)
 {
 	if (GetItem() != NULL)
 	{
-		float tempItemAmount = GetItemAmount() + itemAmount;
-		if (tempItemAmount <= GetMaxItemAmount())
-		{
-			if (tempItemAmount < 0)
-			{
-				GetItem()->amount = 0.0f;
-			}
-			else
-			{
-				GetItem()->amount = tempItemAmount;
-			}
-		}
-		// Send a verbose log message whenever reaching or passing Item values divisible by 10
-		if (int(GetItemAmount()) % 10 == 0 || abs(itemAmount) >= 10)
-		{
-			UE_LOG(LogDistance, Verbose, TEXT("Changing Item Breakpoint: %f"), GetItemAmount());
-		}
+		GetItem()->ChangeAmount(itemAmount);
 	}
 }
 

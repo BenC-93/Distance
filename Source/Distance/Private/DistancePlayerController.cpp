@@ -101,17 +101,13 @@ void ADistancePlayerController::SetNewMoveDestination_Implementation(const FVect
 
 			if (DestLocation.Y >= DistanceCharacterClass->GetActorLocation().Y)
 			{
-				FRotator newRot = FRotator(0.f, -65.f, -90.f);
-				FRotator Rot = DistanceCharacterClass->GetMesh()->GetComponentRotation();
-				Rot.Yaw += 180.0f;
-				DistanceCharacterClass->GetMesh()->SetRelativeRotation(newRot);
+				// Rotation sucks, I'm sorry for relying on scale #yolo
+				DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
 			}
 			else
 			{
-				FRotator newRot = FRotator(0.f, -65.f, 90.0f);
-				FRotator Rot = DistanceCharacterClass->GetMesh()->GetComponentRotation();
-				Rot.Yaw += 180.0f;
-				DistanceCharacterClass->GetMesh()->SetRelativeRotation(newRot);
+				// Rotation sucks, I'm sorry for using scale, please forgive me...
+				DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 			}
 		}
 	}

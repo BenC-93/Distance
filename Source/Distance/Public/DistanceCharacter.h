@@ -70,7 +70,7 @@ public:
 
 	/* Drop currently equipped item */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void DropItem(int32 InvSlot);
+	AItem* DropItem(int32 InvSlot);
 
 	/* Equip a different item that is already in the inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)

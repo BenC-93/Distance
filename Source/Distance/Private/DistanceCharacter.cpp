@@ -104,21 +104,24 @@ void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items w
 	}
 }
 
-void ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more than 1 item and drop until there is 1 left, clicking on (equipping) the last one will Error
+AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more than 1 item and drop until there is 1 left, clicking on (equipping) the last one will Error
 {
 	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot))
 	{
 		// Need to create the item in the world,
 		// before removing it from the array
-		GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
+		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
 		uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 		EquipItem(0);//default equip lantern
 		UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 		Inventory.RemoveAt(InvSlot);
 		spriteInventory.RemoveAt(InvSlot);
 		ItemPickedUp();//refresh gui inventory after drop, but not needed if i keep the one in equip item
+		UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
+		return droppedItem;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
+	return NULL;
 }
 
 void ADistanceCharacter::EquipItem(int32 InvSlot)

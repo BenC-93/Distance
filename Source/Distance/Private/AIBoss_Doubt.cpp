@@ -14,6 +14,12 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	tentacleHealth = 10.0f;
 	numTentacles = 5;
 
+	/*for (int i = 0; i < numTentacles; i++)
+	{
+		ATentacle* tentacle = new ATentacle(ObjectInitializer);
+		tentacleArray.Add(tentacle);
+	}*/
+
 	swallowedPlayer = NULL;
 
 	p1InTrigger = false;
@@ -35,6 +41,12 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	AITriggerAttack->Mobility = EComponentMobility::Movable;
 	AITriggerAttack->SetBoxExtent(FVector(150.0f, 100.0f, 60.0f), true);
 	AITriggerAttack->AttachTo(RootComponent);
+
+	TentacleComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("TentacleComponent"));
+	TentacleComponent->ChildActorClass = ATentacle::StaticClass();
+	TentacleComponent->OnComponentCreated();
+	TentacleComponent->AttachTo(RootComponent);
+	TentacleComponent->SetIsReplicated(true);
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 0.f);
@@ -319,7 +331,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 		//UE_LOG(LogTemp, Warning, TEXT("Total Attack Damage: %f"), healthAmount);
 		if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
 		{
-			float tempTentacleHealth = tentacleHealth + healthAmount;
+			/*float tempTentacleHealth = tentacleHealth + healthAmount;
 			if (tempTentacleHealth <= 0)//defeated current tentacle
 			{
 				tentacleHealth = 0;
@@ -350,6 +362,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 			{
 				tentacleHealth = tempTentacleHealth;
 			}
+			*/
 		}
 		else if (playerController->canMove)//else if no player is grabbed, deal damage to the actual boss
 		{

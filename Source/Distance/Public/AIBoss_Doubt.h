@@ -32,6 +32,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Triggers")
 	class UBoxComponent* AITriggerAttack;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tentacle", meta = (AllowPrivateAccess = "true"))
+	class UChildActorComponent* TentacleComponent;
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 

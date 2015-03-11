@@ -170,6 +170,11 @@ void ADistancePlayerController::OnSetTargetPressed()
 		printScreen(FColor::Red, TEXT("Clicked a boss"));
 		enemyActor = hitActor;
 	}
+	else if (hitActor->IsA(ATentacle::StaticClass()))
+	{
+		printScreen(FColor::Red, TEXT("Clicked a Tentacle"));
+		enemyActor = hitActor;
+	}
 	else if (Hit.bBlockingHit && canMove)
 	{
 		SetNewMoveDestination(Hit.ImpactPoint);
@@ -226,6 +231,17 @@ void ADistancePlayerController::OnUseItemReleased()
 			lightBeam->totalChargedAmount = 0.0f;
 			//UE_LOG(LogTemp, Error, TEXT("totalChargedAmount  after: %d"), lightBeam->totalChargedAmount);
 			if (Cast<AAIBoss_Doubt>(enemyActor)->GetHealth() <= 0)
+			{
+				enemyActor = NULL;
+			}
+		}
+		else if (enemyActor != NULL && enemyActor->IsA(ATentacle::StaticClass()))
+		{
+			//printScreen(FColor::Red, "Attacking the boss woooooooo");
+			class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
+			Cast<ATentacle>(enemyActor)->ChangeHealth(DistanceCharacterClass->Attack(lightBeam->totalChargedAmount));
+			lightBeam->totalChargedAmount = 0.0f;
+			if (enemyActor != NULL && Cast<ATentacle>(enemyActor)->health <= 0)
 			{
 				enemyActor = NULL;
 			}

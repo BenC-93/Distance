@@ -100,6 +100,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Light)
 	bool GetIsItemDroppable();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
+	void BPTransitionToConvergenceState();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
+	void BPTransitionToDivergenceState();
+
+
 	/* The following functions are depreciated and will be removed soon:
 	   ChangeLight, getLightAmount, getMaxLightAmount, getLightEnabled,
 	   RegenerateLight */

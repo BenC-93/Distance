@@ -46,6 +46,14 @@ void TransitionPlayerToState(ADistanceCharacter* player, ConvergenceState NewSta
 			player->GetController()->StopMovement();
 			player->TeleportTo(newLocation, player->GetActorRotation());
 			player->PlayerConvergenceState = NewState;
+			if (player->PlayerConvergenceState == ConvergenceState::CONVERGENCE)
+			{
+				player->BPTransitionToConvergenceState();
+			}
+			else
+			{
+				player->BPTransitionToDivergenceState();
+			}
 		}
 	}
 	else

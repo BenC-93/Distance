@@ -5,8 +5,8 @@
 #include "ConvergenceManager.h"
 #include <map>
 
-const float HorizontalOffset = 10000.0f;	// y-offset, should be reflected as the offset to divergence1
-const float VerticalOffset = -10000.0f;		// x-offset, should be reflected as the offset to divergence2
+const float HorizontalOffset = 30000.0f;	// y-offset, should be reflected as the offset to divergence1
+const float VerticalOffset = 30000.0f;		// x-offset, should be reflected as the offset to divergence2
 
 std::map<ConvergenceState,FVector> OffsetFromConvergenceState = {
 	{ConvergenceState::CONVERGENCE, FVector(0.0, 0.0, 0.0)},

@@ -267,12 +267,31 @@ Spirito = {
     },
 
     blog: function() {
+		$('.blog-first-posts').ready(function() {
+            var btn = $(this);
+            var output = {};
+            $.getJSON('http://' + window.location.host + '/php/posts.php',
+                function(posts) {
+                    for (var i = 0; i < 1; i++) {
+                        post = '<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4"><article data-animate="flipInX" class="post animate fade-in-bottom"><a class="post-image" href="' + posts[i].link + '"><img alt="" src="' + posts[i].img + '"><div class="overlay"><i class="fa fa-' + posts[i].type + '"></i></div></a><h3 class="post-title"><a href="' + posts[i].link + '">' + posts[i].title + '</a></h3><p class="post-meta"><span class="meta-date">' + posts[i].date + '</span><span class="meta-by"><a href="#">' + posts[i].author + '</a></span></p><p class="post-content">' + posts[i].content + '</p><p class="post-read-more"><a class="btn btn-primary btn-sm" href="' + posts[i].link + '">Read More</a></p></article></div>';
+                        output[i] = post;
+                    }
+                    $.each(output, function(i, value) {
+                        setTimeout(function() {
+                            $('.posts').append(value);
+                            $(window).trigger('scroll');
+                        }, (200 * i));
+                    });
+                }
+            );
+            return false;
+        });
         $('.blog-more-posts').click(function() {
             var btn = $(this);
             var output = {};
             $.getJSON('http://' + window.location.host + '/php/posts.php',
                 function(posts) {
-                    for (var i = 0; i < posts.length; i++) {
+                    for (var i = 3; i < posts.length; i++) {
                         post = '<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4"><article data-animate="flipInX" class="post animate fade-in-bottom"><a class="post-image" href="' + posts[i].link + '"><img alt="" src="' + posts[i].img + '"><div class="overlay"><i class="fa fa-' + posts[i].type + '"></i></div></a><h3 class="post-title"><a href="' + posts[i].link + '">' + posts[i].title + '</a></h3><p class="post-meta"><span class="meta-date">' + posts[i].date + '</span><span class="meta-by"><a href="#">' + posts[i].author + '</a></span></p><p class="post-content">' + posts[i].content + '</p><p class="post-read-more"><a class="btn btn-primary btn-sm" href="' + posts[i].link + '">Read More</a></p></article></div>';
                         output[i] = post;
                     }

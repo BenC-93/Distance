@@ -270,7 +270,7 @@ Spirito = {
         $('.blog-more-posts').click(function() {
             var btn = $(this);
             var output = {};
-            $.getJSON('http://' + window.location.host + '/spirito/110/php/posts.php',
+            $.getJSON('http://' + window.location.host + '/php/posts.php',
                 function(posts) {
                     for (var i = 0; i < posts.length; i++) {
                         post = '<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4"><article data-animate="flipInX" class="post animate fade-in-bottom"><a class="post-image" href="' + posts[i].link + '"><img alt="" src="' + posts[i].img + '"><div class="overlay"><i class="fa fa-' + posts[i].type + '"></i></div></a><h3 class="post-title"><a href="' + posts[i].link + '">' + posts[i].title + '</a></h3><p class="post-meta"><span class="meta-date">' + posts[i].date + '</span><span class="meta-by"><a href="#">' + posts[i].author + '</a></span></p><p class="post-content">' + posts[i].content + '</p><p class="post-read-more"><a class="btn btn-primary btn-sm" href="' + posts[i].link + '">Read More</a></p></article></div>';

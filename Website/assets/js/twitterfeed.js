@@ -22,8 +22,8 @@ $(function() {
 				loadingHTML += '<div id="loading-container">Loading tweets...</div>';
 				
 				this.html(loadingHTML);
-				 
-			    $.getJSON('http://192.168.1.69/themes/Spirito/php/gettweets.php', 
+
+			    $.getJSON('http://overtimegames.net/php/gettweets.php', 
 			        function(feeds) {   
 					   //alert(feeds);
 			            var feedHTML = '';

@@ -3,12 +3,12 @@ session_start();
 $path = realpath(__DIR__);
 require_once("twitteroauth/twitteroauth.php"); //Path to twitteroauth library
  
-$twitteruser = "chaosgamer";
+$twitteruser = "distance_game";
 $notweets = 30;
-$consumerkey = "0n7SERZ0ksxQitKe1UwmwRRBw";
-$consumersecret = "VOLD26dvEsVwmFZbu3o42UGF2ZlbtKMTq4CBxpjU2MCIkgGCVS";
-$accesstoken = "66573459-wexDUA7wbjTOaz9nF12RQZdnzWKhgE8ZAZtwjW7mm";
-$accesstokensecret = "pzczBzx6xL2P5YQXsZYXDvAd35pmlU83nBceGaLC7MvHV";
+$consumerkey = "qMzJcU5QmmVEkVwynTJE4utTQ";
+$consumersecret = "buQUhophlJOUuwTQt0mGiRrd9OTKMd96U03eqA50PwQQW6MdUz";
+$accesstoken = "3061055118-ImWGESGjmDyDCvA0PtXvt7tRZRsYoRbyko3u7zB";
+$accesstokensecret = "ecMyCxwKZ66aG2bzA7T0VXzDyySm9eBL6N161jpUuhhxf";
  
 function getConnectionWithAccessToken($cons_key, $cons_secret, $oauth_token, $oauth_token_secret) {
   $connection = new TwitterOAuth($cons_key, $cons_secret, $oauth_token, $oauth_token_secret);

@@ -7,6 +7,7 @@
 
 const float HorizontalOffset = 30000.0f;	// y-offset, should be reflected as the offset to divergence1
 const float VerticalOffset = 30000.0f;		// x-offset, should be reflected as the offset to divergence2
+const FVector2D CentralPoint = FVector2D(15000.0f, 15000.0f);
 
 std::map<ConvergenceState,FVector> OffsetFromConvergenceState = {
 	{ConvergenceState::CONVERGENCE, FVector(0.0, 0.0, 0.0)},
@@ -64,16 +65,46 @@ void TransitionPlayerToState(ADistanceCharacter* player, ConvergenceState NewSta
 
 void ConvergenceManager::InitializeWithPlayers(ADistanceCharacter *p1, ADistanceCharacter *p2)
 {
-	player1 = p1;
-	if (player1)
+	ConvergenceState state;
+	if (p1)
 	{
-		player1->PlayerConvergenceState = ConvergenceState::DIVERGENCE1;
+		state = StateFromLocation(p1->GetActorLocation());
+		p1->PlayerConvergenceState = state;
+		// Set the persistent player references based on spawn location
+		if (state == ConvergenceState::DIVERGENCE1) {
+			player1 = p1;
+		} else if (state == ConvergenceState::DIVERGENCE2) {
+			player2 = p1;
+		}
 	}
-	player2 = p2;
-	if (player2)
+	if (p2)
 	{
-		player2->PlayerConvergenceState = ConvergenceState::DIVERGENCE2;
+		state = StateFromLocation(p2->GetActorLocation());
+		p2->PlayerConvergenceState = state;
+		// Set the persistent player references based on spawn location
+		if (state == ConvergenceState::DIVERGENCE1) {
+			player1 = p2;
+		} else if (state == ConvergenceState::DIVERGENCE2) {
+			player2 = p2;
+		}
 	}
+}
+
+ConvergenceState ConvergenceManager::StateFromLocation(FVector location)
+{
+	ConvergenceState state;
+	// Locations right of the center are divergence 2
+	if (location.X > CentralPoint.X) {
+		state = ConvergenceState::DIVERGENCE2;
+	} else {
+		// Locations below the center are divergence 1
+		if (location.Y > CentralPoint.Y) {
+			state = ConvergenceState::DIVERGENCE1;
+		} else {
+			state = ConvergenceState::CONVERGENCE;
+		}
+	}
+	return state;
 }
 
 void ConvergenceManager::StartConvergence()

@@ -43,7 +43,7 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	AITriggerAttack->AttachTo(RootComponent);
 
 	TentacleComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("TentacleComponent"));
-	TentacleComponent->ChildActorClass = ATentacle::StaticClass();
+	//TentacleComponent->ChildActorClass = ATentacle::StaticClass();
 	TentacleComponent->OnComponentCreated();
 	TentacleComponent->AttachTo(RootComponent);
 	TentacleComponent->SetIsReplicated(true);
@@ -72,6 +72,8 @@ void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLif
 void AAIBoss_Doubt::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//float temptentaclehealth = ((ATentacle *)TentacleComponent->ChildActor)->health;
+	//UE_LOG(LogTemp, Warning, TEXT("Tentacle Health: %f"), temptentaclehealth);
 	if (player != NULL)
 	{
 		if (Health > 0)
@@ -193,6 +195,8 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 
 	tempPlayerController->canMove = false;
 	tempPlayerController->SetNewMoveDestination(GetActorLocation());
+
+	GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnTentacleAtLocation(TentacleClass, tempPlayer->GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
 }
 
 void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)

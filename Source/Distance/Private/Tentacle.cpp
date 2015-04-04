@@ -13,9 +13,9 @@ ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 	RootComponent = RootSceneComponent;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
-	SpriteComponent->AttachTo(RootComponent);
-	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
+	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -65.f);
 	SpriteComponent->RelativeScale3D = FVector(7.0f, 3.0f, 3.0f);
+	SpriteComponent->AttachTo(RootComponent);
 	
 	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
 	TriggerBox->Mobility = EComponentMobility::Movable;
@@ -33,6 +33,7 @@ float ATentacle::ChangeHealth(float amount)
 		if (tempHealth < 0)
 		{
 			health = 0.0f;
+			Destroy();
 		}
 		else
 		{

@@ -23,6 +23,9 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(Category = Items, EditAnywhere)
+	TSubclassOf<ATentacle> TentacleClass;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
 	class UPaperSpriteComponent* SpriteComponent;
 

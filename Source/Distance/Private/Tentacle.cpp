@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "Tentacle.h"
+#include "AIBoss_Doubt.h"
 
 ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -22,6 +23,13 @@ ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 	TriggerBox->SetBoxExtent(FVector(50.0f, 50.0f, 50.0f), true);
 	TriggerBox->RelativeLocation = FVector(70.0f, -270.0f, 0.0f);
 	TriggerBox->AttachTo(RootComponent);
+
+}
+
+void ATentacle::SetBossParent(class AAIBoss_Doubt* parent)
+{
+	doubtParent = parent;
+	TriggerBox->OnComponentBeginOverlap.AddDynamic(doubtParent, &AAIBoss_Doubt::OnTentacleOverlap);
 }
 
 float ATentacle::ChangeHealth(float amount)

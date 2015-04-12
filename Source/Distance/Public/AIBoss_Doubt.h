@@ -7,7 +7,6 @@
 #include "DistanceCharacter.h"
 #include "DistancePlayerController.h"
 #include "Classes/PaperSpriteComponent.h"
-#include "Tentacle.h"
 #include "AIBoss_Doubt.generated.h"
 
 /**
@@ -23,8 +22,12 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void PostInitializeComponents() override;
+
 	UPROPERTY(Category = Items, EditAnywhere)
-	TSubclassOf<ATentacle> TentacleClass;
+	TSubclassOf<class ATentacle> TentacleClass;
+
+	ATentacle* GetTentacle(int index);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
 	class UPaperSpriteComponent* SpriteComponent;
@@ -34,15 +37,32 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Triggers")
 	class UBoxComponent* AITriggerAttack;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tentacle", meta = (AllowPrivateAccess = "true"))
+	class UChildActorComponent* TentacleComponent0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tentacle", meta = (AllowPrivateAccess = "true"))
-	class UChildActorComponent* TentacleComponent;
+	class UChildActorComponent* TentacleComponent1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tentacle", meta = (AllowPrivateAccess = "true"))
+	class UChildActorComponent* TentacleComponent2;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tentacle", meta = (AllowPrivateAccess = "true"))
+	class UChildActorComponent* TentacleComponent3;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tentacle", meta = (AllowPrivateAccess = "true"))
+	TArray<class UChildActorComponent*> TentacleComponentArray;
+
+	UChildActorComponent* CreateTentacleComponent(int i, const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapEnd(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
+	void OnTentacleOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION(BlueprintCallable, Category = "Trigger Functions")
 	bool CheckIfPlayer(class AActor* OtherActor);

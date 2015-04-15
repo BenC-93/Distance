@@ -348,7 +348,7 @@ void AAIBoss_Doubt::EndOfBoss()
 	if (playerController)
 	{
 		playerController->OnConvergenceEnd();
-		Destroy();
+		//Destroy();
 	}
 	else
 	{

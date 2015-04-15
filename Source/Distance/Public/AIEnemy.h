@@ -92,6 +92,9 @@ public:
 	// drain either player's lantern light or player health during attack
 	void Drain();
 
+	void DrainTimer();
+	void StartDrainTimer(float rate);
+
 private:
 	
 	float health;

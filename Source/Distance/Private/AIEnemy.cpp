@@ -9,9 +9,6 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 {
 	moveToPlayer = false;
 	moveAway = false;
-	drainHealth = false;
-	drainLight = false;
-	drainTrigger = false;
 	player1 = NULL;
 	player2 = NULL;
 
@@ -19,10 +16,8 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 
 	health = 0.0f;
 	maxHealth = 100.0f;
-	baseDamage = 20.0f;
-
-	drainCounter = 0.0f;
-	drainRate = 0.1f;// tenth of a second
+	baseDamage = -1.0f;
+	drainRate = 0.1f;//half or tenth of a second
 
 	speedCounter = 1.0f;
 	speedLimit = 1200.0f;
@@ -72,83 +67,7 @@ void AAIEnemy::Tick(float DeltaTime)
 
 	if (player != NULL)
 	{
-		// Player is in range of close trigger and Enemy is not "full"
-		if (drainTrigger && health < maxHealth)
-		{
-			// Add time to drain tick
-			drainCounter += DeltaTime;
-			if (player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
-			{
-				drainLight = true;
-				drainHealth = false;
-			}
-			else//drain health
-			{
-				drainHealth = true;
-				drainLight = false;
-			}
-		}
-
-		if (drainHealth && !drainLight && !moveAway)//drain health
-		{
-			if (health < maxHealth && drainCounter > drainRate)
-			{
-				// Tick the drain
-				drainCounter -= drainRate;
-				health += 1;
-				player->ChangeHealth(-1.0f);
-				if (player->Health == 0)//player health has depleted, move away
-				{
-					GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
-					//drainCounter = 0;
-					drainHealth = false;
-					moveAway = true;
-					moveToPlayer = false;
-				}
-				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
-			}
-			else if (health >= maxHealth)//AI is full, move away
-			{
-				GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
-				//drainCounter = 0;
-				drainHealth = false;
-				moveAway = true;
-				moveToPlayer = false;
-			}
-		}
-		else if (drainLight && !drainHealth && !moveAway)//drain light
-		{
-			if (health < maxHealth && drainCounter > drainRate)
-			{
-				// Tick the drain
-				drainCounter -= drainRate;
-				health += 1;
-				player->ChangeItemAmount(-1.0f);
-				if (player->GetItemAmount() == 0)//dont end here, just go to health
-				{
-					drainLight = false;
-					drainHealth = true;
-					/*
-					GetCharacterMovement()->MaxWalkSpeed = 400;
-					//drainCounter = 0;
-					drainLight = false;
-					moveAway = true;
-					moveToPlayer = false;
-					*/
-				}
-				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->GetItemAmount());
-			}
-			else if (health >= maxHealth)//Ai is full, move away
-			{
-				GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
-				//drainCounter = 0;
-				drainLight = false;
-				moveAway = true;
-				moveToPlayer = false;
-			}
-		}
-
-		if (moveToPlayer && !drainTrigger)//Determines if ai moves faster towards player or player moves slower trying to escape
+		if (moveToPlayer && !GetWorldTimerManager().IsTimerActive(this, &AAIEnemy::DrainTimer))//Determines if ai moves faster towards player or player moves slower trying to escape
 		{
 			FRotator playerDirection = player->GetVelocity().Rotation();
 			FRotator myDirection = GetVelocity().Rotation();
@@ -203,8 +122,53 @@ void AAIEnemy::Tick(float DeltaTime)
 			//UE_LOG(LogTemp, Warning, TEXT("speedCounter: %f"), speedCounter);
 		}
 	}
+}
 
+void AAIEnemy::DrainTimer()
+{
+	if (player != NULL)
+	{
+		if (health >= maxHealth)//Ai is full, move away
+		{
+			GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
+			moveToPlayer = false;
+			moveAway = true;
+			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
+			return;
+		}
+		if (player->Health == 0)//player health has depleted, move away
+		{
+			GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
+			moveToPlayer = false;
+			moveAway = true;
+			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
+			return;
+		}
+		if (moveToPlayer && player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
+		{//drain light
+			if (health < maxHealth)
+			{
+				health += 1;
+				player->ChangeItemAmount(baseDamage);
+				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->GetItemAmount());
+			}
+		}
+		else//drain health
+		{
+			if (moveToPlayer && health < maxHealth)
+			{
+				health += 1;
+				player->ChangeHealth(baseDamage);
+				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
+			}
+		}
+	}
+}
 
+void AAIEnemy::StartDrainTimer(float rate)
+{
+	GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIEnemy::DrainTimer, rate, true);
 }
 
 void AAIEnemy::ChangeHealth(float amount)
@@ -225,14 +189,9 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 		{
 			UE_LOG(LogTemp, Warning, TEXT("-----Player Entered Triggered Area"));
 			moveToPlayer = true;//outer trigger boolean
+			moveAway = false;
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
-			/*if (player->GetItemAmount() > 0 && player->GetItemEnabled())//This is where the enemy is supposed to run away
-			{
-				moveToPlayer = false;
-				moveAway = true;
-				UE_LOG(LogTemp, Warning, TEXT("Moving away from Player"));
-			}*/
 		}
 	}
 }
@@ -261,17 +220,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 			player->ChangeSpeed(400);//Works, but when do we set it back to normal??
 			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
-			if (player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
-			{
-				drainLight = true;
-				drainHealth = false;
-			}
-			else
-			{
-				drainHealth = true;
-				drainLight = false;
-			}
-			drainTrigger = true;
+			StartDrainTimer(drainRate);
 		}
 	}
 }
@@ -283,9 +232,7 @@ void AAIEnemy::OnExitAttackTrigger(class AActor* OtherActor)
 		if (CheckIfPlayer(OtherActor))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player Exited drain trigger."));
-			drainTrigger = false;
-			drainHealth = false;
-			drainLight = false;
+			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
 		}
 	}
 }

@@ -6,6 +6,8 @@
  * 
  */
 
+enum ConvergenceState : uint32;
+
 class DISTANCE_API ConvergenceManager
 {
 private:
@@ -16,6 +18,8 @@ private:
 public:
 	
 	static void InitializeWithPlayers(class ADistanceCharacter* p1, class ADistanceCharacter* p2);
+	
+	static ConvergenceState StateFromLocation(FVector location);
 	
 	static void StartConvergence();
 	

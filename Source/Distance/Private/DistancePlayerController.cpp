@@ -270,8 +270,7 @@ void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for con
 void ADistancePlayerController::OnConvergenceEnd()
 {
 	printScreen(FColor::Red, TEXT("Ending Convergence"));
-	DistanceCharacterClass->TeleportTo(FVector(-502, -341, DistanceCharacterClass->GetActorLocation().Z), DistanceCharacterClass->GetActorRotation());
-	SetNewMoveDestination(DistanceCharacterClass->GetActorLocation() - FVector(121.0f, 0.0f, 0.0f));
+	ConvergenceManager::EndConvergence();
 }
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****

@@ -70,7 +70,7 @@ public:
 
 	/* Drop currently equipped item */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void DropItem(int32 InvSlot);
+	AItem* DropItem(int32 InvSlot);
 
 	/* Equip a different item that is already in the inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -99,6 +99,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Light)
 	bool GetIsItemDroppable();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
+	void BPTransitionToConvergenceState();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
+	void BPTransitionToDivergenceState();
+
 
 	/* The following functions are depreciated and will be removed soon:
 	   ChangeLight, getLightAmount, getMaxLightAmount, getLightEnabled,

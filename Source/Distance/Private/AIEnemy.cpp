@@ -67,6 +67,7 @@ void AAIEnemy::Tick(float DeltaTime)
 
 	if (player != NULL)
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("Distance to Player: %f"), GetDistanceTo(player));
 		if (moveToPlayer && !GetWorldTimerManager().IsTimerActive(this, &AAIEnemy::DrainTimer))//Determines if ai moves faster towards player or player moves slower trying to escape
 		{
 			FRotator playerDirection = player->GetVelocity().Rotation();

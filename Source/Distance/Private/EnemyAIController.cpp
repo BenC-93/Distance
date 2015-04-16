@@ -3,6 +3,7 @@
 #include "Distance.h"
 #include "Engine.h"
 #include "AIEnemy.h"
+//#include "UnrealNetwork.h"
 #include "EnemyAIController.h"
 #include "Navigation/NavigationComponent.h"
 
@@ -150,7 +151,6 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)
 		dir *= lengthDir;
 		loc = myPos + dir;
 		DropRandomItem(loc);
-
 		// You killed my father
 		AIEnemyClass->prepareToDie = true;
 	//}
@@ -160,9 +160,23 @@ void AEnemyAIController::DropRandomItem(FVector loc)
 {
 	if (!AIEnemyClass->prepareToDie)
 	{
-		//FVector Position = AIEnemyClass->GetActorLocation();
+		//might need to find random num here then input into method for spawn specific item
 		GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnRandomItemAtLocation(loc);
 	}
+	if (Role < ROLE_Authority)
+	{
+		ServerDropRandomItem(loc);
+	}
+}
+
+bool AEnemyAIController::ServerDropRandomItem_Validate(FVector loc)
+{
+	return true;
+}
+
+void AEnemyAIController::ServerDropRandomItem_Implementation(FVector loc)
+{
+	DropRandomItem(loc);
 }
 
 void AEnemyAIController::ReactToPlayer()

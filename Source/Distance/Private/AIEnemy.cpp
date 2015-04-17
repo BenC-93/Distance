@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "DistanceCharacter.h"
+#include "KismetMathLibrary.generated.h"
 #include "AIEnemy.h"
 
 AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
@@ -19,8 +20,10 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	baseDamage = -1.0f;
 	drainRate = 0.1f;//half or tenth of a second
 
-	speedCounter = 1.0f;
-	speedLimit = 1200.0f;
+	deathCounter = 10;
+
+	scaleCounter = 5.0f;
+	scaleLimit = 7.0f;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
@@ -28,16 +31,38 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 
 	AITriggerRange = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerRange"));
 	AITriggerRange->Mobility = EComponentMobility::Movable;
-	AITriggerRange->SetBoxExtent(FVector(750.0f, 750.0f, 60.0f), true);
+	AITriggerRange->SetBoxExtent(FVector(900.0f, 900.0f, 60.0f), true);
 	AITriggerRange->AttachTo(RootComponent);
 
 	AITriggerRange->OnComponentBeginOverlap.AddDynamic(this, &AAIEnemy::OnOverlapBegin);
 	AITriggerRange->OnComponentEndOverlap.AddDynamic(this, &AAIEnemy::OnOverlapEnd);
 
+	ShadowSpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("ShadowSpriteComponent"));
+	ShadowSpriteComponent->RelativeRotation = FRotator(0, 90, -90);//y,z,x
+	ShadowSpriteComponent->RelativeLocation = FVector(-58.0f, -5.0f, -42.0f);
+	ShadowSpriteComponent->SetRelativeScale3D(FVector(1, 1, 5));
+	ShadowSpriteComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	ShadowSpriteComponent->AttachTo(RootComponent);
+
+	DrainParticleSys = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("DrainParticleSys"));
+	//Reference to particle system asset
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleSystem
+		(TEXT("ParticleSystem'/Game/MyParticleSystem/Sprite/P_Drain'"));
+
+	//Set Particle system's template
+	DrainParticleSys->SetTemplate(ParticleSystem.Object);
+	DrainParticleSys->bAutoDestroy = false;
+	DrainParticleSys->bAutoActivate = false;
+	DrainParticleSys->bIsActive = false;
+	DrainParticleSys->RelativeLocation = FVector(0, 0, 100);
+	DrainParticleSys->RelativeRotation = FRotator(-90, 0, 0);//y,z,x
+	DrainParticleSys->AttachTo(ShadowSpriteComponent);
+
 	AITriggerAttack = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerAttack"));
 	AITriggerAttack->Mobility = EComponentMobility::Movable;
-	AITriggerAttack->SetBoxExtent(FVector(300.0f,300.0f, 60.0f), true);
-	AITriggerAttack->AttachTo(RootComponent);
+	AITriggerAttack->SetBoxExtent(FVector(88.99f,128.65f, 50.0f), true);//was 300, 300, 60
+	AITriggerAttack->RelativeLocation = FVector(5.0f, 26.0f, 120.0f);
+	AITriggerAttack->AttachTo(ShadowSpriteComponent);
 
 	//AITriggerAttack->OnComponentBeginOverlap.AddDynamic(this, &AAIEnemy::OnOverlapBeginAttack);
 	//AITriggerAttack->OnComponentEndOverlap.AddDynamic(this, &AAIEnemy::OnOverlapEndAttack);
@@ -60,9 +85,24 @@ void AAIEnemy::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("Delta Time, %f"), DeltaTime);
 	
 	//UE_LOG(LogTemp, Warning, TEXT("Speed: %f"), GetVelocity().Size());
-	if (prepareToDie && GetVelocity().Size() == 0)
+	if (prepareToDie && deathCounter == 0 && GetVelocity().Size() == 0)//after running away
 	{
+		//player->GetCharacterMovement()->MaxWalkSpeed = 600;
 		Destroy();
+	}
+	if (prepareToDie)//used for buffer time so the ai can run away
+	{
+		if (deathCounter == 10)//right before running away
+		{
+			player->GetCharacterMovement()->MaxWalkSpeed = 600;
+			ShadowSpriteComponent->SetRelativeScale3D(FVector(1, 1, 1));
+			DrainParticleSys->Deactivate();
+			//DrainParticleSys->bIsActive = false;
+		}
+		if (deathCounter - 1 >= 0)//used to decrement the death counter and so it doesnt go below 0
+		{
+			deathCounter--;
+		}
 	}
 
 	if (player != NULL)
@@ -70,57 +110,77 @@ void AAIEnemy::Tick(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("Distance to Player: %f"), GetDistanceTo(player));
 		if (moveToPlayer && !GetWorldTimerManager().IsTimerActive(this, &AAIEnemy::DrainTimer))//Determines if ai moves faster towards player or player moves slower trying to escape
 		{
+			float distToPlayer = GetDistanceTo(player);
+			//orient shadow towards player//y,z,x
+			float myYaw = FaceActorRotation(player).Yaw;
+			ShadowSpriteComponent->SetWorldRotation(FRotator(0, myYaw + 90, -90));
+			//scale shadow to the player
+
 			FRotator playerDirection = player->GetVelocity().Rotation();
-			FRotator myDirection = GetVelocity().Rotation();
-			FRotator playerRevDir = playerDirection;
-			FRotator myRevDir = myDirection;
-			if (playerRevDir.Yaw > 0)//positive
-			{
-				playerRevDir.Yaw -= 180;
-			}
-			else if (playerRevDir.Yaw <= 0)//negative
-			{
-				playerRevDir.Yaw += 180;
-			}
-			if (myRevDir.Yaw > 0)//positive
-			{
-				myRevDir.Yaw -= 180;
-			}
-			else if (myRevDir.Yaw <= 0)//negative
-			{
-				myRevDir.Yaw += 180;
-			}
+
+			float playerYaw = playerDirection.Yaw;
+
+			playerYaw = ConvertToUnitCircle(playerYaw);
+			myYaw = ConvertToUnitCircle(myYaw);
+			
+			//UE_LOG(LogTemp, Warning, TEXT("Shadow Yaw: %f, Player Yaw: %f"), myYaw, playerYaw);
 
 			float range = 10.0f;
-			if (myDirection.Yaw > playerDirection.Yaw - range && myDirection.Yaw < playerDirection.Yaw + range)//going in same direction
-			{//this is where if light is enabled, player should be slowly moving faster and killing the monster
+			if (myYaw > playerYaw - range && myYaw < playerYaw + range)//going in same direction
+			{//grow shadow even faster
 				//UE_LOG(LogTemp, Warning, TEXT("Same direction"));//speed up ai
-				float aiSpeed = GetCharacterMovement()->MaxWalkSpeed;
-				if (aiSpeed < speedLimit)
+				if (scaleCounter + DeltaTime < scaleLimit)
 				{
-					GetCharacterMovement()->MaxWalkSpeed = aiSpeed + speedCounter;
+					scaleCounter += 5 * DeltaTime;
 					//UE_LOG(LogTemp, Warning, TEXT("AI speed: %f"), GetCharacterMovement()->MaxWalkSpeed);
 				}
 			}
-			else if (myDirection.Yaw > playerRevDir.Yaw - range && myDirection.Yaw < playerRevDir.Yaw + range)//going in opposite directions
-			{//this is where if light is not enabled (maybe light doesnt matter, dont know), but player slowly moves slower until he cannot escape
+			else if (myYaw > playerYaw + 180 - range && myYaw < playerYaw + 180 + range)//going in opposite directions
+			{//shrink shadow
 				//UE_LOG(LogTemp, Warning, TEXT("Opposite direction"));
-				GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
+				if (scaleCounter > 0.8 && scaleCounter - DeltaTime > 0)
+				{
+					scaleCounter -= 1 * DeltaTime;
+					//health += 2;//make enemy full when approaching?
+					//slow down player?
+					float playerSpeed = player->GetCharacterMovement()->MaxWalkSpeed;
+					player->GetCharacterMovement()->MaxWalkSpeed =  FMath::Lerp(200.0f, playerSpeed, (scaleCounter/scaleLimit));
+					UE_LOG(LogTemp, Warning, TEXT("Player speed: %f"), player->GetCharacterMovement()->MaxWalkSpeed);
+				}
+				/*GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
 				speedCounter = 1.0f;
 				moveToPlayer = false;
-				moveAway = true;
+				moveAway = true;*/
 			}
 			else
 			{//not needed, just for testing purposes
 				//UE_LOG(LogTemp, Warning, TEXT("some other direction"));
+				if (scaleCounter + DeltaTime < scaleLimit)//in general, grow
+				{
+					scaleCounter += 2 * DeltaTime;
+					//UE_LOG(LogTemp, Warning, TEXT("AI speed: %f"), GetCharacterMovement()->MaxWalkSpeed);
+				}
 			}
-			//UE_LOG(LogTemp, Warning, TEXT("AI rotation: %s"), *myDirection.ToString());
-			speedCounter += 2;// *DeltaTime;// (speedCounter + 1.0f);
-			if (speedCounter > speedLimit - GetCharacterMovement()->MaxWalkSpeed)
+
+			//UE_LOG(LogTemp, Warning, TEXT("ShadowLen: %f, DistToPlayer: %f"), (scaleCounter * spriteLen), distToPlayer);
+			if (spriteLen * scaleCounter > distToPlayer)//if the player is within the shadow becuase the shadow is too big and doesnt follow the player,
 			{
-				speedCounter = speedLimit - GetCharacterMovement()->MaxWalkSpeed;
+				if (scaleCounter > 0.8 && scaleCounter - DeltaTime > 0)
+				{
+					scaleCounter -= 4 * DeltaTime;
+				}
 			}
-			//UE_LOG(LogTemp, Warning, TEXT("speedCounter: %f"), speedCounter);
+
+			ShadowSpriteComponent->SetRelativeScale3D(FVector(1, 1, scaleCounter));
+			//AITriggerAttack->AddLocalTransform(FTransform(FRotator(0, 0, 0), FVector(0, 0, 0), FVector(1, 1, scaleCounter - 1)));
+			
+			if (scaleCounter <= 0.8)//we have shrunk too far, now we run away
+			{
+				moveToPlayer = false;
+				moveAway = true;
+			}
+			//UE_LOG(LogTemp, Warning, TEXT("scaleCounter: %f"), scaleCounter);
+			
 		}
 	}
 }
@@ -135,6 +195,7 @@ void AAIEnemy::DrainTimer()
 			moveToPlayer = false;
 			moveAway = true;
 			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
+			DrainParticleSys->Deactivate();
 			return;
 		}
 		if (player->Health == 0)//player health has depleted, move away
@@ -143,6 +204,7 @@ void AAIEnemy::DrainTimer()
 			moveToPlayer = false;
 			moveAway = true;
 			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
+			DrainParticleSys->Deactivate();
 			return;
 		}
 		if (moveToPlayer && player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
@@ -182,6 +244,57 @@ void AAIEnemy::Attack(float amount)
 
 }
 
+float AAIEnemy::ConvertToUnitCircle(float degrees)//convert to 0 - 360
+{
+	float unrealDeg = degrees;
+	if (unrealDeg > 0)//positive
+	{
+		if (unrealDeg <= 90)
+		{
+			unrealDeg = 90 - unrealDeg;
+		}
+		else
+		{
+			unrealDeg = 360 - (unrealDeg - 90);
+		}
+	}
+	else if (unrealDeg <= 0)//negative
+	{
+		unrealDeg = FMath::Abs(unrealDeg) + 90;
+	}
+	return unrealDeg;	//it has been converted to normal unit circle lingo
+}
+
+FRotator AAIEnemy::FaceActorRotation(class AActor* OtherActor)//gets the angle needed to turn to another actor
+{
+	FVector playerLoc = OtherActor->GetActorLocation();
+	FVector myLoc = GetActorLocation();
+	FVector difference = playerLoc - myLoc;
+	FRotator angleToRotate = difference.Rotation();
+	//UE_LOG(LogTemp, Warning, TEXT("Angle: %f"), angleToRotate.Yaw);
+	return angleToRotate;
+
+	/*float distToPlayer = GetDistanceTo(OtherActor);//hyp
+	float deltaX = playerLoc.X - GetActorLocation().X;//opp
+	float deltaY = playerLoc.Y - GetActorLocation().Y;//adj
+	float angle = 0;
+	//angle = FMath::RadiansToDegrees(FMath::Atan(deltaX / deltaY));
+	//angle = FMath::RadiansToDegrees(FMath::Asin(deltaX / distToPlayer));
+
+	if (deltaX >= 0)
+	{
+		//angle = FMath::RadiansToDegrees(FMath::Atan(deltaX / deltaY));
+		angle = FMath::RadiansToDegrees(FMath::Asin(deltaX / distToPlayer));
+	}
+	else//do i make deltaY * -1 here?
+	{
+		//angle = FMath::RadiansToDegrees(FMath::Atan(FMath::Abs(deltaY / deltaX)));
+		angle = FMath::RadiansToDegrees(FMath::Acos(deltaX / distToPlayer));
+	}
+	UE_LOG(LogTemp, Warning, TEXT("DeltaX: %f, DeltaY: %f, Angle: %f"), deltaX, deltaY, angle);
+	return FRotator(0, angle, 0);*/
+}
+
 void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)
@@ -193,6 +306,8 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 			moveAway = false;
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
+			//orient shadow towards player//y,z,x
+			ShadowSpriteComponent->SetWorldRotation(FRotator(0, FaceActorRotation(player).Yaw + 90, -90));
 		}
 	}
 }
@@ -222,6 +337,8 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
 			StartDrainTimer(drainRate);
+
+			DrainParticleSys->Activate();
 		}
 	}
 }
@@ -234,6 +351,7 @@ void AAIEnemy::OnExitAttackTrigger(class AActor* OtherActor)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player Exited drain trigger."));
 			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
+			DrainParticleSys->Deactivate();
 		}
 	}
 }

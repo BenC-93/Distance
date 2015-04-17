@@ -21,7 +21,7 @@ void AEnemyAIController::Tick(float DeltaTime)
 	{
 		if (AIEnemyClass->moveToPlayer)//Constantly moves toward player until light or life is drained or something
 		{
-			AIMoveToPlayer(AIEnemyClass->currentPlayer);
+			//AIMoveToPlayer(AIEnemyClass->currentPlayer);
 			//AIEnemyClass->moveToPlayer = false;//if we don't want AI to constantly follow, we uncomment this line
 		}
 		else if (AIEnemyClass->moveAway)

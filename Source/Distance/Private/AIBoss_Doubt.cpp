@@ -15,6 +15,12 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	tentacleHealth = 10.0f;
 	numTentacles = 5;
 
+	distToPlayer = 1;
+	tentacleYaw = 0;
+	chosenTentacleIndex = 0;
+	tentacleCounter = 0;
+	tentacleSpriteLen = 650.0f;//maybe 600
+
 	/*for (int i = 0; i < numTentacles; i++)
 	{
 		ATentacle* tentacle = new ATentacle(ObjectInitializer);
@@ -275,10 +281,60 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 	}
 }
 
+FRotator AAIBoss_Doubt::FaceActorRotation(FVector myActorLoc, class AActor* OtherActor)//gets the angle needed to turn to another actor
+{
+	FVector playerLoc = OtherActor->GetActorLocation();
+	FVector myLoc = myActorLoc;
+	FVector difference = playerLoc - myLoc;
+	FRotator angleToRotate = difference.Rotation();
+	//UE_LOG(LogTemp, Warning, TEXT("Angle: %f"), angleToRotate.Yaw);
+	return angleToRotate;
+}
+
+void AAIBoss_Doubt::TentacleTimer()
+{
+	if (tentacleCounter >= 1.0f)
+	{
+		printScreen(FColor::Red, TEXT("Stopping tentacle timer"));
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
+		return;
+	}
+	//rotate //y,z,x
+	TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	//scale
+	float maxScale = distToPlayer / tentacleSpriteLen;
+	UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
+	TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(FMath::Lerp(0.5f, maxScale, tentacleCounter), 1, 1));//havnt found correct scale yet
+	
+	tentacleCounter += 0.1f;
+	//UE_LOG(LogTemp, Error, TEXT("Tentacle Counter: %f"), tentacleCounter);
+}
+
+void AAIBoss_Doubt::StartTentacleTimer(float rate)
+{
+	tentacleCounter = 0.0f;
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::TentacleTimer, rate, true);
+}
+
 void AAIBoss_Doubt::AttackTimer()
 {
 	printScreen(FColor::Red, TEXT("Boss making an attack"));
 	//PullPlayer(player);//create tentacle, move tentacle
+	chosenTentacleIndex = FMath::RandRange(0, 3);
+	AActor* tentacleActor = TentacleComponentArray[chosenTentacleIndex]->ChildActor;
+	if (tentacleActor)
+	{
+		distToPlayer = tentacleActor->GetDistanceTo(currentPlayer);
+		tentacleYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), currentPlayer).Yaw;
+	}
+	else
+	{
+		distToPlayer = GetDistanceTo(currentPlayer);
+		tentacleYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), currentPlayer).Yaw;
+	}
+	StartTentacleTimer(0.1f);
+
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 }
 
@@ -341,7 +397,7 @@ void AAIBoss_Doubt::EndOfBoss()
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 	printScreen(FColor::Red, TEXT("End of Boss"));
-	//TODO: call convergence end
+
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player = Cast<ADistanceCharacter>(currentPlayer);
 	playerController = Cast<ADistancePlayerController>(player->GetController());
@@ -529,6 +585,10 @@ void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, c
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
+			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
+			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
+			playerController = Cast<ADistancePlayerController>(player->GetController());
+
 			PullPlayer(player);
 			StartDrainTimer(drainRate);
 			

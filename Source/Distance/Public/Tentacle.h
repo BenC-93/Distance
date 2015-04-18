@@ -34,5 +34,9 @@ public:
 	void SetBossParent(class AAIBoss_Doubt* parent);
 
 	float ChangeHealth(float amount);
+
+	void DestroyTentacle();
 	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDestroyTentacle();
 };

@@ -1,14 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#include "Item.h"
+#include "Object.h"
+//#include "Item.h"
 #include "Containers/UnrealString.h"
-#include "InventoryItem.h"
+#include "InventoryItem.generated.h"
 /**
  * 
  */
-class DISTANCE_API InventoryItem
+UCLASS()
+class DISTANCE_API UInventoryItem : public UObject
 {
+	GENERATED_BODY()
 public:
 	TSubclassOf<class AItem> ItemClass;
 	FString name;
@@ -16,9 +19,9 @@ public:
 	float currentValue;
 	UTexture2D* sprite;
 
-	InventoryItem();
-	InventoryItem(class AItem* item);
+	UInventoryItem();
+	UInventoryItem(class AItem* item);
 	UTexture2D* GetItemSprite();
 	void Update(class AItem* item);
-	~InventoryItem();
+	~UInventoryItem();
 };

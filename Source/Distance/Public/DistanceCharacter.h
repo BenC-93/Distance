@@ -49,10 +49,11 @@ public:
 	/* Temporary function for implementing the light(lantern) item */
 	AItem* GetItem();
 
+	UPROPERTY(Replicated)
 	TArray<class UTexture2D*> spriteInventory;
 
 	/* Inventory array */
-	TArray<InventoryItem*> Inventory;//was tarray of class aitem*
+	TArray<UInventoryItem*> Inventory;//was tarray of class aitem*
 
 	/* Array index of currently equipped item */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
@@ -61,6 +62,9 @@ public:
 	/* Pick up nearby item object in the world */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void PickupItem(AItem* Item);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerPickupItem(AItem* Item);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Inventory)
 	void ItemPickedUp();
@@ -87,7 +91,7 @@ public:
 	TArray<class UTexture2D*> GetSpriteInventory();
 
 	/* Returns the inventory array */
-	TArray<class InventoryItem*> GetInventory();
+	TArray<class UInventoryItem*> GetInventory();
 
 	/* Toggle visibility of inventory GUI */
 	UFUNCTION(BlueprintCallable, Category = Inventory)

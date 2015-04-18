@@ -94,10 +94,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Tentacle")
 	TArray<class ATentacle*> tentacleArray;
 
+	UFUNCTION(BlueprintCallable, Category = "Rotations")
+	FRotator FaceActorRotation(FVector myActorLoc, class AActor* OtherActor);
+
+	float tentacleYaw;
+	float distToPlayer;
+	float chosenTentacleIndex;
+	float tentacleCounter;
+	float tentacleSpriteLen;
+
 	void PullPlayer(class ACharacter* tempChar);
 	void ReleasePlayer(class ACharacter* tempChar);
 	void DrainPlayer(class ADistanceCharacter* tempPlayer);
 
+	void TentacleTimer();
+	void StartTentacleTimer(float rate);
 	void AttackTimer();
 	void StartAttackTimer(float rate);
 	void DrainTimer();

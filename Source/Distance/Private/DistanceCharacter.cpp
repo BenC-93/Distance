@@ -78,11 +78,12 @@ void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &O
 
 	DOREPLIFETIME(ADistanceCharacter, Health);
 	DOREPLIFETIME(ADistanceCharacter, MaxHealth);
+	DOREPLIFETIME(ADistanceCharacter, spriteInventory);
 }
 
 void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass)//called at the beginning only once
 {
-	InventoryItem* NewItem = new InventoryItem();
+	UInventoryItem* NewItem = new UInventoryItem();
 	NewItem->ItemClass = ItemClass;
 	// TODO: fix Jordan's terrible assumption
 	NewItem->name = TEXT("Lantern");
@@ -95,13 +96,27 @@ void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items w
 {
 	if (Item)
 	{
-		Inventory.Add(new InventoryItem(Item));
+		Inventory.Add(new UInventoryItem(Item));
 		spriteInventory.Add(Inventory.Last()->GetItemSprite());
 		Item->Pickup();
 		printScreen(FColor::Red, TEXT("Pickup happened!"));
 		ItemPickedUp();
 		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
+		if (Role < ROLE_Authority)
+		{
+			ServerPickupItem(Item);
+		}
 	}
+}
+
+bool ADistanceCharacter::ServerPickupItem_Validate(AItem* Item)
+{
+	return true;
+}
+
+void ADistanceCharacter::ServerPickupItem_Implementation(AItem* Item)
+{
+	PickupItem(Item);
 }
 
 AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more than 1 item and drop until there is 1 left, clicking on (equipping) the last one will Error
@@ -190,7 +205,7 @@ TArray<class UTexture2D*> ADistanceCharacter::GetSpriteInventory()
 	return spriteInventory;
 }
 
-TArray<class InventoryItem*> ADistanceCharacter::GetInventory()
+TArray<class UInventoryItem*> ADistanceCharacter::GetInventory()
 {
 	return Inventory;
 }

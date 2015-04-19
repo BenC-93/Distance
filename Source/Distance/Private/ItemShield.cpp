@@ -6,30 +6,30 @@
 AItemShield::AItemShield(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	name = "Shield";
+	ItemInfo.Name = "Shield";
 	drainRate = 1.0f;
 	drainAmount = -2.0f;
 }
 
 void AItemShield::StartUse()
 {
-	if (!isInUse)
+	if (!bWantsToUse)
 	{
 		GetWorldTimerManager().SetTimer(this, &AItemShield::Drain, drainRate, true);
-		isInUse = true;
+		bWantsToUse = true;
 	}
 }
 
-void AItemShield::EndUse()
+void AItemShield::StopUse()
 {
-	if (isInUse)
+	if (bWantsToUse)
 	{
 		GetWorldTimerManager().ClearTimer(this, &AItemShield::Drain);
-		isInUse = false;
+		bWantsToUse = false;
 	}
 }
 
 void AItemShield::Drain()
 {
-	ChangeAmount(drainAmount);
+	ChangeEnergy(drainAmount);
 }

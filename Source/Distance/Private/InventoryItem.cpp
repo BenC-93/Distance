@@ -3,7 +3,7 @@
 #include "Distance.h"
 #include "InventoryItem.h"
 
-InventoryItem::InventoryItem()
+UInventoryItem::UInventoryItem()
 {
 	ItemClass = NULL;
 	name = "Default";
@@ -12,28 +12,28 @@ InventoryItem::InventoryItem()
 	sprite = NULL;
 }
 
-InventoryItem::InventoryItem(class AItem* item)
+UInventoryItem::UInventoryItem(class AItem* item)
 {
 	ItemClass = item->GetClass();
-	name = item->name;
-	maxValue = item->maxAmount;
-	currentValue = item->amount;
-	sprite = item->GetTheSprite();
+	name = item->GetName();
+	maxValue = item->GetMaxEnergy();
+	currentValue = item->GetEnergy();
+	sprite = item->GetItemSprite()->GetSprite()->GetSourceTexture();
 }
 
-UTexture2D* InventoryItem::GetItemSprite()
+UTexture2D* UInventoryItem::GetItemSprite()
 {
 	return sprite;
 }
 
-void InventoryItem::Update(class AItem* item)
+void UInventoryItem::Update(class AItem* item)
 {
 	ItemClass = item->GetClass();
-	name = item->name;
-	maxValue = item->maxAmount;
-	currentValue = item->amount;
+	name = item->GetName();
+	maxValue = item->GetMaxEnergy();
+	currentValue = item->GetEnergy();
 }
 
-InventoryItem::~InventoryItem()
+UInventoryItem::~UInventoryItem()
 {
 }

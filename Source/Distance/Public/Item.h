@@ -4,99 +4,237 @@
 
 #include "GameFramework/Actor.h"
 #include "Classes/PaperSpriteComponent.h"
-#include "InventoryItem.h"
+//#include "DistanceCharacter.h"
 #include "Item.generated.h"
 
-/**
- * 
- */
-UCLASS(Blueprintable)
+USTRUCT()
+struct FItemData
+{
+	GENERATED_USTRUCT_BODY()
+
+	/* Name */
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	FString Name;
+
+	/* Whether item can be dropped from inventory */
+	UPROPERTY(BlueprintReadWrite, Category = ItemStat)
+	bool bIsDroppable;
+
+	/* Maximum energy */
+	UPROPERTY(BlueprintReadWrite, Category = Energy)
+	float MaxEnergy;
+
+	/* Amount of energy spent upon use */
+	UPROPERTY(BlueprintReadWrite, Category = Energy)
+	float EnergyUseAmount;
+
+	/* Energy regeneration amount (per DeltaSecond) */
+	UPROPERTY(BlueprintReadWrite, Category = Energy)
+	float EnergyRegenAmount;
+
+	/* Time that must pass between item uses */
+	UPROPERTY(BlueprintReadWrite, Category = ItemStat)
+	float TimeBetweenUses;
+
+	/* Defaults */
+	FItemData()
+	{
+		Name = TEXT("Unknown");
+		bIsDroppable = true;
+		MaxEnergy = 100.f;
+		EnergyUseAmount = -10.f;
+		EnergyRegenAmount = 0.1f;
+		TimeBetweenUses = 0.1f;
+	}
+
+};
+
+class ADistanceCharacter;
+class UPaperSpriteComponent;
+
+UCLASS(Abstract, Blueprintable)
 class DISTANCE_API AItem : public AActor
 {
-	GENERATED_BODY()
-	
-public:
+	GENERATED_UCLASS_BODY()
 
-	AItem(const FObjectInitializer& ObjectInitializer);
+	virtual void PostInitializeComponents() override;
 
-	/* Item's name. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
-	FString name;
+	virtual void Tick(float DeltaSeconds) override;
 
-	/* Whether item can be dropped once in inventory. 
-	   Used primarily for the 'Lantern' item. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
-	bool droppable;
 
-	/* Whether the item is currently being used by the player. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Use)
-	bool isInUse;
+	/////////////////////*** ENERGY ***/////////////////////
 
-	/* An abstract value used for various values, depending on item. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Amount)
-	float amount;
+	/* Change energy */
+	virtual void ChangeEnergy(float amount);
 
-	/* Item defined maximum value for arbitrary 'amount' value. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Amount)
-	float maxAmount;
 
-	/* Time in seconds that passes before regenerating. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Regen)
-	float regenRate;
+	/////////////////////*** INVENTORY ***/////////////////////
 
-	/* Amount to regenerate by. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Regen)
-	float regenAmount;
+	/* Item is being equipped */
+	virtual void OnEquip();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Root, meta = (AllowPrivateAccess = "true"))
-	class USceneComponent *RootSceneComponent;
+	/* Item is being unequipped */
+	virtual void OnUnequip();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Sprite, meta = (AllowPrivateAccess = "true"))
-	class UPaperSpriteComponent *SpriteComponent;
+	/* [server] Item added to player's inventory */
+	virtual void OnEnterInventory(ADistanceCharacter* NewOwner);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Triggers)
-	class UBoxComponent *TriggerBox;
-	
-	/* Item's primary action for when it is use by the player. */
-	UFUNCTION(BlueprintCallable, Category = Use)
+	/* [server] Item removed from player's inventory */
+	virtual void OnLeaveInventory();
+
+	/* Check if equipped */
+	bool IsEquipped() const;
+
+
+	/////////////////////*** INPUT ***/////////////////////
+
+	/* [local + server] Starts use */
 	virtual void StartUse();
 
-	UFUNCTION(BlueprintCallable, Category = Use)
-	virtual void EndUse();
+	/* [local + server] Stops use */
+	virtual void StopUse();
 
-	/* What happens when the player equips the item. */
+	/* Start regen */
+	virtual void StartRegen(bool bFromRep = false);
+
+	/* Stop regen */
+	virtual void StopRegen();
+
+
+	/////////////////////*** CONTROL ***/////////////////////
+
+	/* Check if item can be used */
+	bool CanBeUsed() const;
+
+	/* Check if item can regen */
+	bool CanRegen() const;
+
+
+	/////////////////////*** DATA ***/////////////////////
+
+	/* Get item name */
+	FString GetName() const;
+
+	/* Get whether item is droppable */
+	bool GetIsDroppable() const;
+
+	/* Get current energy amount */
 	UFUNCTION(BlueprintCallable, Category = Item)
-	void OnEquip();
+	float GetEnergy() const;
 
-	/* What happens when the player unequips the item. */
-	UFUNCTION(BlueprintCallable, Category = Item)
-	void OnUnequip();
+	/* Get maximum energy amount */
+	float GetMaxEnergy() const;
 
-	/* What happens when a player picks up this item. */
-	UFUNCTION(BlueprintCallable, Category = Item)
-	void Pickup();
+	/* Get energy regen amount */
+	float GetEnergyRegenAmount() const;
 
-	/* What happens when the player drops this item. */
-	UFUNCTION(BlueprintCallable, Category = Item)
-	void Drop();
+	/* Get usage amount */
+	float GetUseAmount() const;
 
-	/* Returns the current value of arbitrary 'amount' variable. */
-	UFUNCTION(BlueprintCallable, Category = Amount)
-	float GetAmount();
+	/* Get item sprite */
+	UPaperSpriteComponent* GetItemSprite() const;
 
-	/* Returns the value of 'maxAmount' variable. */
-	UFUNCTION(BlueprintCallable, Category = Amount)
-	float GetMaxAmount();
+	/* Get owner pawn */
+	class ADistanceCharacter* GetCharacterOwner() const;
 
-	/* Changes 'amount' variable by value, within the bounds [0.0, maxAmount]. */
-	UFUNCTION(BlueprintCallable, Category = Amount)
-	virtual void ChangeAmount(float value);
+	/* Set owning pawn */
+	void SetOwningPawn(ADistanceCharacter* NewPawn);
 
-	/* Adds to 'amount' at rate 'rate'. */
-	UFUNCTION(BlueprintCallable, Category = Regen)
-	void Regenerate();
 
-	void Update(class InventoryItem* invItem);
+protected:
 
-	UTexture2D* GetTheSprite();
+	/* Owning pawn */
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_MyPawn)
+	class ADistanceCharacter* MyPawn;
+
+	/* Item data */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = Data)
+	FItemData ItemInfo;
+
+
+private:
+
+	/* Item sprite */
+	UPROPERTY(VisibleDefaultsOnly, Category = Sprite)
+	UPaperSpriteComponent* SpriteComponent;
+
+protected:
+
+	/* Use sound */
+	UPROPERTY(EditDefaultsOnly, Category = Effects)
+	USoundCue* UseSound;
+
+	/* Equip sound */
+	UPROPERTY(EditDefaultsOnly, Category = Effects)
+	USoundCue* EquipSound;
+
+	/* Is item equipped? */
+	bool bIsEquipped : 1;
+
+	/* Is item trying to be used? */
+	bool bWantsToUse : 1;
+
+	/* Whether item can regen */
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_Regen)
+	uint32 bCanRegen : 1;
+
+	/* Current energy */
+	UPROPERTY(Transient, Replicated)
+	float Energy;
+
+
+	/////////////////////*** INPUT [SERVER SIDE] ***/////////////////////
+
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerStartUse();
+
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerStopUse();
+
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerStartRegen();
+
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerStopRegen();
+
+
+	/////////////////////*** REPLICATION HELPERS ***/////////////////////
+
+	UFUNCTION()
+	void OnRep_MyPawn();
+
+	UFUNCTION()
+	void OnRep_Regen();
+
+
+	/////////////////////*** EFFECTS ***/////////////////////
+
+	/* Use effects */
+	virtual void StartUseEffects();
+
+	/* Play item sounds */
+	UAudioComponent* PlayItemSound(USoundCue* Sound);
+
+
+	/////////////////////*** ITEM USAGE ***/////////////////////
+
+	/* [local] Item specific use implementation */
+	virtual void UseItem();
+
+	/* [server] Use and update energy */
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerHandleUsing();
+
+	/* [local + server] Handle item use */
+	void HandleUsing();
+
+
+	/////////////////////*** SOCKETTING ***/////////////////////
+
+	/* Attach item sprite to pawn mesh */
+	void AttachSpriteToPawn();
+
+	/* Detach item sprite from pawn mesh */
+	void DetachSpriteFromPawn();
+
 };

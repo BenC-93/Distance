@@ -4,15 +4,25 @@
 #include "Classes/PaperSpriteComponent.h"
 #include "Classes/Components/ChildActorComponent.h"
 #include "Item.h"
-#include "InventoryItem.h"
+//#include "InventoryItem.h"
+//#include "NewItem.h"
 #include "DistanceCharacter.generated.h"
 
 enum ConvergenceState : uint32 { CONVERGENCE, DIVERGENCE1, DIVERGENCE2 };
 
-UCLASS(Blueprintable)
+UCLASS(Abstract, Blueprintable)
 class ADistanceCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+	/* Set initial variables and create inventory */
+	virtual void PostInitializeComponents() override;
+
+	/* Update character variables */
+	virtual void Tick(float DeltaSeconds) override;
+
+	/* Cleanup inventory */
+	virtual void Destroyed() override;
 
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -30,13 +40,9 @@ class ADistanceCharacter : public ACharacter
 
 public:
 	ADistanceCharacter(const FObjectInitializer& ObjectInitializer);
-
-	/** Player's current health */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = Health)
-	float Health;
 	
 	/** Player's maximum allowed health */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = Health)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Health)
 	float MaxHealth;
 
 	/** Player's base damage level */
@@ -45,14 +51,8 @@ public:
 	
 	/** Player's convergence state */
 	ConvergenceState PlayerConvergenceState;
-	
-	/* Temporary function for implementing the light(lantern) item */
-	AItem* GetItem();
 
 	TArray<class UTexture2D*> spriteInventory;
-
-	/* Inventory array */
-	TArray<InventoryItem*> Inventory;//was tarray of class aitem*
 
 	/* Array index of currently equipped item */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
@@ -73,8 +73,8 @@ public:
 	AItem* DropItem(int32 InvSlot);
 
 	/* Equip a different item that is already in the inventory */
-	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void EquipItem(int32 InvSlot);
+//	UFUNCTION(BlueprintCallable, Category = Inventory)
+//	void EquipItem(int32 InvSlot);
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void EquipItemComponent(int32 itemIndex);
@@ -87,18 +87,7 @@ public:
 	TArray<class UTexture2D*> GetSpriteInventory();
 
 	/* Returns the inventory array */
-	TArray<class InventoryItem*> GetInventory();
-
-	/* Toggle visibility of inventory GUI */
-	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void ToggleInventory();
-
-	/* Grabs the Name of the Item for comparison for Bosses*/
-	UFUNCTION(BlueprintCallable, Category = Light)
-	FString GetItemName();
-
-	UFUNCTION(BlueprintCallable, Category = Light)
-	bool GetIsItemDroppable();
+	TArray<class AItem*> GetInventory();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
 	void BPTransitionToConvergenceState();
@@ -112,10 +101,7 @@ public:
 	   RegenerateLight */
 
 	UFUNCTION(BlueprintCallable, Category = Item)
-	void ChangeItemAmount(float lightAmount);
-
-	UFUNCTION(BlueprintCallable, Category = Item)
-	float GetItemAmount();
+	void ChangeItemAmount(float itemAmount);
 
 	UFUNCTION(BlueprintCallable, Category = Item)
 	float GetMaxItemAmount();
@@ -126,16 +112,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Speed)
 	void ChangeSpeed(float speedAmount);
 
-	/** Changes player's health based on an attack or item effect */
-	UFUNCTION(BlueprintCallable, Category = Health)
-	void ChangeHealth(float healthAmount);
-
-
 	/* Regeneration functions */
 	virtual void BeginPlay();
-	
-	void RegenerateHealth();
-	void StartRegeneration();
 
 	/** Changes player's target's health based on player attack */
 	UFUNCTION(BlueprintCallable, Category = Damage)
@@ -145,5 +123,113 @@ public:
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+
+
+	/////////////////////*** INPUT HANDLING ***/////////////////////
+
+	/* Player pressed next item button */
+	void OnNextItem();
+
+	/* Player pressed previous item button */
+	void OnPrevItem();
+
+
+	/////////////////////*** HEALTH and DAMAGE ***/////////////////////
+
+	/* Health of character */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = Health)
+	float Health;
+
+	/* Health regeneration amount */
+	UPROPERTY(EditDefaultsOnly, Category = Health)
+	float HealthRegenAmount;
+
+	/* Get max health */
+	int32 GetMaxHealth() const;
+
+	/* Changes player health */
+	void ChangeHealth(float Amount);
+
+
+	/////////////////////*** INVENTORY ***/////////////////////
+
+//	/* Default inventory array */
+//	UPROPERTY(BlueprintReadWrite, Category = Inventory)
+//	TArray<TSubclassOf<class AItem>> DefaultInventoryClass;
+
+	/* [server] Creates default inventory */
+	void CreateDefaultInventory();
+
+	/* Items in inventory */
+	UPROPERTY(Transient, Replicated)
+	TArray<class AItem*> Inventory;
+
+	/* [server] Removes and destroys all items in inventory */
+	void DestroyInventory();
+
+	/* Currently equipped item*/
+	UPROPERTY(Transient, ReplicatedUsing=OnRep_CurrentItem)
+	class AItem* CurrentItem;
+
+	/* Sets current item */
+	void SetCurrentItem(class AItem* NewItem, class AItem* LastItem = NULL);
+
+	/* Replication for setting current item */
+	UFUNCTION()
+	void OnRep_CurrentItem(class AItem* LastItem);
+
+	/* [server] Add item to inventory */
+	void AddItem(class AItem* Item);
+
+	/* [server] Revome item from inventory */
+	void RemoveItem(class AItem* Item);
+
+	/* Find item in inventory */
+	class AItem* FindItem(TSubclassOf<class AItem> ItemClass);
+
+	/* [server + local] Equips a item from inventory */
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void EquipItem(class AItem* Item);
+
+	/* Equip item */
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerEquipItem(class AItem* Item);
+
+	/* Get number of inventory items */
+	int32 GetInventoryCount() const;
+
+	/* Get item from inventory at index */
+	class AItem* GetInventoryItem(int32 index) const;
+
+
+	/////////////////////*** ITEM USAGE ***/////////////////////
+
+	/* [local] Starts item usage */
+	void StartItemUse();
+
+	/* [local] Stops items usage */
+	void StopItemUse();
+
+	/* Get using state */
+	bool IsUsing() const;
+
+	/* Current using state */
+	uint8 bWantsToUse : 1;
+
+	
+	/////////////////////*** ITEM DATA ***/////////////////////
+
+	/* Get equipped item */
+	UFUNCTION(BlueprintCallable, Category = Item)
+	class AItem* GetItem() const;
+
+	/* Socket name for attaching item */
+	UPROPERTY(BlueprintReadWrite, Category = Inventory)
+	FName ItemSocketPoint;
+
+	/* Get item socket point */
+	FName GetItemSocket() const;
+
 };
 

@@ -17,7 +17,7 @@ public:
 
 	AItemShield(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
-	virtual void EndUse() override;
+	virtual void StopUse() override;
 
 	float drainRate;
 	float drainAmount;

@@ -23,7 +23,7 @@ public:
 
 	AItemLantern(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
-	virtual void EndUse() override;
-	virtual void ChangeAmount(float value) override;
+	virtual void StopUse() override;
+	virtual void ChangeEnergy(float value) override;
 	
 };

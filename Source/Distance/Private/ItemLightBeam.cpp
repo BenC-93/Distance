@@ -6,7 +6,7 @@
 AItemLightBeam::AItemLightBeam(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	name = "LightBeam";
+	ItemInfo.Name = "LightBeam";
 	chargeRate = 1.0f;
 	chargeAmount = 2.0f;
 	totalChargedAmount = 0.0f;
@@ -14,24 +14,24 @@ AItemLightBeam::AItemLightBeam(const FObjectInitializer& ObjectInitializer)
 
 void AItemLightBeam::StartUse()
 {
-	if (!isInUse)
+	if (!bWantsToUse)
 	{
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Charge, chargeRate, true);
-		isInUse = true;
+		bWantsToUse = true;
 	}
 }
 
-void AItemLightBeam::EndUse()
+void AItemLightBeam::StopUse()
 {
-	if (isInUse)
+	if (bWantsToUse)
 	{
 		GetWorldTimerManager().ClearTimer(this, &AItemLightBeam::Charge);
-		isInUse = false;
+		bWantsToUse = false;
 	}
 }
 
 void AItemLightBeam::Charge()
 {
-	ChangeAmount(-chargeAmount);
+	ChangeEnergy(-chargeAmount);
 	totalChargedAmount += chargeAmount;//might need to multiply by some factor for more or less damage dealing
 }

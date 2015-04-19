@@ -3,9 +3,10 @@
 #include "Distance.h"
 #include "DistanceCharacter.h"
 #include "Item.h"
+//#include "InventoryItem.h"
+//#include "NewItem.h"
 #include "Engine.h"
 #include "UnrealNetwork.h"
-#include <cmath>
 
 ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -13,6 +14,8 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	//Networking
 	bReplicates = true;
 	bReplicateMovement = true;
+
+	bWantsToUse = false;
 
 	Health = 100.0f;
 	MaxHealth = 100.0f;
@@ -64,30 +67,245 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	//if (YourBPOb.Object != NULL) { YourBPBaseClassPtr = Cast(YourBPOb.Object->GeneratedClass); }
 }
 
+void ADistanceCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (HasAuthority())
+	{
+		Health = GetMaxHealth();
+		CreateDefaultInventory();
+	}
+}
+
+void ADistanceCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// regen health
+	if (Health < GetMaxHealth())
+	{
+		ChangeHealth(HealthRegenAmount * DeltaSeconds);
+	}
+}
+
+void ADistanceCharacter::Destroyed()
+{
+	Super::Destroyed();
+	DestroyInventory();
+}
+
+
+/////////////////////*** INPUT HANDLING ***/////////////////////
+
+void ADistanceCharacter::OnNextItem()
+{
+	const int32 CurrItem = Inventory.IndexOfByKey(CurrentItem);
+	AItem* NextItem = Inventory[(CurrItem + 1) % Inventory.Num()];
+	EquipItem(NextItem);
+}
+
+void ADistanceCharacter::OnPrevItem()
+{
+	const int32 CurrItem = Inventory.IndexOfByKey(CurrentItem);
+	AItem* PrevItem = Inventory[(CurrItem - 1) % Inventory.Num()];
+	EquipItem(PrevItem);
+}
+
+
+/////////////////////*** HEALTH and DAMAGE ***/////////////////////
+
+int32 ADistanceCharacter::GetMaxHealth() const
+{
+	return GetClass()->GetDefaultObject<ADistanceCharacter>()->Health;
+}
+
+void ADistanceCharacter::ChangeHealth(float Amount)
+{
+	int tempHealth = Health + Amount;
+	Health = FMath::Max(0, FMath::Min(100, tempHealth));
+}
+
+
+/////////////////////*** INVENTORY ***/////////////////////
+
+void ADistanceCharacter::CreateDefaultInventory()
+{
+	if (Role < ROLE_Authority) { return; }
+	//AItem* Lantern = (GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern());
+	//AddItem(Lantern);
+	UE_LOG(LogTemp, Error, TEXT("Test String"));
+	if (Inventory.Num() > 0) { EquipItem(Inventory[0]); }
+}
+
+void ADistanceCharacter::DestroyInventory()
+{
+	if (Role < ROLE_Authority) { return; }
+	for (int32 i = Inventory.Num(); i >= 0; i--)
+	{
+		AItem* Item = Inventory[i];
+		if (Item)
+		{
+			RemoveItem(Item);
+			Item->Destroy();
+		}
+	}
+}
+
+void ADistanceCharacter::SetCurrentItem(AItem* NewItem, AItem* LastItem)
+{
+	AItem* LocLastItem = NULL;
+	if (LastItem != NULL)
+	{
+		LocLastItem = LastItem;
+	}
+	else if (NewItem != CurrentItem)
+	{
+		LocLastItem = CurrentItem;
+	}
+	if (LocLastItem)
+	{
+		LocLastItem->OnUnequip();
+	}
+	CurrentItem = NewItem;
+	if (NewItem)
+	{
+		NewItem->SetOwner(this);
+		NewItem->OnEquip();
+	}
+}
+
+void ADistanceCharacter::OnRep_CurrentItem(AItem* LastItem)
+{
+	SetCurrentItem(CurrentItem, LastItem);
+}
+
+void ADistanceCharacter::AddItem(AItem* Item)
+{
+	if (Item && HasAuthority())
+	{
+		Item->OnEnterInventory(this);
+		Inventory.AddUnique(Item);
+	}
+}
+
+void ADistanceCharacter::RemoveItem(AItem* Item)
+{
+	if (Item && HasAuthority())
+	{
+		Item->OnLeaveInventory();
+		Inventory.RemoveSingle(Item);
+	}
+}
+
+AItem* ADistanceCharacter::FindItem(TSubclassOf<AItem> ItemClass)
+{
+	for (int32 i = 0; i < Inventory.Num(); i++)
+	{
+		if (Inventory[i] && Inventory[i]->IsA(ItemClass)) { return Inventory[i]; }
+	}
+	return NULL;
+}
+
+void ADistanceCharacter::EquipItem(AItem* Item)
+{
+	if (Item)
+	{
+		if (HasAuthority())
+		{
+			SetCurrentItem(Item);
+		}
+		else
+		{
+			ServerEquipItem(Item);
+		}
+	}
+}
+
+bool ADistanceCharacter::ServerEquipItem_Validate(AItem* Item)
+{
+	return true;
+}
+
+void ADistanceCharacter::ServerEquipItem_Implementation(AItem* Item)
+{
+	EquipItem(Item);
+}
+
+int32 ADistanceCharacter::GetInventoryCount() const
+{
+	return Inventory.Num();
+}
+
+AItem* ADistanceCharacter::GetInventoryItem(int32 index) const
+{
+	return Inventory[index];
+}
+
+
+/////////////////////*** ITEM USAGE ***/////////////////////
+
+void ADistanceCharacter::StartItemUse()
+{
+	if (!bWantsToUse)
+	{
+		bWantsToUse = true;
+		if (CurrentItem) { CurrentItem->StartUse(); }
+	}
+}
+
+void ADistanceCharacter::StopItemUse()
+{
+	if (bWantsToUse)
+	{
+		bWantsToUse = false;
+		if (CurrentItem) { CurrentItem->StopUse(); }
+	}
+}
+
+bool ADistanceCharacter::IsUsing() const
+{
+	return bWantsToUse;
+}
+
+
+/////////////////////*** ITEM DATA ***/////////////////////
+
+AItem* ADistanceCharacter::GetItem() const
+{
+	return CurrentItem;
+}
+
+FName ADistanceCharacter::GetItemSocket() const
+{
+	return ItemSocketPoint;
+}
+
+
+/////////////////////*** OLD STUFF ***/////////////////////
+
 void ADistanceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	printScreen(FColor::Red, TEXT("Begin Play"));
-	StartRegeneration();
 	ItemPickedUp();
 }
 
 void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
+	DOREPLIFETIME_CONDITION(ADistanceCharacter, Inventory, COND_OwnerOnly);
+	DOREPLIFETIME(ADistanceCharacter, CurrentItem);
 	DOREPLIFETIME(ADistanceCharacter, Health);
-	DOREPLIFETIME(ADistanceCharacter, MaxHealth);
 }
 
 void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass)//called at the beginning only once
 {
-	InventoryItem* NewItem = new InventoryItem();
-	NewItem->ItemClass = ItemClass;
+	//AItem* NewItem;
+	//NewItem->ItemClass = ItemClass;
 	// TODO: fix Jordan's terrible assumption
-	NewItem->name = TEXT("Lantern");
-	Inventory.Add(NewItem);
-	spriteInventory.Add(Inventory.Last()->GetItemSprite());
+	//NewItem->name = TEXT("Lantern");
+	//Inventory.Add(NewItem);
+	//spriteInventory.Add(Inventory.Last()->GetTheSprite());
 	//ItemPickedUp();
 }
 
@@ -95,9 +313,9 @@ void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items w
 {
 	if (Item)
 	{
-		Inventory.Add(new InventoryItem(Item));
-		spriteInventory.Add(Inventory.Last()->GetItemSprite());
-		Item->Pickup();
+		//Inventory.Add(Item);
+		//spriteInventory.Add(Inventory.Last()->GetTheSprite());
+		Item->OnEnterInventory(this);
 		printScreen(FColor::Red, TEXT("Pickup happened!"));
 		ItemPickedUp();
 		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
@@ -110,10 +328,10 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more t
 	{
 		// Need to create the item in the world,
 		// before removing it from the array
-		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
+		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->GetClass(), GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
 		uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 		EquipItem(0);//default equip lantern
-		UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
+		//UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 		Inventory.RemoveAt(InvSlot);
 		spriteInventory.RemoveAt(InvSlot);
 		ItemPickedUp();//refresh gui inventory after drop, but not needed if i keep the one in equip item
@@ -124,49 +342,13 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more t
 	return NULL;
 }
 
-void ADistanceCharacter::EquipItem(int32 InvSlot)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Inventory length: %d"), Inventory.Num());
-	UE_LOG(LogTemp, Warning, TEXT("InvSlot to be equipped: %d"), InvSlot);
-	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot))//TODO: fix bug that happens because of drop item
-	{
-		//Inventory[EquippedSlot]->OnUnequip();
-		if (GetItem() != NULL)
-		{
-			GetItem()->OnUnequip();
-			if (Inventory.IsValidIndex(EquippedSlot))
-			{
-				Inventory[EquippedSlot]->Update(GetItem());
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Previous Item is Null!"));
-		}
-		EquippedSlot = InvSlot;
-		//Inventory[EquippedSlot]->OnEquip();
-		EquipItemComponent(EquippedSlot);
-		if (GetItem() != NULL)
-		{
-			GetItem()->OnEquip();
-			GetItem()->Update(Inventory[EquippedSlot]);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Equipped Item is Null!"));
-		}
-		//Refresh gui inventory with ItemPickedUp()???? if we want some glow thing on current item then id say yes
-		ItemPickedUp();
-	}
-}
-
 void ADistanceCharacter::EquipItemComponent(int32 InvSlot)
 {
 	if (Inventory.IsValidIndex(InvSlot))
 	{
-		class TSubclassOf<AItem> ComponentClass = Inventory[InvSlot]->ItemClass;
+		//class TSubclassOf<AItem> ComponentClass = Inventory[InvSlot]->ItemClass;
 		ItemComponent->OnComponentDestroyed();
-		ItemComponent->ChildActorClass = ComponentClass;
+		//ItemComponent->ChildActorClass = ComponentClass;
 		ItemComponent->OnComponentCreated();
 		ItemComponent->ChildActor->AttachRootComponentToActor(this);
 	}
@@ -190,100 +372,20 @@ TArray<class UTexture2D*> ADistanceCharacter::GetSpriteInventory()
 	return spriteInventory;
 }
 
-TArray<class InventoryItem*> ADistanceCharacter::GetInventory()
+TArray<class AItem*> ADistanceCharacter::GetInventory()
 {
 	return Inventory;
-}
-
-void ADistanceCharacter::ToggleInventory()
-{
-	// Toggle visibility of inventory GUI
-	uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
-	EquipItem(tempIndex);
-	UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
-}
-
-FString ADistanceCharacter::GetItemName()
-{
-	if (Inventory.IsValidIndex(EquippedSlot))
-	{
-		return Inventory[EquippedSlot]->name;
-	}
-	return "Default";
-}
-
-bool ADistanceCharacter::GetIsItemDroppable()
-{
-	if (GetItem())
-	{
-		return GetItem()->droppable;
-	}
-	return false;
 }
 
 /* BELOW ARE THE OLD ITEM HANDLING FUNCTIONS. THEY ARE SUBJECT TO CHANGE.
  * PLEASE USE NEW FUNCTIONS ABOVE. */
 
-/**
-* ChangeHealth()
-* 
-* healthAmount is negative if it represents health change from an attack
-* healthAmount is positive if it represents health change from a heal item
-*
-*/
-
-void ADistanceCharacter::ChangeHealth(float healthAmount) 
-{
-	float tempHealth = Health + healthAmount;
-
-	if (tempHealth <= MaxHealth)
-	{
-		if (tempHealth < 0)
-		{
-			Health = 0.0f;
-		}
-		else
-		{
-			Health = tempHealth;
-		}
-	}
-	if (int(Health) % 10 == 0 || abs(healthAmount) >= 10)
-	{
-		UE_LOG(LogDistance, Verbose, TEXT("Changing Health Breakpoint: %f"), Health);
-	}
-}
-
-void ADistanceCharacter::RegenerateHealth()
-{
-	float RegenAmount = 1.0f;
-	if (Health < MaxHealth)
-	{
-		ChangeHealth(RegenAmount);
-	}
-}
-
-void ADistanceCharacter::StartRegeneration()
-{
-	float RegenInterval = 1.0f;
-	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, RegenInterval, true);
-	UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer is set"));
-}
-
 void ADistanceCharacter::ChangeItemAmount(float itemAmount)
 {
 	if (GetItem() != NULL)
 	{
-		GetItem()->ChangeAmount(itemAmount);
+		GetItem()->ChangeEnergy(itemAmount);
 	}
-}
-
-float ADistanceCharacter::GetItemAmount()
-{
-	if (GetItem() == NULL)
-	{
-		return -1;
-	}
-	return GetItem()->amount;
 }
 
 float ADistanceCharacter::GetMaxItemAmount()
@@ -292,7 +394,7 @@ float ADistanceCharacter::GetMaxItemAmount()
 	{
 		return -1;
 	}
-	return GetItem()->maxAmount;
+	return GetItem()->GetMaxEnergy();
 }
 
 bool ADistanceCharacter::GetItemEnabled()
@@ -301,7 +403,7 @@ bool ADistanceCharacter::GetItemEnabled()
 	{
 		return false;
 	}
-	return GetItem()->isInUse;
+	return GetItem()->CanBeUsed();
 }
 
 void ADistanceCharacter::ChangeSpeed(float speedAmount)
@@ -309,17 +411,6 @@ void ADistanceCharacter::ChangeSpeed(float speedAmount)
 	GetCharacterMovement()->MaxWalkSpeed = speedAmount;
 }
 
-AItem* ADistanceCharacter::GetItem()
-{
-	return (AItem *)ItemComponent->ChildActor;
-}
-
-/**
-* Attack()
-*
-* calculates and returns player damage
-*
-*/
 float ADistanceCharacter::Attack(float extra)
 {
 	float damage = BaseDamage + extra;

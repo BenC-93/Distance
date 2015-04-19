@@ -2,114 +2,342 @@
 
 #include "Distance.h"
 #include "Item.h"
-#include <cmath>
+#include "DistanceCharacter.h"
+#include "UnrealNetwork.h"
 
-AItem::AItem(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+AItem::AItem(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	droppable = true;
-	isInUse = false;
-	amount = 100.0f;
-	maxAmount = 100.0f;
-	regenRate = 1.0f;
-	regenAmount = 1.0f;
-	name = "Default";
-
-
-	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
-	RootComponent = RootSceneComponent;
-
-	//static ConstructorHelpers::FClassFinder<UPaperSpriteComponent> SpriteComponentObj(TEXT("/Game/Sprites/Lantern_Sprite.Lantern_Sprite"));
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
-	SpriteComponent->AttachTo(RootComponent);
-	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
-	//SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite> ("/Game/Sprites/Lantern_Sprite.Lantern_Sprite"));
+	RootComponent = SpriteComponent;
+	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -65.f);
 
-	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
-	TriggerBox->Mobility = EComponentMobility::Movable;
-	TriggerBox->SetBoxExtent(FVector(50.0f, 50.0f, 50.0f), true);
-	TriggerBox->AttachTo(RootComponent);
+	bIsEquipped = false;
+	bWantsToUse = false;
+	bCanRegen = false;
+
+	Energy = 100.f;
+
+	bReplicates = true;
+
+	ItemInfo = FItemData();
+
 }
 
-void AItem::StartUse()
+void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
-	isInUse = true; //this should be the first thing that happens
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AItem, MyPawn);
+	DOREPLIFETIME(AItem, Energy);
+	DOREPLIFETIME(AItem, bCanRegen);
 }
 
-void AItem::EndUse()
+void AItem::PostInitializeComponents()
 {
-	isInUse = false; //this should be the last thing that happens
+	Super::PostInitializeComponents();
+	Energy = GetMaxEnergy();
+	DetachSpriteFromPawn();
 }
+
+void AItem::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (IsEquipped() && CanRegen() && GetEnergy() < GetMaxEnergy())
+	{
+		ChangeEnergy(GetEnergyRegenAmount() * DeltaSeconds);
+	}
+}
+
+
+/////////////////////*** ENERGY ***/////////////////////
+
+void AItem::ChangeEnergy(float amount)
+{
+	float tempEnergy = Energy + amount;
+	Energy = FMath::Max(0.f, FMath::Min(100.f, tempEnergy));
+
+	if (GetEnergy() < 100.f && CanRegen() && MyPawn->GetItem() == this) { StartRegen(); }
+}
+
+
+/////////////////////*** INVENTORY ***/////////////////////
 
 void AItem::OnEquip()
 {
-	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	// Do any special effects like particles, or effects to the player
-	// (that need to happen for all items)
-	GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
+	AttachSpriteToPawn();
+	bIsEquipped = true;
+	if (MyPawn)
+	{
+		if (MyPawn->IsLocallyControlled() && CanRegen()) { StartRegen(); }
+	}
 }
 
 void AItem::OnUnequip()
 {
-	// Do any special effects like particles, or effects to the player
-	// (that need to happen for all items)
-	GetWorldTimerManager().ClearTimer(this, &AItem::Regenerate);
+	DetachSpriteFromPawn();
+	bIsEquipped = false;
+	StopUse();
+	if (bCanRegen) { bCanRegen = false; }
 }
 
-void AItem::Pickup()//TODO: object is still there invisibly somehow
+void AItem::OnEnterInventory(ADistanceCharacter* NewOwner)
 {
-	/*if (SpriteComponent)
-	{
-		SpriteComponent->DestroyComponent();
-	}*/
-	//TriggerBox->DestroyComponent();
-	//SpriteComponent->DestroyComponent();
-	//RootComponent->DestroyComponent();
-	Destroy();
-	//K2_DestroyActor();
+	SetOwningPawn(NewOwner);
 }
 
-void AItem::Drop()
+void AItem::OnLeaveInventory()
 {
-	if (droppable)
+	if (HasAuthority()) { SetOwningPawn(NULL); }
+	if (IsEquipped()) { OnUnequip(); }
+}
+
+bool AItem::IsEquipped() const
+{
+	return bIsEquipped;
+}
+
+
+/////////////////////*** INPUT ***/////////////////////
+
+void AItem::StartUse()
+{
+	if (Role < ROLE_Authority) { ServerStartUse(); }
+	if (!bWantsToUse) { bWantsToUse = true; }
+}
+
+void AItem::StopUse()
+{
+	if (Role < ROLE_Authority) { ServerStopUse(); }
+	if (bWantsToUse) { bWantsToUse = false; }
+}
+
+void AItem::StartRegen(bool bFromRep)
+{
+	if (!bFromRep && Role < ROLE_Authority) { ServerStartRegen(); }
+	if (bFromRep || CanRegen())
 	{
-		// Change the input to this function to take a world location
-		// Move (teleport) this object to that location
-		// Enable the visual component
-		isInUse = false;
+		bCanRegen = true;
 	}
 }
 
-float AItem::GetAmount()
+void AItem::StopRegen()
 {
-	return amount;
+	bCanRegen = false;
 }
 
-float AItem::GetMaxAmount()
+
+/////////////////////*** CONTROL ***/////////////////////
+
+bool AItem::CanBeUsed() const
 {
-	return maxAmount;
+	return (GetEnergy() >= GetUseAmount());
 }
 
-void AItem::ChangeAmount(float value)
+bool AItem::CanRegen() const
 {
-	float tempAmount = GetAmount() + value;
-	tempAmount = fmax(0.0f, fmin(100.0f, tempAmount));
-	amount = tempAmount;
+	return (bCanRegen);
 }
 
-void AItem::Regenerate()
+
+/////////////////////*** DATA ***/////////////////////
+
+FString AItem::GetName() const
 {
-	ChangeAmount(regenAmount);
+	return ItemInfo.Name;
 }
 
-void AItem::Update(class InventoryItem* invItem)
+bool AItem::GetIsDroppable() const
 {
-	name = invItem->name;
-	amount = invItem->currentValue;
-	maxAmount = invItem->maxValue;
+	return ItemInfo.bIsDroppable;
 }
 
-UTexture2D* AItem::GetTheSprite()
+float AItem::GetEnergy() const
 {
-	return SpriteComponent->GetSprite()->GetSourceTexture();
+	return Energy;
+}
+
+float AItem::GetMaxEnergy() const
+{
+	return ItemInfo.MaxEnergy;
+}
+
+float AItem::GetEnergyRegenAmount() const
+{
+	return ItemInfo.EnergyRegenAmount;
+}
+
+float AItem::GetUseAmount() const
+{
+	return ItemInfo.EnergyUseAmount;
+}
+
+UPaperSpriteComponent* AItem::GetItemSprite() const
+{
+	return SpriteComponent;
+}
+
+ADistanceCharacter* AItem::GetCharacterOwner() const
+{
+	return MyPawn;
+}
+
+void AItem::SetOwningPawn(ADistanceCharacter* NewPawn)
+{
+	if (MyPawn != NewPawn)
+	{
+		Instigator = NewPawn;
+		MyPawn = NewPawn;
+		SetOwner(NewPawn);
+	}
+}
+
+
+/////////////////////*** INPUT [SERVER SIDE] ***/////////////////////
+
+bool AItem::ServerStartUse_Validate()
+{
+	return true;
+}
+
+void AItem::ServerStartUse_Implementation()
+{
+	StartUse();
+}
+
+bool AItem::ServerStopUse_Validate()
+{
+	return true;
+}
+
+void AItem::ServerStopUse_Implementation()
+{
+	StopUse();
+}
+
+bool AItem::ServerStartRegen_Validate()
+{
+	return true;
+}
+
+void AItem::ServerStartRegen_Implementation()
+{
+	StartRegen();
+}
+
+bool AItem::ServerStopRegen_Validate()
+{
+	return true;
+}
+
+void AItem::ServerStopRegen_Implementation()
+{
+	StopRegen();
+}
+
+
+/////////////////////*** REPLICATION HELPERS ***/////////////////////
+
+void AItem::OnRep_MyPawn()
+{
+	if (MyPawn)
+	{
+		OnEnterInventory(MyPawn);
+	}
+	else
+	{
+		OnLeaveInventory();
+	}
+}
+
+void AItem::OnRep_Regen()
+{
+	if (bCanRegen)
+	{
+		StartRegen(true);
+	}
+	else
+	{
+		StopRegen();
+	}
+}
+
+
+/////////////////////*** EFFECTS ***/////////////////////
+
+void AItem::StartUseEffects()
+{
+	return;
+}
+
+UAudioComponent* AItem::PlayItemSound(USoundCue* Sound)
+{
+	UAudioComponent* AC = NULL;
+	if (Sound && MyPawn) { AC = UGameplayStatics::PlaySoundAttached(Sound, MyPawn->GetRootComponent()); }
+	return AC;
+}
+
+
+/////////////////////*** ITEM USAGE ***/////////////////////
+
+// Only used for item subtypes (PURE_VIRTUAL):
+void AItem::UseItem()
+{
+	return;
+}
+
+bool AItem::ServerHandleUsing_Validate()
+{
+	return true;
+}
+
+void AItem::ServerHandleUsing_Implementation()
+{
+	const bool bShouldUpdateEnergy = (GetEnergy() > 0 && CanBeUsed());
+	HandleUsing();
+	if (bShouldUpdateEnergy) { ChangeEnergy(GetUseAmount()); }
+}
+
+void AItem::HandleUsing()
+{
+	if (GetEnergy() > 0.f && CanBeUsed())
+	{
+		if (MyPawn && MyPawn->IsLocallyControlled())
+		{
+			UseItem();
+			ChangeEnergy(GetUseAmount());
+		}
+	}
+	if (CanRegen()) { StartRegen(); }
+}
+
+
+/////////////////////*** SOCKETTING ***/////////////////////
+
+void AItem::AttachSpriteToPawn()
+{
+	if (MyPawn)
+	{
+		DetachSpriteFromPawn();
+		FName AttachPoint = MyPawn->GetItemSocket();
+		if (MyPawn->IsLocallyControlled() == true)
+		{
+			USkeletalMeshComponent* PawnMesh = MyPawn->GetMesh();
+			SpriteComponent->AttachTo(PawnMesh, AttachPoint);
+			SpriteComponent->SetHiddenInGame(false);
+		}
+		else
+		{
+			UPaperSpriteComponent* UseItemSprite = GetItemSprite();
+			USkeletalMeshComponent* UsePawnMesh = MyPawn->GetMesh();
+			UseItemSprite->AttachTo(UsePawnMesh, AttachPoint);
+			UseItemSprite->SetHiddenInGame(false);
+		}
+	}
+}
+
+void AItem::DetachSpriteFromPawn()
+{
+	SpriteComponent->DetachFromParent();
+	SpriteComponent->SetHiddenInGame(true);
 }

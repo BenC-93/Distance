@@ -77,7 +77,7 @@ void AAIEnemy::Tick(float DeltaTime)
 		{
 			// Add time to drain tick
 			drainCounter += DeltaTime;
-			if (player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
+			if (player->GetItem()->GetName() == "Lantern" && player->GetItem()->GetEnergy() > 0 && player->GetItemEnabled())
 			{
 				drainLight = true;
 				drainHealth = false;
@@ -124,7 +124,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				drainCounter -= drainRate;
 				health += 1;
 				player->ChangeItemAmount(-1.0f);
-				if (player->GetItemAmount() == 0)//dont end here, just go to health
+				if (player->GetItem()->GetEnergy() == 0)//dont end here, just go to health
 				{
 					drainLight = false;
 					drainHealth = true;
@@ -254,14 +254,14 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Player Entered drain trigger"));
+			//UE_LOG(LogTemp, Warning, TEXT("Player Entered drain trigger"));
 			//UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);
 			player->ChangeSpeed(400);//Works, but when do we set it back to normal??
 			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
-			if (player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
+			if (player->GetItem() && player->GetItem()->GetName() == "Lantern" && player->GetItem()->GetEnergy() > 0 && player->GetItemEnabled())
 			{
 				drainLight = true;
 				drainHealth = false;

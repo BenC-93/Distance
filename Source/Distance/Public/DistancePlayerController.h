@@ -56,6 +56,20 @@ protected:
 	void OnUseItemReleased();
 	void OnInventoryPressed();
 
+
+	/* Player pressed start use button */
+	void OnStartUse();
+
+	/* Player released start use button */
+	void OnStopUse();
+
+	/* Player pressed next item button */
+	void OnNextItem();
+
+	/* Player pressed previous item button */
+	void OnPrevItem();
+
+
 	void OnGetLocation();//Temporary Binding, for location testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************
 	

@@ -17,7 +17,7 @@ public:
 
 	AItemLightBeam(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
-	virtual void EndUse() override;
+	virtual void StopUse() override;
 
 	float chargeRate;
 	float chargeAmount;

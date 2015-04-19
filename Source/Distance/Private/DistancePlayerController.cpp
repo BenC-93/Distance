@@ -53,6 +53,11 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAction("UseItem", IE_Pressed, this, &ADistancePlayerController::OnUseItemPressed);
 	InputComponent->BindAction("UseItem", IE_Released, this, &ADistancePlayerController::OnUseItemReleased);
 
+	InputComponent->BindAction("Use", IE_Pressed, this, &ADistancePlayerController::OnStartUse);
+	InputComponent->BindAction("Use", IE_Released, this, &ADistancePlayerController::OnStopUse);
+	InputComponent->BindAction("NextItem", IE_Released, this, &ADistancePlayerController::OnNextItem);
+	InputComponent->BindAction("PrevItem", IE_Released, this, &ADistancePlayerController::OnPrevItem);
+
 	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
 
 	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnGetLocation);//Temporary Binding, for location testing***************************************
@@ -211,10 +216,10 @@ void ADistancePlayerController::OnUseItemReleased()
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
-	item->EndUse();
+	item->StopUse();
 	UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
 	//UE_LOG(LogTemp, Warning, TEXT("Item name: %s"), *DistanceCharacterClass->GetItemName());
-	if (DistanceCharacterClass->GetItemName() == "LightBeam")
+	if (DistanceCharacterClass->GetItem()->GetName() == "LightBeam")
 	{
 		//printScreen(FColor::Red, "Used Light Beam");
 		if (enemyActor != NULL && enemyActor->IsA(AAIBoss_Doubt::StaticClass()))
@@ -237,7 +242,26 @@ void ADistancePlayerController::OnUseItemReleased()
 void ADistancePlayerController::OnInventoryPressed()
 {
 	switchedItem = true;
-	DistanceCharacterClass->ToggleInventory();
+}
+
+void ADistancePlayerController::OnStartUse()
+{
+	DistanceCharacterClass->StartItemUse();
+}
+
+void ADistancePlayerController::OnStopUse()
+{
+	DistanceCharacterClass->StopItemUse();
+}
+
+void ADistancePlayerController::OnNextItem()
+{
+	DistanceCharacterClass->OnNextItem();
+}
+
+void ADistancePlayerController::OnPrevItem()
+{
+	DistanceCharacterClass->OnPrevItem();
 }
 
 void ADistancePlayerController::OnGetLocation()//Temporary Binding, for location testing***************************************

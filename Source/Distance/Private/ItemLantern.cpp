@@ -8,11 +8,11 @@ AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
 {
 //	SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite>(TEXT("/Game/Sprites/Lantern_Sprite")));
 
-	name = "Lantern";
-	droppable = false;
-	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ItemInfo.Name = "Lantern";
+	ItemInfo.bIsDroppable = false;
+	GetItemSprite()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	LightIntensity = 100.0f * amount;
+	LightIntensity = 100.0f * GetEnergy();
 
 	LightSource = ObjectInitializer.CreateDefaultSubobject<UPointLightComponent>(this, "LightSource");
 	LightSource->AttachTo(RootComponent);
@@ -24,27 +24,26 @@ AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
 
 void AItemLantern::StartUse()
 {
-	if (isInUse)
+	if (bWantsToUse)
 	{
-		isInUse = false;
+		bWantsToUse = false;
 		LightSource->SetVisibility(false);
 	}
 	else
 	{
-		isInUse = true;
+		bWantsToUse = true;
 		LightSource->SetVisibility(true);
-
 	}
 }
 
-void AItemLantern::EndUse()
+void AItemLantern::StopUse()
 {
 	return;
 }
 
-void AItemLantern::ChangeAmount(float value)
+void AItemLantern::ChangeEnergy(float value)
 {
-	Super::ChangeAmount(value);
-	LightIntensity = 100.0f * amount;
+	Super::ChangeEnergy(value);
+	LightIntensity = 100.0f * GetEnergy();
 	LightSource->SetIntensity(LightIntensity);
 }

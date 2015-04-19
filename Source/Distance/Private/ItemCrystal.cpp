@@ -7,12 +7,12 @@
 AItemCrystal::AItemCrystal(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	name = "Crystal";
+	ItemInfo.Name = "Crystal";
 }
 
 void AItemCrystal::StartUse()
 {
-	if (!isInUse)
+	if (!bWantsToUse)
 	{
 		printScreen(FColor::Red, TEXT("Beginning Convergence"));
 		ConvergenceManager::StartConvergence();

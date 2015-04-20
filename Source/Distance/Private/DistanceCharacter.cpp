@@ -3,8 +3,6 @@
 #include "Distance.h"
 #include "DistanceCharacter.h"
 #include "Item.h"
-//#include "InventoryItem.h"
-//#include "NewItem.h"
 #include "Engine.h"
 #include "UnrealNetwork.h"
 

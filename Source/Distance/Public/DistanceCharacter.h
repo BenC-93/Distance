@@ -4,8 +4,6 @@
 #include "Classes/PaperSpriteComponent.h"
 #include "Classes/Components/ChildActorComponent.h"
 #include "Item.h"
-//#include "InventoryItem.h"
-//#include "NewItem.h"
 #include "DistanceCharacter.generated.h"
 
 enum ConvergenceState : uint32 { CONVERGENCE, DIVERGENCE1, DIVERGENCE2 };

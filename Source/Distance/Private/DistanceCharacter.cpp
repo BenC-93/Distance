@@ -316,7 +316,7 @@ void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items w
 	if (Item)
 	{
 		//Inventory.Add(Item);
-		//spriteInventory.Add(Inventory.Last()->GetTheSprite());
+		spriteInventory.Add(Item->GetItemTexture());
 		Item->OnEnterInventory(this);
 		Inventory.AddUnique(Item);
 		printScreen(FColor::Red, TEXT("Pickup happened!"));

@@ -133,6 +133,9 @@ class DISTANCE_API AItem : public AActor
 
 	/* Get item sprite */
 	UPaperSpriteComponent* GetItemSprite() const;
+	
+	/* Get item texture */
+	UTexture2D* GetItemTexture() const;
 
 	/* Get owner pawn */
 	class ADistanceCharacter* GetCharacterOwner() const;
@@ -154,6 +157,10 @@ protected:
 
 private:
 
+	/* Root component */
+	UPROPERTY(VisibleDefaultsOnly, Category = Root)
+	class USceneComponent *RootSceneComponent;
+	
 	/* Item sprite */
 	UPROPERTY(VisibleDefaultsOnly, Category = Sprite)
 	UPaperSpriteComponent* SpriteComponent;

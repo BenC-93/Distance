@@ -7,8 +7,11 @@
 
 AItem::AItem(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
+	RootComponent = RootSceneComponent;
+	
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
-	RootComponent = SpriteComponent;
+	SpriteComponent->AttachTo(RootComponent);
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -65.f);
 
 	bIsEquipped = false;
@@ -36,7 +39,7 @@ void AItem::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	Energy = GetMaxEnergy();
-	DetachSpriteFromPawn();
+	//DetachSpriteFromPawn();
 }
 
 void AItem::Tick(float DeltaSeconds)
@@ -84,6 +87,7 @@ void AItem::OnUnequip()
 void AItem::OnEnterInventory(ADistanceCharacter* NewOwner)
 {
 	SetOwningPawn(NewOwner);
+	DetachSpriteFromPawn();
 }
 
 void AItem::OnLeaveInventory()
@@ -175,6 +179,11 @@ float AItem::GetUseAmount() const
 UPaperSpriteComponent* AItem::GetItemSprite() const
 {
 	return SpriteComponent;
+}
+
+UTexture2D* AItem::GetItemTexture() const
+{
+	return SpriteComponent->GetSprite()->GetSourceTexture();
 }
 
 ADistanceCharacter* AItem::GetCharacterOwner() const
@@ -322,7 +331,7 @@ void AItem::AttachSpriteToPawn()
 		FName AttachPoint = MyPawn->GetItemSocket();
 		USkeletalMeshComponent* PawnMesh = MyPawn->GetMesh();
 		RootComponent->AttachTo(PawnMesh, AttachPoint, EAttachLocation::SnapToTarget);
-		RootComponent->SetHiddenInGame(false);
+		SpriteComponent->SetHiddenInGame(false);
 //		if (MyPawn->IsLocallyControlled() == true)
 //		{
 //			USkeletalMeshComponent* PawnMesh = MyPawn->GetMesh();
@@ -342,5 +351,5 @@ void AItem::AttachSpriteToPawn()
 void AItem::DetachSpriteFromPawn()
 {
 	RootComponent->DetachFromParent();
-	RootComponent->SetHiddenInGame(true);
+	SpriteComponent->SetHiddenInGame(true);
 }

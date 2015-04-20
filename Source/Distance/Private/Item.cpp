@@ -320,24 +320,27 @@ void AItem::AttachSpriteToPawn()
 	{
 		DetachSpriteFromPawn();
 		FName AttachPoint = MyPawn->GetItemSocket();
-		if (MyPawn->IsLocallyControlled() == true)
-		{
-			USkeletalMeshComponent* PawnMesh = MyPawn->GetMesh();
-			SpriteComponent->AttachTo(PawnMesh, AttachPoint);
-			SpriteComponent->SetHiddenInGame(false);
-		}
-		else
-		{
-			UPaperSpriteComponent* UseItemSprite = GetItemSprite();
-			USkeletalMeshComponent* UsePawnMesh = MyPawn->GetMesh();
-			UseItemSprite->AttachTo(UsePawnMesh, AttachPoint);
-			UseItemSprite->SetHiddenInGame(false);
-		}
+		USkeletalMeshComponent* PawnMesh = MyPawn->GetMesh();
+		RootComponent->AttachTo(PawnMesh, AttachPoint, EAttachLocation::SnapToTarget);
+		RootComponent->SetHiddenInGame(false);
+//		if (MyPawn->IsLocallyControlled() == true)
+//		{
+//			USkeletalMeshComponent* PawnMesh = MyPawn->GetMesh();
+//			SpriteComponent->AttachTo(PawnMesh, AttachPoint, EAttachLocation::SnapToTarget);
+//			SpriteComponent->SetHiddenInGame(false);
+//		}
+//		else
+//		{
+//			UPaperSpriteComponent* UseItemSprite = GetItemSprite();
+//			USkeletalMeshComponent* UsePawnMesh = MyPawn->GetMesh();
+//			UseItemSprite->AttachTo(UsePawnMesh, AttachPoint, EAttachLocation::SnapToTarget);
+//			UseItemSprite->SetHiddenInGame(false);
+//		}
 	}
 }
 
 void AItem::DetachSpriteFromPawn()
 {
-	SpriteComponent->DetachFromParent();
-	SpriteComponent->SetHiddenInGame(true);
+	RootComponent->DetachFromParent();
+	RootComponent->SetHiddenInGame(true);
 }

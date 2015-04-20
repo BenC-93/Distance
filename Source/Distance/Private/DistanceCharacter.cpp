@@ -61,6 +61,8 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	ItemComponent->OnComponentCreated();
 	ItemComponent->AttachTo(RootComponent);
 	ItemComponent->SetIsReplicated(true);
+	
+	ItemSocketPoint = TEXT("HandSocket");
 
 	//some C++ class constructor 
 	//Your BP of the base C++ class static ConstructorHelpers::FObjectFinder YourBPOb(TEXT("Blueprint'/Game/Characters/YourBP.YourBP'")); 
@@ -216,6 +218,7 @@ void ADistanceCharacter::EquipItem(AItem* Item)
 		}
 		else
 		{
+			SetCurrentItem(Item);
 			ServerEquipItem(Item);
 		}
 	}
@@ -287,7 +290,6 @@ void ADistanceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	printScreen(FColor::Red, TEXT("Begin Play"));
-	ItemPickedUp();
 }
 
 void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
@@ -316,7 +318,13 @@ void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items w
 		//Inventory.Add(Item);
 		//spriteInventory.Add(Inventory.Last()->GetTheSprite());
 		Item->OnEnterInventory(this);
+		Inventory.AddUnique(Item);
 		printScreen(FColor::Red, TEXT("Pickup happened!"));
+		// No item equipped, equip this one
+		if (CurrentItem == NULL)
+		{
+			SetCurrentItem(Item);
+		}
 		ItemPickedUp();
 		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
 	}
@@ -346,11 +354,14 @@ void ADistanceCharacter::EquipItemComponent(int32 InvSlot)
 {
 	if (Inventory.IsValidIndex(InvSlot))
 	{
-		//class TSubclassOf<AItem> ComponentClass = Inventory[InvSlot]->ItemClass;
-		ItemComponent->OnComponentDestroyed();
-		//ItemComponent->ChildActorClass = ComponentClass;
-		ItemComponent->OnComponentCreated();
-		ItemComponent->ChildActor->AttachRootComponentToActor(this);
+//		//class TSubclassOf<AItem> ComponentClass = Inventory[InvSlot]
+//		ItemComponent->OnComponentDestroyed();
+//		//ItemComponent->ChildActorClass = ComponentClass;
+//		ItemComponent->OnComponentCreated();
+//		ItemComponent->ChildActor = Inventory[InvSlot];
+//		ItemComponent->ChildActor->AttachRootComponentToActor(this);
+		UE_LOG(LogDistance, Warning, TEXT("Equipping item"));
+		Inventory[InvSlot]->OnEquip();
 	}
 }
 

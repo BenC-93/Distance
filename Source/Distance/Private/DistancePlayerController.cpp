@@ -283,7 +283,7 @@ void ADistancePlayerController::OnConvergenceEnd()
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
 {
-	((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnLantern();
+	// TODO:remove this if it isn't bound to anything
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

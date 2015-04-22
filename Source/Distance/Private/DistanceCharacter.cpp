@@ -86,7 +86,7 @@ void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem
 	UInventoryItem* NewItem = new UInventoryItem();
 	NewItem->ItemClass = ItemClass;
 	// TODO: fix Jordan's terrible assumption
-	NewItem->name = TEXT("Lantern");
+	NewItem->SetItemName(TEXT("Lantern"));
 	Inventory.Add(NewItem);
 	spriteInventory.Add(Inventory.Last()->GetItemSprite());
 	//ItemPickedUp();
@@ -222,9 +222,9 @@ FString ADistanceCharacter::GetItemName()
 {
 	if (Inventory.IsValidIndex(EquippedSlot))
 	{
-		return Inventory[EquippedSlot]->name;
+		return Inventory[EquippedSlot]->GetItemName();
 	}
-	return "Default";
+	return TEXT("Default");
 }
 
 bool ADistanceCharacter::GetIsItemDroppable()

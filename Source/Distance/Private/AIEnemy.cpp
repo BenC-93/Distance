@@ -207,8 +207,10 @@ void AAIEnemy::DrainTimer()
 			DrainParticleSys->Deactivate();
 			return;
 		}
-		if (moveToPlayer && player->GetItemName() == "Lantern" && player->GetItemAmount() > 0 && player->GetItemEnabled())
-		{//drain light
+		//UE_LOG(LogTemp, Warning, TEXT("Equipped item name, %s"), *player->GetItemName());
+		if (moveToPlayer && player->GetItemName().Equals(TEXT("Lantern")) && player->GetItemAmount() > 0.0f && player->GetItemEnabled())
+		{
+			//drain light
 			if (health < maxHealth)
 			{
 				health += 1;
@@ -216,15 +218,16 @@ void AAIEnemy::DrainTimer()
 				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->GetItemAmount());
 			}
 		}
-		else//drain health
-		{
+		//else//drain health
+		//{
 			if (moveToPlayer && health < maxHealth)
 			{
+				UE_LOG(LogTemp, Error, TEXT("Equipped item name, %s"), *player->GetItemName());
 				health += 1;
 				player->ChangeHealth(baseDamage);
 				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
 			}
-		}
+		//}
 	}
 }
 

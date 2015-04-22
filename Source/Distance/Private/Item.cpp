@@ -13,7 +13,7 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	maxAmount = 100.0f;
 	regenRate = 1.0f;
 	regenAmount = 1.0f;
-	name = "Default";
+	name = TEXT("Default");
 
 
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
@@ -104,9 +104,19 @@ void AItem::Regenerate()
 
 void AItem::Update(class UInventoryItem* invItem)
 {
-	name = invItem->name;
+	name = invItem->GetItemName();
 	amount = invItem->currentValue;
 	maxAmount = invItem->maxValue;
+}
+
+FString AItem::GetItemName()
+{
+	return name;
+}
+
+void AItem::SetItemName(FString n)
+{
+	name = n;
 }
 
 UTexture2D* AItem::GetTheSprite()

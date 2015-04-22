@@ -109,7 +109,7 @@ void AItem::Update(class UInventoryItem* invItem)
 	maxAmount = invItem->maxValue;
 }
 
-UTexture2D* AItem::GetTheSprite()
+UTexture2D* AItem::GetTheSprite() const
 {
-	return SpriteComponent->GetSprite()->GetSourceTexture();
+	return SpriteComponent->GetSprite()->GetBakedTexture();
 }

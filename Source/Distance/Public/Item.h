@@ -98,5 +98,5 @@ public:
 
 	void Update(class UInventoryItem* invItem);
 
-	UTexture2D* GetTheSprite();
+	UTexture2D* GetTheSprite() const;
 };

@@ -96,7 +96,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Regen)
 	void Regenerate();
 
-	void Update(class InventoryItem* invItem);
+	FString GetItemName();
+	void SetItemName(FString n);
 
-	UTexture2D* GetTheSprite();
+	void Update(class UInventoryItem* invItem);
+
+	UTexture2D* GetTheSprite() const;
 };

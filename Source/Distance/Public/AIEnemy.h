@@ -27,8 +27,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Triggers")
 	class UBoxComponent* AITriggerRange;//for approaching
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
+	class UPaperSpriteComponent* ShadowSpriteComponent;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Triggers")
 	class UBoxComponent* AITriggerAttack;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Particles")
+	class UParticleSystemComponent* DrainParticleSys;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -44,6 +50,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Trigger Functions")
 	bool CheckIfPlayer(class AActor* OtherActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Rotations")
+	FRotator FaceActorRotation(class AActor* OtherActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Unit Circle")
+	float ConvertToUnitCircle(float degrees);
 
 	/*UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBeginAttack(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -62,20 +74,15 @@ public:
 
 	float runAwaySpeed = 1000.0f;
 
-	UPROPERTY(EditAnywhere)
-	bool drainTrigger;
-
-	UPROPERTY(EditAnywhere)
-	bool drainHealth;
-
-	UPROPERTY(EditAnywhere)
-	bool drainLight;
-
 	float drainCounter;
 	float drainRate;
 
-	float speedCounter;
-	float speedLimit;
+	float deathCounter;
+
+	const float spriteLen = 125.0f;// 506.0f;
+
+	float scaleCounter;
+	float scaleLimit;
 
 	UPROPERTY(EditAnywhere)
 	class ACharacter* player1;
@@ -91,6 +98,9 @@ public:
 
 	// drain either player's lantern light or player health during attack
 	void Drain();
+
+	void DrainTimer();
+	void StartDrainTimer(float rate);
 
 private:
 	

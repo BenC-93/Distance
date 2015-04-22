@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "Tentacle.h"
+#include "AIBoss_Doubt.h"
 
 ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -13,15 +14,22 @@ ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 	RootComponent = RootSceneComponent;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
-	SpriteComponent->AttachTo(RootComponent);
-	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
+	SpriteComponent->RelativeRotation = FRotator(0.0f, 90.0f, 0.0f);//y,z,x
 	SpriteComponent->RelativeScale3D = FVector(7.0f, 3.0f, 3.0f);
+	SpriteComponent->AttachTo(RootComponent);
 	
 	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
 	TriggerBox->Mobility = EComponentMobility::Movable;
-	TriggerBox->SetBoxExtent(FVector(50.0f, 50.0f, 50.0f), true);
-	TriggerBox->RelativeLocation = FVector(70.0f, -270.0f, 0.0f);
+	TriggerBox->SetBoxExtent(FVector(175.0f, 65.0f, 500.0f), true);
+	TriggerBox->RelativeLocation = FVector(-474.0f, -76.0f, 0.0f);
 	TriggerBox->AttachTo(RootComponent);
+
+}
+
+void ATentacle::SetBossParent(class AAIBoss_Doubt* parent)
+{
+	doubtParent = parent;
+	TriggerBox->OnComponentBeginOverlap.AddDynamic(doubtParent, &AAIBoss_Doubt::OnTentacleOverlap);
 }
 
 float ATentacle::ChangeHealth(float amount)
@@ -33,6 +41,7 @@ float ATentacle::ChangeHealth(float amount)
 		if (tempHealth < 0)
 		{
 			health = 0.0f;
+			DestroyTentacle();
 		}
 		else
 		{
@@ -40,4 +49,23 @@ float ATentacle::ChangeHealth(float amount)
 		}
 	}
 	return health;
+}
+
+void ATentacle::DestroyTentacle()
+{
+	Destroy();
+	if (Role < ROLE_Authority)
+	{
+		ServerDestroyTentacle();
+	}
+}
+
+bool ATentacle::ServerDestroyTentacle_Validate()
+{
+	return true;
+}
+
+void ATentacle::ServerDestroyTentacle_Implementation()
+{
+	DestroyTentacle();
 }

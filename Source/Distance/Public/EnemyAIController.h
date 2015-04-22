@@ -33,6 +33,11 @@ public:
 
 private:
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDropRandomItem(FVector loc);
+	//virtual bool ServerDropRandomItem_Validate(FVector loc);
+	//virtual void ServerDropRandomItem_Implementation(FVector loc);
+
 	UPROPERTY(transient)
 	class AAIEnemy* AIEnemyClass;
 

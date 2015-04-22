@@ -3,6 +3,7 @@
 #include "Distance.h"
 #include "AIBoss_Doubt.h"
 #include "UnrealNetwork.h"
+#include "Tentacle.h"
 
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -13,6 +14,18 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	drainRate = 0.25f;
 	tentacleHealth = 10.0f;
 	numTentacles = 5;
+
+	distToPlayer = 1;
+	tentacleYaw = 0;
+	chosenTentacleIndex = 0;
+	tentacleCounter = 0;
+	tentacleSpriteLen = 650.0f;//maybe 600
+
+	/*for (int i = 0; i < numTentacles; i++)
+	{
+		ATentacle* tentacle = new ATentacle(ObjectInitializer);
+		tentacleArray.Add(tentacle);
+	}*/
 
 	swallowedPlayer = NULL;
 
@@ -36,6 +49,11 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	AITriggerAttack->SetBoxExtent(FVector(150.0f, 100.0f, 60.0f), true);
 	AITriggerAttack->AttachTo(RootComponent);
 
+	TentacleComponent0 = CreateTentacleComponent(0, ObjectInitializer);
+	TentacleComponent1 = CreateTentacleComponent(1, ObjectInitializer);
+	TentacleComponent2 = CreateTentacleComponent(2, ObjectInitializer);
+	TentacleComponent3 = CreateTentacleComponent(3, ObjectInitializer);
+
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 0.f);
 	GetCharacterMovement()->bConstrainToPlane = true;
@@ -50,6 +68,35 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
 }
 
+UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjectInitializer& ObjectInitializer)
+{
+	
+	FName componentName = FName(*FString::Printf(TEXT("TentacleComponent %d"), i));
+	class UChildActorComponent* TentacleComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, componentName);
+	//TentacleComponent->ChildActorClass = ATentacle::StaticClass(); //not needed anymore
+	TentacleComponent->OnComponentCreated();
+	TentacleComponent->AttachTo(RootComponent);
+	TentacleComponent->SetIsReplicated(true);
+	
+	// Add TC to Array of components
+	TentacleComponentArray.Add(TentacleComponent);
+	return TentacleComponent;
+}
+
+void AAIBoss_Doubt::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	for (int i = 0; i < TentacleComponentArray.Num(); i++)
+	{
+		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
+		if (tentacle != NULL)
+		{
+			tentacle->SetBossParent(this);
+		}
+	}
+}
+
 void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -60,6 +107,8 @@ void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLif
 void AAIBoss_Doubt::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//float temptentaclehealth = ((ATentacle *)TentacleComponent->ChildActor)->health;
+	//UE_LOG(LogTemp, Warning, TEXT("Tentacle Health: %f"), temptentaclehealth);
 	if (player != NULL)
 	{
 		if (Health > 0)
@@ -181,6 +230,8 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 
 	tempPlayerController->canMove = false;
 	tempPlayerController->SetNewMoveDestination(GetActorLocation());
+
+	//GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnTentacleAtLocation(TentacleClass, tempPlayer->GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
 }
 
 void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)
@@ -230,11 +281,60 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 	}
 }
 
+FRotator AAIBoss_Doubt::FaceActorRotation(FVector myActorLoc, class AActor* OtherActor)//gets the angle needed to turn to another actor
+{
+	FVector playerLoc = OtherActor->GetActorLocation();
+	FVector myLoc = myActorLoc;
+	FVector difference = playerLoc - myLoc;
+	FRotator angleToRotate = difference.Rotation();
+	//UE_LOG(LogTemp, Warning, TEXT("Angle: %f"), angleToRotate.Yaw);
+	return angleToRotate;
+}
+
+void AAIBoss_Doubt::TentacleTimer()
+{
+	if (tentacleCounter >= 1.0f)
+	{
+		printScreen(FColor::Red, TEXT("Stopping tentacle timer"));
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
+		return;
+	}
+	//rotate //y,z,x
+	TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	//scale
+	float maxScale = distToPlayer / tentacleSpriteLen;
+	UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
+	TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(FMath::Lerp(0.5f, maxScale, tentacleCounter), 1, 1));//havnt found correct scale yet
+	
+	tentacleCounter += 0.1f;
+	//UE_LOG(LogTemp, Error, TEXT("Tentacle Counter: %f"), tentacleCounter);
+}
+
+void AAIBoss_Doubt::StartTentacleTimer(float rate)
+{
+	tentacleCounter = 0.0f;
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::TentacleTimer, rate, true);
+}
+
 void AAIBoss_Doubt::AttackTimer()
 {
 	printScreen(FColor::Red, TEXT("Boss making an attack"));
-	PullPlayer(player);
-	StartDrainTimer(drainRate);
+	//PullPlayer(player);//create tentacle, move tentacle
+	chosenTentacleIndex = FMath::RandRange(0, 3);
+	AActor* tentacleActor = TentacleComponentArray[chosenTentacleIndex]->ChildActor;
+	if (tentacleActor)
+	{
+		distToPlayer = tentacleActor->GetDistanceTo(currentPlayer);
+		tentacleYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), currentPlayer).Yaw;
+	}
+	else
+	{
+		distToPlayer = GetDistanceTo(currentPlayer);
+		tentacleYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), currentPlayer).Yaw;
+	}
+	StartTentacleTimer(0.1f);
+
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 }
 
@@ -297,14 +397,14 @@ void AAIBoss_Doubt::EndOfBoss()
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 	printScreen(FColor::Red, TEXT("End of Boss"));
-	//TODO: call convergence end
+
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player = Cast<ADistanceCharacter>(currentPlayer);
 	playerController = Cast<ADistancePlayerController>(player->GetController());
 	if (playerController)
 	{
 		playerController->OnConvergenceEnd();
-		Destroy();
+		//Destroy();
 	}
 	else
 	{
@@ -319,7 +419,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 		//UE_LOG(LogTemp, Warning, TEXT("Total Attack Damage: %f"), healthAmount);
 		if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
 		{
-			float tempTentacleHealth = tentacleHealth + healthAmount;
+			/*float tempTentacleHealth = tentacleHealth + healthAmount;
 			if (tempTentacleHealth <= 0)//defeated current tentacle
 			{
 				tentacleHealth = 0;
@@ -350,6 +450,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 			{
 				tentacleHealth = tempTentacleHealth;
 			}
+			*/
 		}
 		else if (playerController->canMove)//else if no player is grabbed, deal damage to the actual boss
 		{
@@ -478,6 +579,24 @@ void AAIBoss_Doubt::OnExitAttackTrigger(class AActor* OtherActor)
 	}
 }
 
+void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		if (CheckIfPlayer(OtherActor))
+		{
+			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
+			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
+			playerController = Cast<ADistancePlayerController>(player->GetController());
+
+			PullPlayer(player);
+			StartDrainTimer(drainRate);
+			
+			UE_LOG(LogTemp, Warning, TEXT("****Player Entered TENTACLE Triggered Area"));
+		}
+	}
+}
+
 bool AAIBoss_Doubt::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% positive im checking this correctly
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
@@ -498,4 +617,9 @@ bool AAIBoss_Doubt::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% posi
 		return true;
 	}
 	return false;
+}
+
+ATentacle* AAIBoss_Doubt::GetTentacle(int index)
+{
+	return (ATentacle *)TentacleComponentArray[index]->ChildActor;
 }

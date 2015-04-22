@@ -3,6 +3,7 @@
 #include "GameFramework/GameMode.h"
 #include "ItemDataList.h"
 #include "Item.h"
+#include "Tentacle.h"
 #include "DistanceGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -21,6 +22,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
 	class AItem* SpawnItemAtLocation(TSubclassOf<class AItem> indexClass, FVector location);
+
+	UFUNCTION(BlueprintCallable, Category = Items)
+	class ATentacle* SpawnTentacleAtLocation(TSubclassOf<class ATentacle> indexClass, FVector location);
 
 	UFUNCTION(BlueprintCallable, Category = Items)
 	void SpawnRandomItemAtLocation(FVector location);

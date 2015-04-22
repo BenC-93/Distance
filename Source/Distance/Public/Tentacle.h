@@ -29,6 +29,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Triggers)
 	class UBoxComponent *TriggerBox;
 
+	class AAIBoss_Doubt* doubtParent;
+
+	void SetBossParent(class AAIBoss_Doubt* parent);
+
 	float ChangeHealth(float amount);
+
+	void DestroyTentacle();
 	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDestroyTentacle();
 };

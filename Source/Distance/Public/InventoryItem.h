@@ -22,6 +22,8 @@ public:
 	UInventoryItem();
 	UInventoryItem(class AItem* item);
 	UTexture2D* GetItemSprite();
+	FString GetItemName();
+	void SetItemName(FString n);
 	void Update(class AItem* item);
 	~UInventoryItem();
 };

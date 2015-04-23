@@ -26,8 +26,8 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 void ADistanceGameMode::StartPlay()
 {
 	Super::StartPlay();
-	ADistanceCharacter *p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	ADistanceCharacter *p2 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 1));
+	//ADistanceCharacter *p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	//ADistanceCharacter *p2 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 1));
 	//ConvergenceManager::InitializeWithPlayers(p1, p2);
 }
 
@@ -49,7 +49,7 @@ class AItem* ADistanceGameMode::SpawnLantern()
 	TSubclassOf<class AItem> ItemClass;
 	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
-	ACharacter* player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	ACharacter* player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter(); //GetPlayerCharacter(GetWorld(), 0);
 	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
 }
 

@@ -41,9 +41,6 @@ void ADistancePlayerController::SetupInputComponent()
 	//InputComponent->BindAction("SetDestination", IE_Pressed, this, &ADistancePlayerController::OnSetDestinationPressed);
 	//InputComponent->BindAction("SetDestination", IE_Released, this, &ADistancePlayerController::OnSetDestinationReleased);
 
-	//This is for testing the spawning of items
-	InputComponent->BindAction("SpawnItem", IE_Pressed, this, &ADistancePlayerController::PleaseSpawnItem);
-
 	InputComponent->BindAction("SetTarget", IE_Pressed, this, &ADistancePlayerController::OnSetTargetPressed);
 	InputComponent->BindAction("SetTarget", IE_Released, this, &ADistancePlayerController::OnSetTargetReleased);
 	// support touch devices 
@@ -273,18 +270,11 @@ void ADistancePlayerController::OnConvergenceEnd()
 	ConvergenceManager::EndConvergence();
 }
 
-void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
-{
-	((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnLantern();
-}
-
 void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
 	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern());
-	//DistanceCharacterClass->EquipItem(0);
-	//DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
 	DistanceCharacterClass->EquipItemComponent(0);
 	DistanceCharacterClass->ItemPickedUp();
 }

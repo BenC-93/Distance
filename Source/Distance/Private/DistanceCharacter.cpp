@@ -81,17 +81,6 @@ void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &O
 	DOREPLIFETIME(ADistanceCharacter, spriteInventory);
 }
 
-void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass)//called at the beginning only once
-{
-	UInventoryItem* NewItem = new UInventoryItem();
-	NewItem->ItemClass = ItemClass;
-	// TODO: fix Jordan's terrible assumption
-	NewItem->SetItemName(TEXT("Lantern"));
-	Inventory.Add(NewItem);
-	spriteInventory.Add(Inventory.Last()->GetItemSprite());
-	//ItemPickedUp();
-}
-
 void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items within the game HUD on click and drag potentially?
 {
 	if (Item)
@@ -222,6 +211,7 @@ FString ADistanceCharacter::GetItemName()
 {
 	if (Inventory.IsValidIndex(EquippedSlot))
 	{
+		UInventoryItem *currentItem = Inventory[EquippedSlot];
 		return Inventory[EquippedSlot]->GetItemName();
 	}
 	return TEXT("Default");

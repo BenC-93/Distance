@@ -53,6 +53,7 @@ public:
 	TArray<class UTexture2D*> spriteInventory;
 
 	/* Inventory array */
+	UPROPERTY(Replicated)
 	TArray<UInventoryItem*> Inventory;//was tarray of class aitem*
 
 	/* Array index of currently equipped item */
@@ -68,9 +69,6 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Inventory)
 	void ItemPickedUp();
-
-	/* Add an item to your inventory from the Item class */
-	void AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass);
 
 	/* Drop currently equipped item */
 	UFUNCTION(BlueprintCallable, Category = Inventory)

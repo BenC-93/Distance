@@ -19,11 +19,12 @@ public:
 	float currentValue;
 	UTexture2D* sprite;
 
-	UInventoryItem();
 	UInventoryItem(class AItem* item);
 	UTexture2D* GetItemSprite();
 	FString GetItemName();
 	void SetItemName(FString n);
 	void Update(class AItem* item);
 	~UInventoryItem();
+private:
+	UInventoryItem();
 };

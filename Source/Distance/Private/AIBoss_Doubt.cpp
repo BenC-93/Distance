@@ -230,8 +230,6 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 
 	tempPlayerController->canMove = false;
 	tempPlayerController->SetNewMoveDestination(GetActorLocation());
-
-	//GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnTentacleAtLocation(TentacleClass, tempPlayer->GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
 }
 
 void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)

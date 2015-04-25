@@ -58,8 +58,6 @@ protected:
 
 	void OnGetLocation();//Temporary Binding, for location testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************
-	
-	void PleaseSpawnItem();//Temp for testing *******
 
 	UPROPERTY(transient)
 	class ADistanceCharacter* DistanceCharacterClass;

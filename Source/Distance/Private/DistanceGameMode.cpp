@@ -31,6 +31,11 @@ void ADistanceGameMode::StartPlay()
 	//ConvergenceManager::InitializeWithPlayers(p1, p2);
 }
 
+void ADistanceGameMode::InitializeConvergence(class ADistanceCharacter* p1, class ADistanceCharacter* p2)
+{
+	ConvergenceManager::InitializeWithPlayers(p1, p2);
+}
+
 void ADistanceGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
@@ -43,13 +48,13 @@ void ADistanceGameMode::PostLogin(APlayerController* NewPlayer)
 	ConvergenceManager::InitializeWithPlayers(p1, p2);
 }
 
-class AItem* ADistanceGameMode::SpawnLantern()
+class AItem* ADistanceGameMode::SpawnLantern(ACharacter* player)
 {
 	printScreen(FColor::Red, TEXT("Spawning The thing"));
 	TSubclassOf<class AItem> ItemClass;
 	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
-	ACharacter* player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter(); //GetPlayerCharacter(GetWorld(), 0);
+	//ACharacter* player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter(); //GetPlayerCharacter(GetWorld(), 0);
 	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
 }
 

@@ -275,19 +275,19 @@ void ADistancePlayerController::OnConvergenceEnd()
 
 void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
 {
-	((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnLantern();
+	//((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnLantern();
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
-	//DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern());
+	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern(DistanceCharacterClass));
 	
 	//usually commented out
 	//DistanceCharacterClass->EquipItem(0);
 	//DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
 
-	//DistanceCharacterClass->EquipItemComponent(0);
-	//DistanceCharacterClass->ItemPickedUp();
+	DistanceCharacterClass->EquipItemComponent(0);
+	DistanceCharacterClass->ItemPickedUp();
 }

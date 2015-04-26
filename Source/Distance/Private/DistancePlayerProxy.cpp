@@ -8,7 +8,7 @@
 #include "UnrealNetwork.h"
 
 ADistancePlayerProxy::ADistancePlayerProxy(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;

@@ -10,11 +10,13 @@
  * This class serves as a proxy for the client to track movements of
  * the real character on the server and send back controls
  */
-UCLASS()
+UCLASS(Blueprintable)
 class DISTANCE_API ADistancePlayerProxy : public APawn
 {
 	GENERATED_BODY()
 
+	ADistancePlayerProxy(const FObjectInitializer& ObjectInitializer);
+		
 	// Top down camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* TopDownCameraComponent;

@@ -212,7 +212,7 @@ TArray<class UInventoryItem*> ADistanceCharacter::GetInventory()
 
 void ADistanceCharacter::ToggleInventory()
 {
-	// Toggle visibility of inventory GUI
+	// cycle items of inventory GUI
 	uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 	EquipItem(tempIndex);
 	UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());

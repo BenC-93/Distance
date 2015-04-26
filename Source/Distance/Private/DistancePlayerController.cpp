@@ -57,6 +57,26 @@ void ADistancePlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnGetLocation);//Temporary Binding, for location testing***************************************
 	InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnConvergenceBegin);//Temporary Binding, for starting convergence***************************************
+
+	InputComponent->BindAxis("MoveForward", this, &ADistancePlayerController::MoveForward);
+	InputComponent->BindAxis("MoveRight", this, &ADistancePlayerController::MoveRight);
+	InputComponent->BindAction("CycleInventory", IE_Pressed, this, &ADistancePlayerController::CycleInventory);
+}
+
+void ADistancePlayerController::MoveForward(float val)
+{
+	DistanceCharacterClass->AddMovementInput(FVector(1.0, 0.0, 0.0), GetInputAxisValue("MoveForward"));
+}
+
+void ADistancePlayerController::MoveRight(float val)
+{
+	DistanceCharacterClass->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
+}
+
+void ADistancePlayerController::CycleInventory()
+{
+	switchedItem = true;
+	DistanceCharacterClass->ToggleInventory();
 }
 
 void ADistancePlayerController::MoveToMouseCursor()

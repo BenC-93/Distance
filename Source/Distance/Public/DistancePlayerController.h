@@ -56,6 +56,10 @@ protected:
 	void OnUseItemReleased();
 	void OnInventoryPressed();
 
+	void MoveForward(float val);
+	void MoveRight(float val);
+	void CycleInventory();
+
 	void OnGetLocation();//Temporary Binding, for location testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************
 	

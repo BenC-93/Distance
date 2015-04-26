@@ -222,7 +222,7 @@ void AAIEnemy::DrainTimer()
 		//{
 			if (moveToPlayer && health < maxHealth)
 			{
-				UE_LOG(LogTemp, Error, TEXT("Equipped item name, %s"), *player->GetItemName());
+				//UE_LOG(LogTemp, Error, TEXT("Equipped item name, %s"), *player->GetItemName());
 				health += 1;
 				player->ChangeHealth(baseDamage);
 				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);

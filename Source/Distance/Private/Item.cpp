@@ -102,7 +102,7 @@ void AItem::Regenerate()
 	ChangeAmount(regenAmount);
 }
 
-void AItem::Update(class UInventoryItem* invItem)
+void AItem::Update(class AInventoryItem* invItem)
 {
 	name = invItem->GetItemName();
 	amount = invItem->currentValue;

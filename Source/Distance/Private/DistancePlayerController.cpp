@@ -177,7 +177,7 @@ void ADistancePlayerController::OnSetTargetReleased()
 
 void ADistancePlayerController::PickupItem(AItem* Item)
 {
-	DCharacter()->PickupItem(Item);
+	//DCharacter()->PickupItem(Item);
 	ServerPickupItem(Item);
 }
 

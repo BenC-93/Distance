@@ -99,7 +99,7 @@ public:
 	FString GetItemName();
 	void SetItemName(FString n);
 
-	void Update(class UInventoryItem* invItem);
+	void Update(class AInventoryItem* invItem);
 
 	UTexture2D* GetTheSprite() const;
 };

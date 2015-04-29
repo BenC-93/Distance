@@ -2,17 +2,18 @@
 
 #include "Distance.h"
 #include "InventoryItem.h"
+#include "UnrealNetwork.h"
 
-UInventoryItem::UInventoryItem()
+AInventoryItem::AInventoryItem(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	ItemClass = NULL;
+	bReplicates = true;
+	bAlwaysRelevant = true;
+	// This section intentionally left blank?
 	name = TEXT("Default");
-	maxValue = 100.0f;
-	currentValue = 100.0f;
-	sprite = NULL;
 }
 
-UInventoryItem::UInventoryItem(class AItem* item)
+void AInventoryItem::CreateFromItem(AItem* item)
 {
 	ItemClass = item->GetClass();
 	name = item->GetItemName();
@@ -21,22 +22,22 @@ UInventoryItem::UInventoryItem(class AItem* item)
 	sprite = item->GetTheSprite();
 }
 
-UTexture2D* UInventoryItem::GetItemSprite()
+UTexture2D* AInventoryItem::GetItemSprite()
 {
 	return sprite;
 }
 
-FString UInventoryItem::GetItemName()
+FString AInventoryItem::GetItemName()
 {
 	return name;
 }
 
-void UInventoryItem::SetItemName(FString n)
+void AInventoryItem::SetItemName(FString n)
 {
 	name = n;
 }
 
-void UInventoryItem::Update(class AItem* item)
+void AInventoryItem::Update(class AItem* item)
 {
 	ItemClass = item->GetClass();
 	name = item->GetItemName();
@@ -44,6 +45,13 @@ void UInventoryItem::Update(class AItem* item)
 	currentValue = item->amount;
 }
 
-UInventoryItem::~UInventoryItem()
+void AInventoryItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AInventoryItem, ItemClass);
+	DOREPLIFETIME(AInventoryItem, name);
+	DOREPLIFETIME(AInventoryItem, maxValue);
+	DOREPLIFETIME(AInventoryItem, currentValue);
+	DOREPLIFETIME(AInventoryItem, sprite);
 }

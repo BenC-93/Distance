@@ -78,25 +78,36 @@ void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &O
 
 	DOREPLIFETIME(ADistanceCharacter, Health);
 	DOREPLIFETIME(ADistanceCharacter, MaxHealth);
-	DOREPLIFETIME(ADistanceCharacter, spriteInventory);
+
+	// This is causing the majority of the issues, the inventory just isn't replicating, having better luck trying to rep manually
+	DOREPLIFETIME(ADistanceCharacter, Inventory);
 }
 
 void ADistanceCharacter::PickupItem(AItem* Item)
 {
 	if (Item)
 	{
-		Inventory.Add(new UInventoryItem(Item));
-		spriteInventory.Add(Inventory.Last()->GetItemSprite());
-		ItemPickedUp();
+		ClientPickupItem(Item);
 		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
 		if (Role == ROLE_Authority)
 		{
+			AInventoryItem* InvItem = GetWorld()->SpawnActor<AInventoryItem>();
+			InvItem->CreateFromItem(Item);
+			Inventory.Add(InvItem);
 			Item->Destroy();
 		} else
 		{
 			printScreen(FColor::Red, TEXT("Pickup happened!"));
 		}
 	}
+}
+
+void ADistanceCharacter::ClientPickupItem_Implementation(AItem* Item)
+{
+	if (Item == NULL) {
+		return;
+	}
+	ItemPickedUp();
 }
 
 bool ADistanceCharacter::ServerPickupItem_Validate(AItem* Item)
@@ -120,7 +131,6 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more t
 		EquipItem(0);//default equip lantern
 		UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 		Inventory.RemoveAt(InvSlot);
-		spriteInventory.RemoveAt(InvSlot);
 		ItemPickedUp();//refresh gui inventory after drop, but not needed if i keep the one in equip item
 		UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
 		return droppedItem;
@@ -192,10 +202,16 @@ void ADistanceCharacter::UseItem()
 
 TArray<class UTexture2D*> ADistanceCharacter::GetSpriteInventory()
 {
-	return spriteInventory;
+	TArray<UTexture2D*> Sprites;
+	for (AInventoryItem* Item : Inventory)
+	{
+		if (Item)
+			Sprites.Add(Item->GetItemSprite());
+	}
+	return Sprites;
 }
 
-TArray<class UInventoryItem*> ADistanceCharacter::GetInventory()
+TArray<class AInventoryItem*> ADistanceCharacter::GetInventory()
 {
 	return Inventory;
 }
@@ -212,7 +228,7 @@ FString ADistanceCharacter::GetItemName()
 {
 	if (Inventory.IsValidIndex(EquippedSlot))
 	{
-		UInventoryItem *currentItem = Inventory[EquippedSlot];
+		AInventoryItem *currentItem = Inventory[EquippedSlot];
 		return Inventory[EquippedSlot]->GetItemName();
 	}
 	return TEXT("Default");

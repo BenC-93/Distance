@@ -19,6 +19,9 @@ public:
 	UFUNCTION(reliable, server, WithValidation)
 	void SetNewMoveDestination(const FVector DestLocation);
 
+	bool converged;
+	float rangeToItem;
+
 	bool canMove;
 
 	class AActor* hitActor;
@@ -59,6 +62,7 @@ protected:
 	void MoveForward(float val);
 	void MoveRight(float val);
 	void CycleInventory();
+	void ItemPickup();
 
 	void OnGetLocation();//Temporary Binding, for location testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************

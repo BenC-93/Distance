@@ -18,6 +18,10 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	canMove = true;
 	hitActor = NULL;
 
+	rangeToItem = 250.0f;
+
+	converged = false;//for testing
+
 	switchedItem = false;//Temporary Bool, for boss testing***************************************
 }
 
@@ -61,6 +65,7 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAxis("MoveForward", this, &ADistancePlayerController::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ADistancePlayerController::MoveRight);
 	InputComponent->BindAction("CycleInventory", IE_Pressed, this, &ADistancePlayerController::CycleInventory);
+	InputComponent->BindAction("ItemPickup", IE_Pressed, this, &ADistancePlayerController::ItemPickup);
 }
 
 void ADistancePlayerController::MoveForward(float val)
@@ -77,6 +82,28 @@ void ADistancePlayerController::CycleInventory()
 {
 	switchedItem = true;
 	DistanceCharacterClass->ToggleInventory();
+}
+
+void ADistancePlayerController::ItemPickup()
+{
+	FVector myLoc = DistanceCharacterClass->GetActorLocation();
+	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		FVector itemLoc = ActorItr->GetActorLocation();
+		FVector distToItem = itemLoc - myLoc;
+		if (distToItem.Size() <= rangeToItem)//or use AActor::GetDistanceTo(AActor otherActor)
+		{
+			if (DistanceCharacterClass->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
+			{
+				DistanceCharacterClass->PickupItem(*ActorItr);
+			}
+			else
+			{
+				printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+			}
+			break;
+		}
+	}
 }
 
 void ADistancePlayerController::MoveToMouseCursor()
@@ -283,8 +310,17 @@ void ADistancePlayerController::OnGetLocation()//Temporary Binding, for location
 
 void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for convergence start***************************************
 {
-	printScreen(FColor::Red, TEXT("Beginning Convergence"));
-	ConvergenceManager::StartConvergence();
+	if (!converged)
+	{
+		printScreen(FColor::Red, TEXT("Beginning Convergence"));
+		ConvergenceManager::StartConvergence();
+	}
+	else//make sure to get rid of this code when done testing with pushing a button to converge and diverge
+	{
+		printScreen(FColor::Red, TEXT("Ending Convergence"));
+		ConvergenceManager::EndConvergence();
+	}
+	converged = !converged;
 }
 
 void ADistancePlayerController::OnConvergenceEnd()

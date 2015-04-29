@@ -10,6 +10,9 @@
 ADistancePlayerProxy::ADistancePlayerProxy(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	bReplicates = true;
+	bReplicateMovement = true;
+	
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -56,6 +59,11 @@ void ADistancePlayerProxy::BeginPlay()
 		
 		// Spawn the actual player character at the same location as the Proxy
 		Character = Cast<ADistanceCharacter>(GetWorld()->SpawnActor(CharacterClass, &Location, &Rotation, SpawnParams));
+		
+		// Spawn with lantern
+		Character->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern(Character));
+		Character->EquipItemComponent(0);
+		Character->ItemPickedUp();
 		
 		// We use the PlayerAI to control the Player Character for Navigation
 		PlayerAI = GetWorld()->SpawnActor<AAIController>(GetActorLocation(), GetActorRotation());

@@ -5,6 +5,7 @@
 #include "DistancePlayerController.h"
 #include "DistanceCharacter.h"
 #include "ConvergenceManager.h"
+#include "DistancePlayerProxy.h"
 
 ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -12,11 +13,7 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 	PlayerControllerClass = ADistancePlayerController::StaticClass();
 
 	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Blueprints/2DSpriteCharacter"));
-	if (PlayerPawnBPClass.Class != NULL)
-	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
+	DefaultPawnClass = ADistancePlayerProxy::StaticClass();
 	if (GEngine) {
 		UE_LOG(LogDistance, Verbose, TEXT("Turning on on-screen debugging"));
 		GEngine->bEnableOnScreenDebugMessages = true;
@@ -38,19 +35,18 @@ void ADistanceGameMode::PostLogin(APlayerController* NewPlayer)
 	// This is probably going to be incredibly messy... Try to find another way.
 	// Grab the remote player from login and the server player from gameplay statics, blech
 	ADistancePlayerController *remoteController = Cast<ADistancePlayerController>(NewPlayer);
-	ADistanceCharacter *p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	ADistanceCharacter *p2 = Cast<ADistanceCharacter>(remoteController->GetDistanceCharacter());
-	ConvergenceManager::InitializeWithPlayers(p1, p2);
+//	ADistanceCharacter *p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+//	ADistanceCharacter *p2 = Cast<ADistanceCharacter>(remoteController->DCharacter());
+//	ConvergenceManager::InitializeWithPlayers(p1, p2);
 }
 
-class AItem* ADistanceGameMode::SpawnLantern()
+class AItem* ADistanceGameMode::SpawnLantern(ADistanceCharacter *owningPlayer)
 {
 	printScreen(FColor::Red, TEXT("Spawning The thing"));
 	TSubclassOf<class AItem> ItemClass;
 	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
-	ACharacter* player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
+	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(owningPlayer->GetActorLocation()), FRotator(owningPlayer->GetActorRotation())));
 }
 
 class AItem* ADistanceGameMode::SpawnItemAtLocation(TSubclassOf<class AItem> indexClass, FVector location)

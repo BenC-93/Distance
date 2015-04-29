@@ -6,6 +6,8 @@
 #include "AIBoss_Doubt.h"
 #include "AI/Navigation/NavigationSystem.h"
 #include "ConvergenceManager.h"
+#include "DistancePlayerProxy.h"
+#include "UnrealNetwork.h"
 
 //this is here for testing the spawning of items
 #include "ItemLantern.h"
@@ -83,34 +85,41 @@ void ADistancePlayerController::MoveToTouchLocation(const ETouchIndex::Type Fing
 	}
 }
 
-void ADistancePlayerController::SetNewMoveDestination_Implementation(const FVector DestLocation)
+void ADistancePlayerController::SetNewMoveDestination(const FVector DestLocation)
 {
-	APawn* const Pawn = GetPawn();
+	ServerSetNewMoveDestination(DestLocation);
+}
+
+void ADistancePlayerController::ServerSetNewMoveDestination_Implementation(const FVector DestLocation)
+{
+	ADistancePlayerProxy* const Pawn = Cast<ADistancePlayerProxy>(GetPawn());
 	if (Pawn)
 	{
+		
 		UNavigationSystem* const NavSys = UNavigationSystem::GetCurrent(this);
 		float const Distance = FVector::Dist(DestLocation, Pawn->GetActorLocation());
 
 		// We need to issue move command only if far enough in order for walk animation to play correctly
 		if (NavSys && (Distance > 120.0f))
 		{
-			NavSys->SimpleMoveToLocation(this, DestLocation);
+			//NavSys->SimpleMoveToLocation(this, DestLocation);
+			Pawn->MoveToLocation(this, DestLocation);
 
-			if (DestLocation.Y >= DistanceCharacterClass->GetActorLocation().Y)
+			if (DestLocation.Y >= Pawn->Character->GetActorLocation().Y)
 			{
 				// Rotation sucks, I'm sorry for relying on scale #yolo
-				DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
+				Pawn->Character->GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
 			}
 			else
 			{
 				// Rotation sucks, I'm sorry for using scale, please forgive me...
-				DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+				Pawn->Character->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 			}
 		}
 	}
 }
 
-bool ADistancePlayerController::SetNewMoveDestination_Validate(const FVector DestLocation)
+bool ADistancePlayerController::ServerSetNewMoveDestination_Validate(const FVector DestLocation)
 {
 	return true;
 }
@@ -138,12 +147,11 @@ void ADistancePlayerController::OnSetTargetPressed()
 	{
 		printScreen(FColor::Red, TEXT("Clicked an Item"));
 		AItem* item = Cast<AItem>(hitActor);
-		if (DistanceCharacterClass->GetDistanceTo(item) < 250.0f)
+		if (DCharacter()->GetDistanceTo(item) < 250.0f)
 		{
-			//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), DistanceCharacterClass->GetInventory().Num());
-			if (DistanceCharacterClass->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
+			if (DCharacter()->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
 			{
-				DistanceCharacterClass->PickupItem(item);
+				DCharacter()->PickupItem(item);
 			}
 			else
 			{
@@ -186,47 +194,44 @@ void ADistancePlayerController::OnSetTargetReleased()
 
 void ADistancePlayerController::OnUseItemPressed()
 {
-	if (DistanceCharacterClass == NULL)
+	if (DCharacter() == NULL)
 	{
 		UE_LOG(LogTemp, Error, TEXT("DistanceCharacter is null."));
 		return;
 	}
-	if (DistanceCharacterClass->GetItem() == NULL)
+	if (DCharacter()->GetItem() == NULL)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
-	DistanceCharacterClass->GetItem()->StartUse();
-	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+	DCharacter()->GetItem()->StartUse();
+	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DCharacter()->GetItemEnabled());
 }
 
 void ADistancePlayerController::OnUseItemReleased()
 {
-	if (DistanceCharacterClass == NULL)
+	if (DCharacter() == NULL)
 	{
 		UE_LOG(LogTemp, Error, TEXT("DistanceCharacter is null."));
 		return;
 	}
-	AItem* item = DistanceCharacterClass->GetItem();
+	AItem* item = DCharacter()->GetItem();
 	if (item == NULL)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
 	item->EndUse();
-	UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
-	//UE_LOG(LogTemp, Warning, TEXT("Item name: %s"), *DistanceCharacterClass->GetItemName());
-	if (DistanceCharacterClass->GetItemName() == "LightBeam")
+	UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DCharacter()->GetItemEnabled());
+	if (DCharacter()->GetItemName() == "LightBeam")
 	{
-		//printScreen(FColor::Red, "Used Light Beam");
 		if (enemyActor != NULL && enemyActor->IsA(AAIBoss_Doubt::StaticClass()))
 		{
-			//printScreen(FColor::Red, "Attacking the boss woooooooo");
 			class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
-			Cast<AAIBoss_Doubt>(enemyActor)->ChangeHealth(DistanceCharacterClass->Attack(lightBeam->totalChargedAmount));
-			//UE_LOG(LogTemp, Error, TEXT("totalChargedAmount before: %f"), lightBeam->totalChargedAmount);
+			Cast<AAIBoss_Doubt>(enemyActor)->ChangeHealth(DCharacter()->Attack(lightBeam->totalChargedAmount));
+			
 			lightBeam->totalChargedAmount = 0.0f;
-			//UE_LOG(LogTemp, Error, TEXT("totalChargedAmount  after: %d"), lightBeam->totalChargedAmount);
+			
 			if (Cast<AAIBoss_Doubt>(enemyActor)->GetHealth() <= 0)
 			{
 				enemyActor = NULL;
@@ -236,7 +241,7 @@ void ADistancePlayerController::OnUseItemReleased()
 		{
 			//printScreen(FColor::Red, "Attacking the boss woooooooo");
 			class AItemLightBeam* lightBeam = Cast<AItemLightBeam>(item);
-			Cast<ATentacle>(enemyActor)->ChangeHealth(DistanceCharacterClass->Attack(lightBeam->totalChargedAmount));
+			Cast<ATentacle>(enemyActor)->ChangeHealth(DCharacter()->Attack(lightBeam->totalChargedAmount));
 			lightBeam->totalChargedAmount = 0.0f;
 			if (enemyActor != NULL && Cast<ATentacle>(enemyActor)->health <= 0)
 			{
@@ -250,12 +255,12 @@ void ADistancePlayerController::OnUseItemReleased()
 void ADistancePlayerController::OnInventoryPressed()
 {
 	switchedItem = true;
-	DistanceCharacterClass->ToggleInventory();
+	DCharacter()->ToggleInventory();
 }
 
 void ADistancePlayerController::OnGetLocation()//Temporary Binding, for location testing***************************************
 {
-	UE_LOG(LogTemp, Error, TEXT("Location is = %s"), *DistanceCharacterClass->GetActorLocation().ToString());
+	UE_LOG(LogTemp, Error, TEXT("Location is = %s"), *(DCharacter()->GetActorLocation()).ToString());
 }
 
 void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for convergence start***************************************
@@ -273,8 +278,15 @@ void ADistancePlayerController::OnConvergenceEnd()
 void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
-	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
-	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern());
-	DistanceCharacterClass->EquipItemComponent(0);
-	DistanceCharacterClass->ItemPickedUp();
 }
+
+void ADistancePlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+ADistanceCharacter* ADistancePlayerController::DCharacter() const
+{
+	return Cast<ADistancePlayerProxy>(GetPawn())->Character;
+}
+

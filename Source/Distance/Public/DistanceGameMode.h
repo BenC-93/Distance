@@ -18,7 +18,7 @@ public:
 	TArray<TSubclassOf<AItem>> ItemTypes;//maybe convert to TMap, inport from Engine/source/runtime/core/public/containers/Map.h
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
-	class AItem* SpawnLantern();
+	class AItem* SpawnLantern(class ADistanceCharacter* owningPlayer);
 	
 	UFUNCTION(BlueprintCallable, Category = Items)
 	class AItem* SpawnItemAtLocation(TSubclassOf<class AItem> indexClass, FVector location);

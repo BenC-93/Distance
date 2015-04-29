@@ -359,21 +359,9 @@ void AAIEnemy::OnExitAttackTrigger(class AActor* OtherActor)
 	}
 }
 
-bool AAIEnemy::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% positive im checking this correctly
+bool AAIEnemy::CheckIfPlayer(class AActor* OtherActor)
 {
-	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-	//UE_LOG(LogTemp, Warning, TEXT("Player actually is: %s"), *player1->GetActorLabel());// these are messages for checking if we collide with the player or not
-	//UE_LOG(LogTemp, Warning, TEXT("Player checked is: %s"), *OtherActor->GetActorLabel());
-	//UE_LOG(LogTemp, Warning, TEXT("Are they the same?: %d"), ((player1 == OtherActor)));// ? "Yes" : "No"));
-	if (player1 != NULL && player1 == OtherActor)//player1->GetActorLabel() == OtherActor->GetActorLabel())
-	{
-		return true;
-	}
-	else if (player2 != NULL && player2 == OtherActor)//player2->GetActorLabel() == OtherActor->GetActorLabel())
-	{
-		return true;
-	}
-	return false;
+	// Just do a simple check to see if it can cast properly
+	return Cast<ADistanceCharacter>(OtherActor) != NULL;
 }
 

@@ -11,7 +11,7 @@
  * the real character on the server and send back controls
  */
 UCLASS(Blueprintable)
-class DISTANCE_API ADistancePlayerProxy : public APawn
+class DISTANCE_API ADistancePlayerProxy : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -28,10 +28,6 @@ class DISTANCE_API ADistancePlayerProxy : public APawn
 	// Character class reference for spawning
 	TSubclassOf<AActor> CharacterClass;
 	
-	// Pointer to the actual character which is replicated
-	UPROPERTY(Replicated)
-	class ADistanceCharacter* Character;
-	
 	// AI Controller for actually navigating the player
 	class AAIController* PlayerAI;
 	
@@ -40,7 +36,12 @@ class DISTANCE_API ADistancePlayerProxy : public APawn
 	
 	// Keep actor in sync on tick
 	void Tick(float DeltaTime);
-	
+
+public:
 	// What the controller uses for client movement
 	void MoveToLocation(const class ADistancePlayerController* Controller, const FVector& Location);
+	
+	// Pointer to the actual character which is replicated
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	class ADistanceCharacter* Character;
 };

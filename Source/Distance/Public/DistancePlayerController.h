@@ -14,10 +14,12 @@ public:
 	ADistancePlayerController(const FObjectInitializer& ObjectInitializer);
 
 	virtual void Possess(class APawn *InPawn) override;
+	virtual void BeginPlay() override;
 
-	/** Navigate player to the given world location. */
-	UFUNCTION(reliable, server, WithValidation)
+	/** Navigate player to the given world location. Local and Server */
 	void SetNewMoveDestination(const FVector DestLocation);
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerSetNewMoveDestination(const FVector DestLocation);
 
 	bool canMove;
 
@@ -28,7 +30,7 @@ public:
 
 	void OnConvergenceEnd();
 	
-	FORCEINLINE class ADistanceCharacter* GetDistanceCharacter() const { return DistanceCharacterClass; }
+	class ADistanceCharacter* DCharacter() const;
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -58,9 +60,6 @@ protected:
 
 	void OnGetLocation();//Temporary Binding, for location testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************
-
-	UPROPERTY(transient)
-	class ADistanceCharacter* DistanceCharacterClass;
 };
 
 

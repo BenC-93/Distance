@@ -20,6 +20,11 @@ public:
 	void SetNewMoveDestination(const FVector DestLocation);
 	UFUNCTION(reliable, server, WithValidation)
 	void ServerSetNewMoveDestination(const FVector DestLocation);
+	
+	// Pickup Item, local and server flavors
+	void PickupItem(AItem* Item);
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerPickupItem(AItem* Item);
 
 	bool canMove;
 

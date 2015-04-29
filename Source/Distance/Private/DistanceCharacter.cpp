@@ -81,19 +81,20 @@ void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &O
 	DOREPLIFETIME(ADistanceCharacter, spriteInventory);
 }
 
-void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items within the game HUD on click and drag potentially?
+void ADistanceCharacter::PickupItem(AItem* Item)
 {
 	if (Item)
 	{
 		Inventory.Add(new UInventoryItem(Item));
 		spriteInventory.Add(Inventory.Last()->GetItemSprite());
-		Item->Pickup();
-		printScreen(FColor::Red, TEXT("Pickup happened!"));
 		ItemPickedUp();
 		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
-		if (Role < ROLE_Authority)
+		if (Role == ROLE_Authority)
 		{
-			ServerPickupItem(Item);
+			Item->Destroy();
+		} else
+		{
+			printScreen(FColor::Red, TEXT("Pickup happened!"));
 		}
 	}
 }

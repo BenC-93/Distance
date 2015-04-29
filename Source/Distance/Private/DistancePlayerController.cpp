@@ -139,14 +139,7 @@ void ADistancePlayerController::OnSetTargetPressed()
 		AItem* item = Cast<AItem>(hitActor);
 		if (DCharacter()->GetDistanceTo(item) < 250.0f)
 		{
-			if (DCharacter()->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
-			{
-				DCharacter()->PickupItem(item);
-			}
-			else
-			{
-				printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
-			}
+			PickupItem(item);
 		}
 		else
 		{
@@ -180,6 +173,29 @@ void ADistancePlayerController::OnSetTargetPressed()
 void ADistancePlayerController::OnSetTargetReleased()
 {
 	bMoveToMouseCursor = false;
+}
+
+void ADistancePlayerController::PickupItem(AItem* Item)
+{
+	DCharacter()->PickupItem(Item);
+	ServerPickupItem(Item);
+}
+
+void ADistancePlayerController::ServerPickupItem_Implementation(AItem* Item)
+{
+	if (DCharacter()->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
+	{
+		DCharacter()->PickupItem(Item);
+	}
+	else
+	{
+		printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+	}
+}
+
+bool ADistancePlayerController::ServerPickupItem_Validate(AItem* Item)
+{
+	return true;
 }
 
 void ADistancePlayerController::OnUseItemPressed()

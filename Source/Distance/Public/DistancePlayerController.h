@@ -63,6 +63,7 @@ protected:
 	void MoveRight(float val);
 	void CycleInventory();
 	void ItemPickup();
+	void ItemDrop();
 
 	void OnGetLocation();//Temporary Binding, for location testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************

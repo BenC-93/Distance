@@ -121,7 +121,7 @@ void ADistanceCharacter::ServerPickupItem_Implementation(AItem* Item)
 
 AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more than 1 item and drop until there is 1 left, clicking on (equipping) the last one will Error
 {
-	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot))
+	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot) && InvSlot != 0)
 	{
 		// Need to create the item in the world,
 		// before removing it from the array

@@ -66,6 +66,7 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAxis("MoveRight", this, &ADistancePlayerController::MoveRight);
 	InputComponent->BindAction("CycleInventory", IE_Pressed, this, &ADistancePlayerController::CycleInventory);
 	InputComponent->BindAction("ItemPickup", IE_Pressed, this, &ADistancePlayerController::ItemPickup);
+	InputComponent->BindAction("ItemDrop", IE_Pressed, this, &ADistancePlayerController::ItemDrop);
 }
 
 void ADistancePlayerController::MoveForward(float val)
@@ -89,6 +90,10 @@ void ADistancePlayerController::ItemPickup()
 	FVector myLoc = DistanceCharacterClass->GetActorLocation();
 	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
+		if (ActorItr->GetItemName() == "Lantern")
+		{
+			continue;
+		}
 		FVector itemLoc = ActorItr->GetActorLocation();
 		FVector distToItem = itemLoc - myLoc;
 		if (distToItem.Size() <= rangeToItem)//or use AActor::GetDistanceTo(AActor otherActor)
@@ -104,6 +109,11 @@ void ADistancePlayerController::ItemPickup()
 			break;
 		}
 	}
+}
+
+void ADistancePlayerController::ItemDrop()
+{
+	DistanceCharacterClass->DropItem(DistanceCharacterClass->EquippedSlot);
 }
 
 void ADistancePlayerController::MoveToMouseCursor()

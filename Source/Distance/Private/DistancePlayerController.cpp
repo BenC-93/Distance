@@ -104,17 +104,7 @@ void ADistancePlayerController::ServerSetNewMoveDestination_Implementation(const
 		{
 			//NavSys->SimpleMoveToLocation(this, DestLocation);
 			Pawn->MoveToLocation(this, DestLocation);
-
-			if (DestLocation.Y >= Pawn->Character->GetActorLocation().Y)
-			{
-				// Rotation sucks, I'm sorry for relying on scale #yolo
-				Pawn->Character->GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
-			}
-			else
-			{
-				// Rotation sucks, I'm sorry for using scale, please forgive me...
-				Pawn->Character->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
-			}
+			Pawn->Character->FlipForMovement_RPC(DestLocation);
 		}
 	}
 }

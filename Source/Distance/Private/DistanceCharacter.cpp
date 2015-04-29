@@ -314,6 +314,20 @@ void ADistanceCharacter::ChangeSpeed(float speedAmount)
 	GetCharacterMovement()->MaxWalkSpeed = speedAmount;
 }
 
+void ADistanceCharacter::FlipForMovement_RPC_Implementation(const FVector DestLocation)
+{
+	if (DestLocation.Y >= GetActorLocation().Y)
+	{
+		// Rotation sucks, I'm sorry for relying on scale #yolo
+		GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
+	}
+	else
+	{
+		// Rotation sucks, I'm sorry for using scale, please forgive me...
+		GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	}
+}
+
 AItem* ADistanceCharacter::GetItem()
 {
 	return (AItem *)ItemComponent->ChildActor;

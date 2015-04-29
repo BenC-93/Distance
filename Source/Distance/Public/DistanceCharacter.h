@@ -107,6 +107,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
 	void BPTransitionToDivergenceState();
+	
+	UFUNCTION(Unreliable, NetMulticast)
+	void FlipForMovement_RPC(const FVector DestLocation);
 
 
 	/* The following functions are depreciated and will be removed soon:

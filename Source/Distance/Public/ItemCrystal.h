@@ -5,6 +5,8 @@
 #include "Item.h"
 #include "ItemCrystal.generated.h"
 
+class ADistanceCharacter;
+
 /**
  * 
  */

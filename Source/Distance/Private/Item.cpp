@@ -15,6 +15,7 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	regenRate = 1.0f;
 	regenAmount = 1.0f;
 	name = TEXT("Default");
+	OwningPawn = NULL;
 
 
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
@@ -57,8 +58,9 @@ void AItem::OnUnequip()
 	GetWorldTimerManager().ClearTimer(this, &AItem::Regenerate);
 }
 
-void AItem::Pickup()//TODO: object is still there invisibly somehow
+void AItem::Pickup(ADistanceCharacter* PickerUpper)//TODO: object is still there invisibly somehow
 {
+	OwningPawn = PickerUpper;
 	/*if (SpriteComponent)
 	{
 		SpriteComponent->DestroyComponent();
@@ -77,6 +79,7 @@ void AItem::Drop()
 		// Change the input to this function to take a world location
 		// Move (teleport) this object to that location
 		// Enable the visual component
+		OwningPawn = NULL;
 		isInUse = false;
 	}
 }

@@ -98,14 +98,11 @@ void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items w
 	{
 		Inventory.Add(new UInventoryItem(Item));
 		spriteInventory.Add(Inventory.Last()->GetItemSprite());
-		Item->Pickup();
+		Item->Pickup(this);
 		printScreen(FColor::Red, TEXT("Pickup happened!"));
 		ItemPickedUp();
 		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
-		if (Role < ROLE_Authority)
-		{
-			ServerPickupItem(Item);
-		}
+		//if (Role < ROLE_Authority) { ServerPickupItem(Item); }
 	}
 }
 
@@ -126,7 +123,6 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more t
 		// Need to create the item in the world,
 		// before removing it from the array
 		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
-		uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 		EquipItem(0);//default equip lantern
 		//UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 		Inventory.RemoveAt(InvSlot);
@@ -184,6 +180,8 @@ void ADistanceCharacter::EquipItemComponent(int32 InvSlot)
 		ItemComponent->ChildActorClass = ComponentClass;
 		ItemComponent->OnComponentCreated();
 		ItemComponent->ChildActor->AttachRootComponentToActor(this);
+		AItem* currItem = Cast<AItem>(ItemComponent->ChildActor);
+		if (currItem) { currItem->OwningPawn = this; }
 	}
 }
 

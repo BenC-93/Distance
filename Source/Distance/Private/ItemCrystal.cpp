@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Distance.h"
+#include "DistanceCharacter.h"
 #include "ItemCrystal.h"
 #include "ConvergenceManager.h"
 
@@ -16,8 +17,7 @@ void AItemCrystal::StartUse()
 	{
 		printScreen(FColor::Red, TEXT("Beginning Convergence"));
 		ConvergenceManager::StartConvergence();
-		//drop itself
-		//destroy itself
-		//Destroy();
+		if (OwningPawn != NULL) OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
+		Drop();
 	}
 }

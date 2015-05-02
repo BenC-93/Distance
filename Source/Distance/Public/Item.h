@@ -7,6 +7,8 @@
 #include "InventoryItem.h"
 #include "Item.generated.h"
 
+class ADistanceCharacter;
+
 /**
  * 
  */
@@ -22,6 +24,10 @@ public:
 	/* Item's name. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	FString name;
+
+	/* Reference to player holding this item */
+	UPROPERTY(EditAnywhere, Category = Item)
+	ADistanceCharacter* OwningPawn;
 
 	/* Whether item can be dropped once in inventory. 
 	   Used primarily for the 'Lantern' item. */
@@ -77,7 +83,7 @@ public:
 
 	/* What happens when a player picks up this item. */
 	UFUNCTION(BlueprintCallable, Category = Item)
-	void Pickup();
+	void Pickup(ADistanceCharacter* PickerUpper);
 
 	/* What happens when the player drops this item. */
 	UFUNCTION(BlueprintCallable, Category = Item)

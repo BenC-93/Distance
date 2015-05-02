@@ -3,6 +3,7 @@
 #include "Distance.h"
 #include "AIBoss_Doubt.h"
 #include "UnrealNetwork.h"
+#include "ItemShield.h"
 #include "Tentacle.h"
 
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
@@ -19,7 +20,7 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	tentacleYaw = 0;
 	chosenTentacleIndex = 0;
 	tentacleCounter = 0;
-	tentacleSpriteLen = 650.0f;//maybe 600
+	tentacleSpriteLen = 300.0f;//maybe 600, works with 650
 
 	/*for (int i = 0; i < numTentacles; i++)
 	{
@@ -219,7 +220,7 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
 	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
 
-	if (tempPlayer->GetItemName() == "Shield" && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
+	if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
 		tempPlayer->ChangeSpeed(50);//shield is enabled
 	}
@@ -271,7 +272,7 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 		UE_LOG(LogTemp, Error, TEXT("Error: DrainPlayer, tempPlayer is Null."));
 		return;
 	}
-	if (tempPlayer->GetItemName() == "Shield" && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
+	if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
 		tempPlayer->ChangeItemAmount(baseDamage);//shield is enabled
 	}

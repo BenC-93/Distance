@@ -3,6 +3,7 @@
 #include "Distance.h"
 #include "DistanceCharacter.h"
 #include "KismetMathLibrary.generated.h"
+#include "ItemLantern.h"
 #include "AIEnemy.h"
 
 AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
@@ -22,7 +23,7 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 
 	deathCounter = 10;
 
-	scaleCounter = 5.0f;
+	scaleCounter = 4.0f;
 	scaleLimit = 7.0f;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
@@ -208,7 +209,7 @@ void AAIEnemy::DrainTimer()
 			return;
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("Equipped item name, %s"), *player->GetItemName());
-		if (moveToPlayer && player->GetItemName().Equals(TEXT("Lantern")) && player->GetItemAmount() > 0.0f && player->GetItemEnabled())
+		if (moveToPlayer && player->GetItem()->IsA(AItemLantern::StaticClass()) && player->GetItemAmount() > 0.0f && player->GetItemEnabled())
 		{
 			//drain light
 			if (health < maxHealth)

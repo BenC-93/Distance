@@ -25,6 +25,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Charge)
 	void Charge();
-	
+
+	UFUNCTION(BlueprintCallable, Category = "Timers")
+	void AnimationTimer();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
+	void OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
 };

@@ -30,10 +30,10 @@ void ADistancePlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	// keep updating the destination every tick while desired
-	if (bMoveToMouseCursor)
-	{
-		MoveToMouseCursor();
-	}
+	//if (bMoveToMouseCursor)
+	//{
+	//	MoveToMouseCursor();
+	//}
 }
 
 void ADistancePlayerController::SetupInputComponent()
@@ -90,7 +90,7 @@ void ADistancePlayerController::ItemPickup()
 	FVector myLoc = DistanceCharacterClass->GetActorLocation();
 	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if (ActorItr->GetItemName() == "Lantern")
+		if (ActorItr->IsA(AItemLantern::StaticClass()))
 		{
 			continue;
 		}
@@ -274,7 +274,7 @@ void ADistancePlayerController::OnUseItemReleased()
 		return;
 	}
 	item->EndUse();
-	UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+	/*UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
 	//UE_LOG(LogTemp, Warning, TEXT("Item name: %s"), *DistanceCharacterClass->GetItemName());
 	if (DistanceCharacterClass->GetItemName() == "LightBeam")
 	{
@@ -303,7 +303,7 @@ void ADistancePlayerController::OnUseItemReleased()
 				enemyActor = NULL;
 			}
 		}
-	}
+	}*/
 	//UE_LOG(LogTemp, Warning, TEXT("AttackBoss is true?: %d, and hitActor is: %s"), attackBoss, *hitActor->GetName());
 }
 

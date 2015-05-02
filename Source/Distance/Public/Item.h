@@ -28,6 +28,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
 	bool droppable;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Use)
+	bool canUse;
+
 	/* Whether the item is currently being used by the player. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Use)
 	bool isInUse;
@@ -56,7 +59,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Triggers)
 	class UBoxComponent *TriggerBox;
-	
+
 	/* Item's primary action for when it is use by the player. */
 	UFUNCTION(BlueprintCallable, Category = Use)
 	virtual void StartUse();

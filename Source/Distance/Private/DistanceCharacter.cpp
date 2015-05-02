@@ -128,7 +128,7 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more t
 		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
 		uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 		EquipItem(0);//default equip lantern
-		UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
+		//UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 		Inventory.RemoveAt(InvSlot);
 		spriteInventory.RemoveAt(InvSlot);
 		ItemPickedUp();//refresh gui inventory after drop, but not needed if i keep the one in equip item
@@ -215,7 +215,7 @@ void ADistanceCharacter::ToggleInventory()
 	// cycle items of inventory GUI
 	uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 	EquipItem(tempIndex);
-	UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
+	//UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 }
 
 FString ADistanceCharacter::GetItemName()

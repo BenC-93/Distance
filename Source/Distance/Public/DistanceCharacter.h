@@ -127,6 +127,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Item)//TODO: need to be able to enable this by some input
 	bool GetItemEnabled();
 
+	UFUNCTION(BlueprintCallable, Category = Item)
+	bool GetItemHasOwner();
+
 	UFUNCTION(BlueprintCallable, Category = Speed)
 	void ChangeSpeed(float speedAmount);
 

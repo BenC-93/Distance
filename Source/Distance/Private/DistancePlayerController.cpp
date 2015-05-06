@@ -95,19 +95,17 @@ void ADistancePlayerController::CycleInventory()
 
 void ADistancePlayerController::ItemPickup()
 {
-	FVector myLoc = DistanceCharacterClass->GetActorLocation();
 	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		if (ActorItr->IsA(AItemLantern::StaticClass()))
 		{
 			continue;
 		}
-		FVector itemLoc = ActorItr->GetActorLocation();
-		FVector distToItem = itemLoc - myLoc;
-		if (distToItem.Size() <= rangeToItem)//or use AActor::GetDistanceTo(AActor otherActor)
+		if (DistanceCharacterClass->GetDistanceTo(*ActorItr) <= rangeToItem)
 		{
 			if (DistanceCharacterClass->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
 			{
+				if (*ActorItr == DistanceCharacterClass->GetItem()) { break; }
 				DistanceCharacterClass->PickupItem(*ActorItr);
 			}
 			else

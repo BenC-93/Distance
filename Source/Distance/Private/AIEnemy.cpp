@@ -219,8 +219,8 @@ void AAIEnemy::DrainTimer()
 				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->GetItemAmount());
 			}
 		}
-		//else//drain health
-		//{
+		else//drain health
+		{
 			if (moveToPlayer && health < maxHealth)
 			{
 				//UE_LOG(LogTemp, Error, TEXT("Equipped item name, %s"), *player->GetItemName());
@@ -228,7 +228,7 @@ void AAIEnemy::DrainTimer()
 				player->ChangeHealth(baseDamage);
 				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
 			}
-		//}
+		}
 	}
 }
 

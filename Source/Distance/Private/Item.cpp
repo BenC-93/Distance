@@ -22,7 +22,7 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	RootComponent = RootSceneComponent;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
-	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
+	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -70.f);
 	SpriteComponent->AttachTo(RootComponent);
 
 	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
@@ -84,7 +84,7 @@ float AItem::GetMaxAmount()
 void AItem::ChangeAmount(float value)
 {
 	float tempAmount = GetAmount() + value;
-	tempAmount = fmax(0.0f, fmin(100.0f, tempAmount));
+	tempAmount = fmax(0.0f, fmin(maxAmount, tempAmount));
 	amount = tempAmount;
 }
 

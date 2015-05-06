@@ -21,11 +21,9 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
 	RootComponent = RootSceneComponent;
 
-	//static ConstructorHelpers::FClassFinder<UPaperSpriteComponent> SpriteComponentObj(TEXT("/Game/Sprites/Lantern_Sprite.Lantern_Sprite"));
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -60.f);
 	SpriteComponent->AttachTo(RootComponent);
-	//SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite> ("/Game/Sprites/Lantern_Sprite.Lantern_Sprite"));
 
 	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
 	TriggerBox->Mobility = EComponentMobility::Movable;
@@ -58,27 +56,16 @@ void AItem::OnUnequip()
 	GetWorldTimerManager().ClearTimer(this, &AItem::Regenerate);
 }
 
-void AItem::Pickup(ADistanceCharacter* PickerUpper)//TODO: object is still there invisibly somehow
+void AItem::Pickup(ADistanceCharacter* PickerUpper)
 {
 	OwningPawn = PickerUpper;
-	/*if (SpriteComponent)
-	{
-		SpriteComponent->DestroyComponent();
-	}*/
-	//TriggerBox->DestroyComponent();
-	//SpriteComponent->DestroyComponent();
-	//RootComponent->DestroyComponent();
 	Destroy();
-	//K2_DestroyActor();
 }
 
 void AItem::Drop()
 {
 	if (droppable)
 	{
-		// Change the input to this function to take a world location
-		// Move (teleport) this object to that location
-		// Enable the visual component
 		OwningPawn = NULL;
 		isInUse = false;
 	}

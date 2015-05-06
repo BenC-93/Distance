@@ -45,9 +45,6 @@ void ADistancePlayerController::SetupInputComponent()
 	//InputComponent->BindAction("SetDestination", IE_Pressed, this, &ADistancePlayerController::OnSetDestinationPressed);
 	//InputComponent->BindAction("SetDestination", IE_Released, this, &ADistancePlayerController::OnSetDestinationReleased);
 
-	//This is for testing the spawning of items
-	InputComponent->BindAction("SpawnItem", IE_Pressed, this, &ADistancePlayerController::PleaseSpawnItem);
-
 	InputComponent->BindAction("SetTarget", IE_Pressed, this, &ADistancePlayerController::OnSetTargetPressed);
 	InputComponent->BindAction("SetTarget", IE_Released, this, &ADistancePlayerController::OnSetTargetReleased);
 	// support touch devices 
@@ -103,7 +100,7 @@ void ADistancePlayerController::ItemPickup()
 		}
 		if (DistanceCharacterClass->GetDistanceTo(*ActorItr) <= rangeToItem)
 		{
-			if (DistanceCharacterClass->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
+			if (DistanceCharacterClass->GetInventory().Num() <= 4)
 			{
 				if (*ActorItr == DistanceCharacterClass->GetItem()) { break; }
 				DistanceCharacterClass->PickupItem(*ActorItr);
@@ -207,7 +204,7 @@ void ADistancePlayerController::OnSetTargetPressed()
 		if (DistanceCharacterClass->GetDistanceTo(item) < 250.0f)
 		{
 			//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), DistanceCharacterClass->GetInventory().Num());
-			if (DistanceCharacterClass->GetInventory().Num() <= 4)//Something strange might be happening where it doesnt recognize the last item pushed yet? we get the exact num within the pickup function
+			if (DistanceCharacterClass->GetInventory().Num() <= 4)
 			{
 				DistanceCharacterClass->PickupItem(item);
 			}
@@ -343,11 +340,6 @@ void ADistancePlayerController::OnConvergenceEnd()
 {
 	printScreen(FColor::Red, TEXT("Ending Convergence"));
 	ConvergenceManager::EndConvergence();
-}
-
-void ADistancePlayerController::PleaseSpawnItem()//Temp for testing ****
-{
-	//((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->SpawnLantern();
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)

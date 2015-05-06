@@ -76,6 +76,7 @@ UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjec
 	class UChildActorComponent* TentacleComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, componentName);
 	//TentacleComponent->ChildActorClass = ATentacle::StaticClass(); //not needed anymore
 	TentacleComponent->OnComponentCreated();
+	TentacleComponent->RelativeLocation = FVector(-465.0f, -370.0f + (i * 170.0f), -280.0f + (i * 3.0f));//add y by 170, add z by 3 each tentacle
 	TentacleComponent->AttachTo(RootComponent);
 	TentacleComponent->SetIsReplicated(true);
 	
@@ -305,7 +306,7 @@ void AAIBoss_Doubt::TentacleTimer()
 	TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
 	//scale
 	float maxScale = distToPlayer / tentacleSpriteLen;
-	UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
+	//UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
 	TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(FMath::Lerp(0.5f, maxScale, tentacleCounter), 1, 1));//havnt found correct scale yet
 	
 	tentacleCounter += 0.1f;
@@ -483,7 +484,15 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 		//UChildActorComponent* tempTentacle = TentacleComponentArray[numTentacles];
 		//TentacleComponentArray.RemoveAt(numTentacles);
 		//tempTentacle->DestroyComponent();
-		TentacleComponentArray[numTentacles]->DestroyComponent();
+		if (numTentacles > -1)
+		{
+			TentacleComponentArray[numTentacles]->DestroyComponent();
+		}
+		if (numTentacles > 0)
+		{
+			StartAttackTimer(3.0f);
+		}
+
 		if (tempHealth <= 0)
 		{
 			Health = 0.0f;//Defeated boss!

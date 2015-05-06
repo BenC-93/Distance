@@ -146,7 +146,7 @@ void AAIEnemy::Tick(float DeltaTime)
 					//slow down player?
 					float playerSpeed = player->GetCharacterMovement()->MaxWalkSpeed;
 					player->GetCharacterMovement()->MaxWalkSpeed =  FMath::Lerp(200.0f, playerSpeed, (scaleCounter/scaleLimit));
-					UE_LOG(LogTemp, Warning, TEXT("Player speed: %f"), player->GetCharacterMovement()->MaxWalkSpeed);
+					//UE_LOG(LogTemp, Warning, TEXT("Player speed: %f"), player->GetCharacterMovement()->MaxWalkSpeed);
 				}
 				/*GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
 				speedCounter = 1.0f;

@@ -14,7 +14,7 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	baseDamage = -1.0f;//TODO: will change along with other vars here
 	drainRate = 0.25f;
 	tentacleHealth = 10.0f;
-	numTentacles = 5;
+	numTentacles = 4;
 
 	distToPlayer = 1;
 	tentacleYaw = 0;
@@ -39,7 +39,7 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 
 	AITriggerRange = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerRange"));
 	AITriggerRange->Mobility = EComponentMobility::Movable;
-	AITriggerRange->SetBoxExtent(FVector(750.0f, 750.0f, 60.0f), true);
+	AITriggerRange->SetBoxExtent(FVector(1000.0f, 1000.0f, 60.0f), true);
 	AITriggerRange->AttachTo(RootComponent);
 
 	AITriggerRange->OnComponentBeginOverlap.AddDynamic(this, &AAIBoss_Doubt::OnOverlapBegin);
@@ -86,16 +86,17 @@ UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjec
 
 void AAIBoss_Doubt::PostInitializeComponents()
 {
-	Super::PostInitializeComponents();
-
 	for (int i = 0; i < TentacleComponentArray.Num(); i++)
 	{
 		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
+		UE_LOG(LogTemp, Warning, TEXT("this line is just before setting tentacle parents"));
 		if (tentacle != NULL)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("trying to set tentacles parents..."));
 			tentacle->SetBossParent(this);
 		}
 	}
+	Super::PostInitializeComponents();
 }
 
 void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
@@ -322,7 +323,7 @@ void AAIBoss_Doubt::AttackTimer()
 {
 	printScreen(FColor::Red, TEXT("Boss making an attack"));
 	//PullPlayer(player);//create tentacle, move tentacle
-	chosenTentacleIndex = FMath::RandRange(0, 3);
+	chosenTentacleIndex = numTentacles - 1; //FMath::RandRange(0, numTentacles - 1);
 	AActor* tentacleActor = TentacleComponentArray[chosenTentacleIndex]->ChildActor;
 	if (tentacleActor)
 	{
@@ -415,12 +416,12 @@ void AAIBoss_Doubt::EndOfBoss()
 
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
 {//TODO: something weird is happening where if player1 does damage its fine, but then if player2 does damage, its as if the boss has full health again, and when the boss has 0 health it still does stuff
-	if (playerController)
+	/*if (playerController)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Total Attack Damage: %f"), healthAmount);
 		if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
 		{
-			/*float tempTentacleHealth = tentacleHealth + healthAmount;
+			//float tempTentacleHealth = tentacleHealth + healthAmount;
 			if (tempTentacleHealth <= 0)//defeated current tentacle
 			{
 				tentacleHealth = 0;
@@ -451,7 +452,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 			{
 				tentacleHealth = tempTentacleHealth;
 			}
-			*/
+			//
 		}
 		else if (playerController->canMove)//else if no player is grabbed, deal damage to the actual boss
 		{
@@ -469,8 +470,31 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 				}
 			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
+		//UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
+	}*/
+	float tempHealth = Health + healthAmount;
+	if (tempHealth <= MaxHealth)
+	{
+		if (player)
+		{
+			ReleasePlayer(player);
+		}
+		numTentacles--;
+		//UChildActorComponent* tempTentacle = TentacleComponentArray[numTentacles];
+		//TentacleComponentArray.RemoveAt(numTentacles);
+		//tempTentacle->DestroyComponent();
+		TentacleComponentArray[numTentacles]->DestroyComponent();
+		if (tempHealth <= 0)
+		{
+			Health = 0.0f;//Defeated boss!
+			EndOfBoss();
+		}
+		else
+		{
+			Health = tempHealth;
+		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Boss health: %f Num of Tentacles: %d"), Health, numTentacles);
 }
 
 float AAIBoss_Doubt::GetHealth()

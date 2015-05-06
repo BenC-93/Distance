@@ -28,6 +28,7 @@ ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 
 void ATentacle::SetBossParent(class AAIBoss_Doubt* parent)
 {
+	UE_LOG(LogDistance, Error, TEXT("Tentacle parents are set!"));
 	doubtParent = parent;
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(doubtParent, &AAIBoss_Doubt::OnTentacleOverlap);
 }
@@ -38,9 +39,14 @@ float ATentacle::ChangeHealth(float amount)
 
 	if (tempHealth <= maxHealth)
 	{
-		if (tempHealth < 0)
+		if (tempHealth <= 0)
 		{
 			health = 0.0f;
+			if (doubtParent)
+			{
+				UE_LOG(LogDistance, Error, TEXT("Did damage to boss"));
+				doubtParent->ChangeHealth(-25);
+			}
 			DestroyTentacle();
 		}
 		else
@@ -48,16 +54,17 @@ float ATentacle::ChangeHealth(float amount)
 			health = tempHealth;
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Tentacle health: %f"), health);
 	return health;
 }
 
 void ATentacle::DestroyTentacle()
 {
 	Destroy();
-	if (Role < ROLE_Authority)
+	/*if (Role < ROLE_Authority)
 	{
 		ServerDestroyTentacle();
-	}
+	}*/
 }
 
 bool ATentacle::ServerDestroyTentacle_Validate()

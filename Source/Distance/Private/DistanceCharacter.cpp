@@ -85,14 +85,12 @@ void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem
 {
 	UInventoryItem* NewItem = new UInventoryItem();
 	NewItem->ItemClass = ItemClass;
-	// TODO: fix Jordan's terrible assumption
 	NewItem->SetItemName(TEXT("Lantern"));
 	Inventory.Add(NewItem);
 	spriteInventory.Add(Inventory.Last()->GetItemSprite());
-	//ItemPickedUp();
 }
 
-void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items within the game HUD on click and drag potentially?
+void ADistanceCharacter::PickupItem(AItem* Item)
 {
 	if (Item && Inventory.Num() < 5)
 	{
@@ -101,8 +99,6 @@ void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items w
 		Item->Pickup(this);
 		printScreen(FColor::Red, TEXT("Pickup happened!"));
 		ItemPickedUp();
-		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
-		//if (Role < ROLE_Authority) { ServerPickupItem(Item); }
 	}
 }
 
@@ -116,22 +112,18 @@ void ADistanceCharacter::ServerPickupItem_Implementation(AItem* Item)
 	PickupItem(Item);
 }
 
-AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more than 1 item and drop until there is 1 left, clicking on (equipping) the last one will Error
+AItem* ADistanceCharacter::DropItem(int32 InvSlot)
 {
 	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot) && InvSlot != 0)
 	{
-		// Need to create the item in the world,
-		// before removing it from the array
 		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
-		EquipItem(0);//default equip lantern
-		//UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
+		EquipItem(0);//equip lantern
 		Inventory.RemoveAt(InvSlot);
 		spriteInventory.RemoveAt(InvSlot);
-		ItemPickedUp();//refresh gui inventory after drop, but not needed if i keep the one in equip item
+		ItemPickedUp();//gui refresh
 		UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
 		return droppedItem;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
 	return NULL;
 }
 
@@ -139,9 +131,7 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Inventory length: %d"), Inventory.Num());
 	UE_LOG(LogTemp, Warning, TEXT("InvSlot to be equipped: %d"), InvSlot);
-	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot))//TODO: fix bug that happens because of drop item
 	{
-		//Inventory[EquippedSlot]->OnUnequip();
 		if (GetItem() != NULL)
 		{
 			GetItem()->OnUnequip();
@@ -155,7 +145,6 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Previous Item is Null!"));
 		}
 		EquippedSlot = InvSlot;
-		//Inventory[EquippedSlot]->OnEquip();
 		EquipItemComponent(EquippedSlot);
 		if (GetItem() != NULL)
 		{
@@ -166,7 +155,6 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 		{
 			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Equipped Item is Null!"));
 		}
-		//Refresh gui inventory with ItemPickedUp()???? if we want some glow thing on current item then id say yes
 		ItemPickedUp();
 	}
 }
@@ -189,7 +177,6 @@ void ADistanceCharacter::UseItem()
 {
 	if (Inventory.IsValidIndex(EquippedSlot) && GetItem() != NULL)
 	{
-		//Inventory[EquippedSlot]->StartUse();
 		GetItem()->StartUse();
 	}
 	else
@@ -210,10 +197,9 @@ TArray<class UInventoryItem*> ADistanceCharacter::GetInventory()
 
 void ADistanceCharacter::ToggleInventory()
 {
-	// cycle items of inventory GUI
+	//cycle inventory items
 	uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 	EquipItem(tempIndex);
-	//UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 }
 
 FString ADistanceCharacter::GetItemName()
@@ -237,33 +223,19 @@ bool ADistanceCharacter::GetIsItemDroppable()
 /* BELOW ARE THE OLD ITEM HANDLING FUNCTIONS. THEY ARE SUBJECT TO CHANGE.
  * PLEASE USE NEW FUNCTIONS ABOVE. */
 
-/**
-* ChangeHealth()
-* 
-* healthAmount is negative if it represents health change from an attack
-* healthAmount is positive if it represents health change from a heal item
-*
-*/
+/*
+ * ChangeHealth()
+ * 
+ * healthAmount is negative if it represents health change from an attack
+ * healthAmount is positive if it represents health change from a heal item
+ *
+ */
 
-void ADistanceCharacter::ChangeHealth(float healthAmount) 
+void ADistanceCharacter::ChangeHealth(float healthAmount)
 {
 	float tempHealth = Health + healthAmount;
-
-	if (tempHealth <= MaxHealth)
-	{
-		if (tempHealth < 0)
-		{
-			Health = 0.0f;
-		}
-		else
-		{
-			Health = tempHealth;
-		}
-	}
-	if (int(Health) % 10 == 0 || abs(healthAmount) >= 10)
-	{
-		UE_LOG(LogDistance, Verbose, TEXT("Changing Health Breakpoint: %f"), Health);
-	}
+	Health = fmax(0.0f, fmin(MaxHealth, tempHealth));
+	UE_LOG(LogDistance, Verbose, TEXT("Changing Health Breakpoint: %f"), Health);
 }
 
 void ADistanceCharacter::RegenerateHealth()
@@ -332,12 +304,12 @@ AItem* ADistanceCharacter::GetItem()
 	return (AItem *)ItemComponent->ChildActor;
 }
 
-/**
-* Attack()
-*
-* calculates and returns player damage
-*
-*/
+/*
+ * Attack()
+ *
+ * calculates and returns player damage
+ *
+ */
 float ADistanceCharacter::Attack(float extra)
 {
 	float damage = BaseDamage + extra;

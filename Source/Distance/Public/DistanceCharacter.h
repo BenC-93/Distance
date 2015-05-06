@@ -46,14 +46,14 @@ public:
 	/** Player's convergence state */
 	ConvergenceState PlayerConvergenceState;
 	
-	/* Temporary function for implementing the light(lantern) item */
+	/* Currently held item */
 	AItem* GetItem();
 
 	UPROPERTY(Replicated)
 	TArray<class UTexture2D*> spriteInventory;
 
 	/* Inventory array */
-	TArray<UInventoryItem*> Inventory;//was tarray of class aitem*
+	TArray<UInventoryItem*> Inventory;
 
 	/* Array index of currently equipped item */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
@@ -109,11 +109,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
 	void BPTransitionToDivergenceState();
-
-
-	/* The following functions are depreciated and will be removed soon:
-	   ChangeLight, getLightAmount, getMaxLightAmount, getLightEnabled,
-	   RegenerateLight */
+	
 
 	UFUNCTION(BlueprintCallable, Category = Item)
 	void ChangeItemAmount(float lightAmount);
@@ -124,7 +120,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Item)
 	float GetMaxItemAmount();
 
-	UFUNCTION(BlueprintCallable, Category = Item)//TODO: need to be able to enable this by some input
+	UFUNCTION(BlueprintCallable, Category = Item)
 	bool GetItemEnabled();
 
 	UFUNCTION(BlueprintCallable, Category = Item)

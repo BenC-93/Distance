@@ -127,3 +127,8 @@ UTexture2D* AItem::GetTheSprite() const
 {
 	return SpriteComponent->GetSprite()->GetBakedTexture();
 }
+
+ADistanceCharacter* AItem::GetOwningPawn()
+{
+	return OwningPawn;
+}

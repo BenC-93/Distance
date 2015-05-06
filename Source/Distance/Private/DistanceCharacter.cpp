@@ -94,7 +94,7 @@ void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem
 
 void ADistanceCharacter::PickupItem(AItem* Item)//TODO:  be able to drop items within the game HUD on click and drag potentially?
 {
-	if (Item)
+	if (Item && Inventory.Num() < 5)
 	{
 		Inventory.Add(new UInventoryItem(Item));
 		spriteInventory.Add(Inventory.Last()->GetItemSprite());
@@ -315,6 +315,11 @@ bool ADistanceCharacter::GetItemEnabled()
 		return false;
 	}
 	return GetItem()->isInUse;
+}
+
+bool ADistanceCharacter::GetItemHasOwner()
+{
+	return (GetItem()->GetOwningPawn() != NULL);
 }
 
 void ADistanceCharacter::ChangeSpeed(float speedAmount)

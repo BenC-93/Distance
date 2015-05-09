@@ -59,6 +59,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
 	int32 EquippedSlot;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = Camera)
+	void PlayConvergenceAnim();
+
 	/* Pick up nearby item object in the world */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void PickupItem(AItem* Item);

@@ -18,6 +18,7 @@ void AItemCrystal::StartUse()
 	{
 		printScreen(FColor::Red, TEXT("Beginning Convergence"));
 		ConvergenceManager::StartConvergence();
+		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
 		if (OwningPawn != NULL) OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
 		Drop();
 	}

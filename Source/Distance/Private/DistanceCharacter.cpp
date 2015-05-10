@@ -20,7 +20,7 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	EquippedSlot = 0;
 
 	// Set size for player capsule
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(30.f, 60.f);
 
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;

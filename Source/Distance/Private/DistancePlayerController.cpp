@@ -4,6 +4,7 @@
 #include "DistancePlayerController.h"
 #include "AIEnemy.h"
 #include "AIBoss_Doubt.h"
+#include "ItemCrystal.h"
 #include "AI/Navigation/NavigationSystem.h"
 #include "ConvergenceManager.h"
 
@@ -17,7 +18,6 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	canMove = true;
 	hitActor = NULL;
-
 	rangeToItem = 250.0f;
 
 	converged = false;//for testing
@@ -64,6 +64,10 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAction("CycleInventory", IE_Pressed, this, &ADistancePlayerController::CycleInventory);
 	InputComponent->BindAction("ItemPickup", IE_Pressed, this, &ADistancePlayerController::ItemPickup);
 	InputComponent->BindAction("ItemDrop", IE_Pressed, this, &ADistancePlayerController::ItemDrop);
+
+	//Temp input for crystal
+	InputComponent->BindAction("OtherUseItem", IE_Pressed, this, &ADistancePlayerController::OnOtherUseItemPressed);
+	InputComponent->BindAction("OtherUseItem", IE_Released, this, &ADistancePlayerController::OnUseItemReleased);
 }
 
 void ADistancePlayerController::MoveForward(float val)
@@ -259,7 +263,38 @@ void ADistancePlayerController::OnUseItemPressed()
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
-	DistanceCharacterClass->GetItem()->StartUse();
+	if (DistanceCharacterClass->GetItem()->IsA(AItemCrystal::StaticClass()))
+	{
+		Cast<AItemCrystal>(DistanceCharacterClass->GetItem())->StartUse(false);
+	}
+	else
+	{
+		DistanceCharacterClass->GetItem()->StartUse();
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+}
+
+//temp
+void ADistancePlayerController::OnOtherUseItemPressed()
+{
+	if (DistanceCharacterClass == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DistanceCharacter is null."));
+		return;
+	}
+	if (DistanceCharacterClass->GetItem() == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Light is null."));
+		return;
+	}
+	if (DistanceCharacterClass->GetItem()->IsA(AItemCrystal::StaticClass()))
+	{
+		Cast<AItemCrystal>(DistanceCharacterClass->GetItem())->StartUse(true);
+	}
+	else
+	{
+		DistanceCharacterClass->GetItem()->StartUse();
+	}
 	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
 }
 

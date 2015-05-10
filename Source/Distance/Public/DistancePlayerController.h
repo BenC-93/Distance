@@ -65,6 +65,9 @@ protected:
 	void ItemPickup();
 	void ItemDrop();
 
+	//temp input
+	void OnOtherUseItemPressed();
+
 	void OnGetLocation();//Temporary Binding, for location testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************
 

@@ -150,8 +150,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				}
 				/*GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
 				speedCounter = 1.0f;
-				moveToPlayer = false;
-				moveAway = true;*/
+				RunAway();*/
 			}
 			else
 			{//not needed, just for testing purposes
@@ -177,13 +176,21 @@ void AAIEnemy::Tick(float DeltaTime)
 			
 			if (scaleCounter <= 0.8)//we have shrunk too far, now we run away
 			{
-				moveToPlayer = false;
-				moveAway = true;
+				RunAway();
 			}
 			//UE_LOG(LogTemp, Warning, TEXT("scaleCounter: %f"), scaleCounter);
 			
 		}
 	}
+}
+
+void AAIEnemy::RunAway()
+{
+	GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
+	moveToPlayer = false;
+	moveAway = true;
+	GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
+	DrainParticleSys->Deactivate();
 }
 
 void AAIEnemy::DrainTimer()
@@ -192,20 +199,12 @@ void AAIEnemy::DrainTimer()
 	{
 		if (health >= maxHealth)//Ai is full, move away
 		{
-			GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
-			moveToPlayer = false;
-			moveAway = true;
-			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
-			DrainParticleSys->Deactivate();
+			RunAway();
 			return;
 		}
 		if (player->Health == 0)//player health has depleted, move away
 		{
-			GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
-			moveToPlayer = false;
-			moveAway = true;
-			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
-			DrainParticleSys->Deactivate();
+			RunAway();
 			return;
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("Equipped item name, %s"), *player->GetItemName());

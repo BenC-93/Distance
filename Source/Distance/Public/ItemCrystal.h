@@ -19,5 +19,13 @@ public:
 
 	AItemCrystal(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
+	void StartUse(bool spawnSpirit);
+
+	UPROPERTY(Category = Spirit, EditAnywhere)
+	TSubclassOf<class ASpirit> SpiritClass;
 	
+	void SpawnSpirit();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSpawnSpirit();
 };

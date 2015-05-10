@@ -7,7 +7,14 @@
 #include "InventoryItem.h"
 #include "DistanceCharacter.generated.h"
 
-enum ConvergenceState : uint32 { CONVERGENCE, DIVERGENCE1, DIVERGENCE2 };
+// make ConvergenceState enum blueprintable
+UENUM(BlueprintType)
+enum class ConvergenceState : uint8
+{
+	CONVERGENCE	UMETA(DisplayName = "Convergence"),
+	DIVERGENCE1	UMETA(DisplayName = "Divergence1"),
+	DIVERGENCE2 UMETA(DisplayName = "Divergence2")
+};
 
 UCLASS(Blueprintable)
 class ADistanceCharacter : public ACharacter
@@ -44,6 +51,7 @@ public:
 	float BaseDamage;
 	
 	/** Player's convergence state */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Convergence)
 	ConvergenceState PlayerConvergenceState;
 	
 	/* Currently held item */
@@ -108,10 +116,7 @@ public:
 	bool GetIsItemDroppable();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
-	void BPTransitionToConvergenceState();
-
-	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
-	void BPTransitionToDivergenceState();
+	void BPTransitionToNewConvergenceState();
 	
 
 	UFUNCTION(BlueprintCallable, Category = Item)

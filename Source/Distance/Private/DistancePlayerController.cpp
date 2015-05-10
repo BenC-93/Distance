@@ -327,11 +327,13 @@ void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for con
 	{
 		printScreen(FColor::Red, TEXT("Beginning Convergence"));
 		ConvergenceManager::StartConvergence();
+		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
 	}
 	else//make sure to get rid of this code when done testing with pushing a button to converge and diverge
 	{
 		printScreen(FColor::Red, TEXT("Ending Convergence"));
 		ConvergenceManager::EndConvergence();
+		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
 	}
 	converged = !converged;
 }

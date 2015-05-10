@@ -14,6 +14,9 @@ ASpirit::ASpirit(const FObjectInitializer& ObjectInitializer)
 
 	OwningPawn = NULL;
 
+	fadeOut = false;
+	alphaVal = 0.0f; //in this case, 0 is not transparent, 1 is fully transparent
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
@@ -47,6 +50,17 @@ void ASpirit::Tick(float DeltaTime)
 			SetActorLocation(newLoc);
 		}
 	}
+	if (fadeOut)
+	{
+		alphaVal += (DeltaTime / 8);
+		UE_LOG(LogDistance, Error, TEXT("Alpha color: %f"), alphaVal);
+		if (alphaVal >= 1.0f)
+		{
+			alphaVal = 1.0f;
+			Destroy();
+		}
+		ChangeSpriteAlpha(alphaVal);
+	}
 }
 
 void ASpirit::SetOwner(ADistanceCharacter* owningPlayer)
@@ -61,7 +75,8 @@ void ASpirit::SetOwner(ADistanceCharacter* owningPlayer)
 void ASpirit::DeathTimer()
 {
 	//destroy, or i could make a fade away
-	Destroy();
+	fadeOut = true;
+	//Destroy();
 }
 
 void ASpirit::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

@@ -22,6 +22,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Spirit)
 	float movementSpeed;
 
+	bool fadeOut;
+	float alphaVal;
+
 	UPROPERTY(EditAnywhere, Category = Spirit)
 	ADistanceCharacter* OwningPawn;
 
@@ -51,5 +54,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Timers")
 	void DeathTimer();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Sprite)
+	void ChangeSpriteAlpha(float alphaValue);
 	
 };

@@ -83,11 +83,11 @@ void ADistancePlayerController::MoveRight(float val)
 	DistanceCharacterClass->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
 	if (val > 0.f)
 	{
-		DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+		DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
 	}
 	else if (val < 0.f)
 	{
-		DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+		DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 	}
 }
 

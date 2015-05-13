@@ -41,6 +41,8 @@ public:
 	// What the controller uses for client movement
 	void MoveToLocation(const class ADistancePlayerController* Controller, const FVector& Location);
 	
+	void MoveFromInput(const FVector InputVector, float AxisValue);
+	
 	// Pointer to the actual character which is replicated
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	class ADistanceCharacter* Character;

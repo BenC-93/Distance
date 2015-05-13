@@ -77,12 +77,13 @@ void ADistancePlayerController::SetupInputComponent()
 
 void ADistancePlayerController::MoveForward(float val)
 {
-	DCharacter()->AddMovementInput(FVector(1.0, 0.0, 0.0), GetInputAxisValue("MoveForward"));
+	Cast<ADistancePlayerProxy>(GetPawn())->MoveFromInput(FVector(1.0, 0.0, 0.0), GetInputAxisValue("MoveForward"));
 }
 
 void ADistancePlayerController::MoveRight(float val)
 {
-	DCharacter()->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
+	printLog(TEXT("input right: %f"), GetInputAxisValue("MoveRight"));
+	Cast<ADistancePlayerProxy>(GetPawn())->MoveFromInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
 	if (val > 0.f)
 	{
 		DCharacter()->GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));

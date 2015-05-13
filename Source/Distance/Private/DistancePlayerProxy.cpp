@@ -102,6 +102,13 @@ void ADistancePlayerProxy::MoveToLocation(const ADistancePlayerController* contr
 	PlayerAI->MoveToLocation(DestLocation);
 }
 
+void ADistancePlayerProxy::MoveFromInput(const FVector InputVector, float AxisValue)
+{
+	// Move both the player and the proxy in-sync
+	Character->AddMovementInput(InputVector, AxisValue);
+	AddMovementInput(InputVector, AxisValue);
+}
+
 void ADistancePlayerProxy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const
 {
  

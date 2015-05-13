@@ -41,20 +41,16 @@ void TransitionPlayerToState(ADistanceCharacter* player, ConvergenceState NewSta
 		}
 		else
 		{
+			//show animation
+			player->PlayConvergenceAnim();
+
 			FVector currentLocation = player->GetActorLocation();
 			// Shift player location to convergence state then to the desired state
 			FVector newLocation = currentLocation - OffsetFromConvergenceState.at(CurrentState) + OffsetFromConvergenceState.at(NewState);
 			player->GetController()->StopMovement();
-			player->TeleportTo(newLocation, player->GetActorRotation());
+			player->TeleportTo(newLocation, player->GetActorRotation(),false,true);
 			player->PlayerConvergenceState = NewState;
-			if (player->PlayerConvergenceState == ConvergenceState::CONVERGENCE)
-			{
-				player->BPTransitionToConvergenceState();
-			}
-			else
-			{
-				player->BPTransitionToDivergenceState();
-			}
+			player->BPTransitionToNewConvergenceState();
 		}
 	}
 	else

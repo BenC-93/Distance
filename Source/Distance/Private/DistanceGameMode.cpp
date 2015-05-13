@@ -23,9 +23,14 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 void ADistanceGameMode::StartPlay()
 {
 	Super::StartPlay();
-	ADistanceCharacter *p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	ADistanceCharacter *p2 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 1));
+	//ADistanceCharacter *p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	//ADistanceCharacter *p2 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 1));
 	//ConvergenceManager::InitializeWithPlayers(p1, p2);
+}
+
+void ADistanceGameMode::InitializeConvergence(class ADistanceCharacter* p1, class ADistanceCharacter* p2)
+{
+	ConvergenceManager::InitializeWithPlayers(p1, p2);
 }
 
 void ADistanceGameMode::PostLogin(APlayerController* NewPlayer)

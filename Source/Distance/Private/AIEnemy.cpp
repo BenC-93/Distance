@@ -3,6 +3,7 @@
 #include "Distance.h"
 #include "DistanceCharacter.h"
 #include "KismetMathLibrary.generated.h"
+#include "ItemLantern.h"
 #include "AIEnemy.h"
 
 AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
@@ -22,7 +23,7 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 
 	deathCounter = 10;
 
-	scaleCounter = 5.0f;
+	scaleCounter = 4.0f;
 	scaleLimit = 7.0f;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
@@ -145,12 +146,11 @@ void AAIEnemy::Tick(float DeltaTime)
 					//slow down player?
 					float playerSpeed = player->GetCharacterMovement()->MaxWalkSpeed;
 					player->GetCharacterMovement()->MaxWalkSpeed =  FMath::Lerp(200.0f, playerSpeed, (scaleCounter/scaleLimit));
-					UE_LOG(LogTemp, Warning, TEXT("Player speed: %f"), player->GetCharacterMovement()->MaxWalkSpeed);
+					//UE_LOG(LogTemp, Warning, TEXT("Player speed: %f"), player->GetCharacterMovement()->MaxWalkSpeed);
 				}
 				/*GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
 				speedCounter = 1.0f;
-				moveToPlayer = false;
-				moveAway = true;*/
+				RunAway();*/
 			}
 			else
 			{//not needed, just for testing purposes
@@ -176,13 +176,21 @@ void AAIEnemy::Tick(float DeltaTime)
 			
 			if (scaleCounter <= 0.8)//we have shrunk too far, now we run away
 			{
-				moveToPlayer = false;
-				moveAway = true;
+				RunAway();
 			}
 			//UE_LOG(LogTemp, Warning, TEXT("scaleCounter: %f"), scaleCounter);
 			
 		}
 	}
+}
+
+void AAIEnemy::RunAway()
+{
+	GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
+	moveToPlayer = false;
+	moveAway = true;
+	GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
+	DrainParticleSys->Deactivate();
 }
 
 void AAIEnemy::DrainTimer()
@@ -191,24 +199,16 @@ void AAIEnemy::DrainTimer()
 	{
 		if (health >= maxHealth)//Ai is full, move away
 		{
-			GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
-			moveToPlayer = false;
-			moveAway = true;
-			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
-			DrainParticleSys->Deactivate();
+			RunAway();
 			return;
 		}
 		if (player->Health == 0)//player health has depleted, move away
 		{
-			GetCharacterMovement()->MaxWalkSpeed = runAwaySpeed;
-			moveToPlayer = false;
-			moveAway = true;
-			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
-			DrainParticleSys->Deactivate();
+			RunAway();
 			return;
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("Equipped item name, %s"), *player->GetItemName());
-		if (moveToPlayer && player->GetItemName().Equals(TEXT("Lantern")) && player->GetItemAmount() > 0.0f && player->GetItemEnabled())
+		if (moveToPlayer && player->GetItem()->IsA(AItemLantern::StaticClass()) && player->GetItemAmount() > 0.0f && player->GetItemEnabled())
 		{
 			//drain light
 			if (health < maxHealth)
@@ -218,16 +218,16 @@ void AAIEnemy::DrainTimer()
 				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->GetItemAmount());
 			}
 		}
-		//else//drain health
-		//{
+		else//drain health
+		{
 			if (moveToPlayer && health < maxHealth)
 			{
-				UE_LOG(LogTemp, Error, TEXT("Equipped item name, %s"), *player->GetItemName());
+				//UE_LOG(LogTemp, Error, TEXT("Equipped item name, %s"), *player->GetItemName());
 				health += 1;
 				player->ChangeHealth(baseDamage);
 				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
 			}
-		//}
+		}
 	}
 }
 

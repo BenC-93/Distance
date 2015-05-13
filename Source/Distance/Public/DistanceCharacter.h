@@ -7,7 +7,14 @@
 #include "InventoryItem.h"
 #include "DistanceCharacter.generated.h"
 
-enum ConvergenceState : uint32 { CONVERGENCE, DIVERGENCE1, DIVERGENCE2 };
+// make ConvergenceState enum blueprintable
+UENUM(BlueprintType)
+enum class ConvergenceState : uint8
+{
+	CONVERGENCE	UMETA(DisplayName = "Convergence"),
+	DIVERGENCE1	UMETA(DisplayName = "Divergence1"),
+	DIVERGENCE2 UMETA(DisplayName = "Divergence2")
+};
 
 UCLASS(Blueprintable)
 class ADistanceCharacter : public ACharacter
@@ -44,9 +51,10 @@ public:
 	float BaseDamage;
 	
 	/** Player's convergence state */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Convergence)
 	ConvergenceState PlayerConvergenceState;
 	
-	/* Temporary function for implementing the light(lantern) item */
+	/* Currently held item */
 	AItem* GetItem();
 
 	/* Inventory array */
@@ -56,6 +64,9 @@ public:
 	/* Array index of currently equipped item */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
 	int32 EquippedSlot;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Camera)
+	void PlayConvergenceAnim();
 
 	/* Pick up nearby item object in the world */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -101,20 +112,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Light)
 	bool GetIsItemDroppable();
-
-	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
-	void BPTransitionToConvergenceState();
-
-	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
-	void BPTransitionToDivergenceState();
 	
 	UFUNCTION(Unreliable, NetMulticast)
 	void FlipForMovement_RPC(const FVector DestLocation);
 
-
-	/* The following functions are depreciated and will be removed soon:
-	   ChangeLight, getLightAmount, getMaxLightAmount, getLightEnabled,
-	   RegenerateLight */
+	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
+	void BPTransitionToNewConvergenceState();
 
 	UFUNCTION(BlueprintCallable, Category = Item)
 	void ChangeItemAmount(float lightAmount);
@@ -125,8 +128,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Item)
 	float GetMaxItemAmount();
 
-	UFUNCTION(BlueprintCallable, Category = Item)//TODO: need to be able to enable this by some input
+	UFUNCTION(BlueprintCallable, Category = Item)
 	bool GetItemEnabled();
+
+	UFUNCTION(BlueprintCallable, Category = Item)
+	bool GetItemHasOwner();
 
 	UFUNCTION(BlueprintCallable, Category = Speed)
 	void ChangeSpeed(float speedAmount);

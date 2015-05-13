@@ -4,6 +4,8 @@
 #include "DistancePlayerController.h"
 #include "AIEnemy.h"
 #include "AIBoss_Doubt.h"
+#include "ItemCrystal.h"
+#include "Shrine.h"
 #include "AI/Navigation/NavigationSystem.h"
 #include "ConvergenceManager.h"
 #include "DistancePlayerProxy.h"
@@ -19,6 +21,11 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	canMove = true;
 	hitActor = NULL;
+	rangeToItem = 250.0f;
+
+	rangeToShrine = 350.0f;
+
+	converged = false;//for testing
 
 	switchedItem = false;//Temporary Bool, for boss testing***************************************
 }
@@ -28,10 +35,10 @@ void ADistancePlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	// keep updating the destination every tick while desired
-	if (bMoveToMouseCursor)
-	{
-		MoveToMouseCursor();
-	}
+	//if (bMoveToMouseCursor)
+	//{
+	//	MoveToMouseCursor();
+	//}
 }
 
 void ADistancePlayerController::SetupInputComponent()
@@ -56,6 +63,69 @@ void ADistancePlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnGetLocation);//Temporary Binding, for location testing***************************************
 	InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnConvergenceBegin);//Temporary Binding, for starting convergence***************************************
+
+	InputComponent->BindAxis("MoveForward", this, &ADistancePlayerController::MoveForward);
+	InputComponent->BindAxis("MoveRight", this, &ADistancePlayerController::MoveRight);
+	InputComponent->BindAction("CycleInventory", IE_Pressed, this, &ADistancePlayerController::CycleInventory);
+	InputComponent->BindAction("ItemPickup", IE_Pressed, this, &ADistancePlayerController::ItemPickup);
+	InputComponent->BindAction("ItemDrop", IE_Pressed, this, &ADistancePlayerController::ItemDrop);
+
+	//Temp input for crystal
+	InputComponent->BindAction("OtherUseItem", IE_Pressed, this, &ADistancePlayerController::OnOtherUseItemPressed);
+	InputComponent->BindAction("OtherUseItem", IE_Released, this, &ADistancePlayerController::OnUseItemReleased);
+}
+
+void ADistancePlayerController::MoveForward(float val)
+{
+	DCharacter()->AddMovementInput(FVector(1.0, 0.0, 0.0), GetInputAxisValue("MoveForward"));
+}
+
+void ADistancePlayerController::MoveRight(float val)
+{
+	DCharacter()->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
+	if (val > 0.f)
+	{
+		DCharacter()->GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
+	}
+	else if (val < 0.f)
+	{
+		DCharacter()->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	}
+}
+
+void ADistancePlayerController::CycleInventory()
+{
+	switchedItem = true;
+	DCharacter()->ToggleInventory();
+}
+
+void ADistancePlayerController::ItemPickup()
+{
+	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (ActorItr->IsA(AItemLantern::StaticClass()))
+		{
+			continue;
+		}
+		if (DCharacter()->GetDistanceTo(*ActorItr) <= rangeToItem)
+		{
+			if (DCharacter()->GetInventory().Num() <= 4)
+			{
+				if (*ActorItr == DCharacter()->GetItem()) { break; }
+				DCharacter()->PickupItem(*ActorItr);
+			}
+			else
+			{
+				printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+			}
+			break;
+		}
+	}
+}
+
+void ADistancePlayerController::ItemDrop()
+{
+	DCharacter()->DropItem(DCharacter()->EquippedSlot);
 }
 
 void ADistancePlayerController::MoveToMouseCursor()
@@ -210,7 +280,55 @@ void ADistancePlayerController::OnUseItemPressed()
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
-	DCharacter()->GetItem()->StartUse();
+
+	if (DCharacter()->GetItem()->IsA(AItemCrystal::StaticClass()))
+	{
+		bool shrineFound = false;
+		for (TActorIterator<AShrine> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			float distToShrine = DCharacter()->GetDistanceTo(*ActorItr);
+			if (distToShrine <= rangeToShrine)
+			{
+				shrineFound = true;	
+			}
+		}
+		if (shrineFound)
+		{
+			Cast<AItemCrystal>(DCharacter()->GetItem())->StartUse(false);
+		}
+		else
+		{
+			Cast<AItemCrystal>(DCharacter()->GetItem())->StartUse(true);
+		}
+	}
+	else
+	{
+		DCharacter()->GetItem()->StartUse();
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DCharacter()->GetItemEnabled());
+}
+
+//temp
+void ADistancePlayerController::OnOtherUseItemPressed()
+{
+	if (DCharacter() == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DistanceCharacter is null."));
+		return;
+	}
+	if (DCharacter()->GetItem() == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Light is null."));
+		return;
+	}
+	if (DCharacter()->GetItem()->IsA(AItemCrystal::StaticClass()))
+	{
+		Cast<AItemCrystal>(DCharacter()->GetItem())->StartUse(true);
+	}
+	else
+	{
+		DCharacter()->GetItem()->StartUse();
+	}
 	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DCharacter()->GetItemEnabled());
 }
 
@@ -228,7 +346,8 @@ void ADistancePlayerController::OnUseItemReleased()
 		return;
 	}
 	item->EndUse();
-	UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DCharacter()->GetItemEnabled());
+	/*UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DCharacter()->GetItemEnabled());
+	//UE_LOG(LogTemp, Warning, TEXT("Item name: %s"), *DCharacter()->GetItemName());
 	if (DCharacter()->GetItemName() == "LightBeam")
 	{
 		if (enemyActor != NULL && enemyActor->IsA(AAIBoss_Doubt::StaticClass()))
@@ -254,7 +373,7 @@ void ADistancePlayerController::OnUseItemReleased()
 				enemyActor = NULL;
 			}
 		}
-	}
+	}*/
 	//UE_LOG(LogTemp, Warning, TEXT("AttackBoss is true?: %d, and hitActor is: %s"), attackBoss, *hitActor->GetName());
 }
 
@@ -271,8 +390,19 @@ void ADistancePlayerController::OnGetLocation()//Temporary Binding, for location
 
 void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for convergence start***************************************
 {
-	printScreen(FColor::Red, TEXT("Beginning Convergence"));
-	ConvergenceManager::StartConvergence();
+	if (!converged)
+	{
+		printScreen(FColor::Red, TEXT("Beginning Convergence"));
+		ConvergenceManager::StartConvergence();
+		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
+	}
+	else//make sure to get rid of this code when done testing with pushing a button to converge and diverge
+	{
+		printScreen(FColor::Red, TEXT("Ending Convergence"));
+		ConvergenceManager::EndConvergence();
+		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
+	}
+	converged = !converged;
 }
 
 void ADistancePlayerController::OnConvergenceEnd()

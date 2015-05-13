@@ -7,6 +7,8 @@
 #include "InventoryItem.h"
 #include "Item.generated.h"
 
+class ADistanceCharacter;
+
 /**
  * 
  */
@@ -23,10 +25,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	FString name;
 
+	/* Reference to player holding this item */
+	UPROPERTY(EditAnywhere, Category = Item)
+	ADistanceCharacter* OwningPawn;
+
 	/* Whether item can be dropped once in inventory. 
 	   Used primarily for the 'Lantern' item. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)
 	bool droppable;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Use)
+	bool canUse;
 
 	/* Whether the item is currently being used by the player. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Use)
@@ -56,7 +65,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Triggers)
 	class UBoxComponent *TriggerBox;
-	
+
 	/* Item's primary action for when it is use by the player. */
 	UFUNCTION(BlueprintCallable, Category = Use)
 	virtual void StartUse();
@@ -74,7 +83,7 @@ public:
 
 	/* What happens when a player picks up this item. */
 	UFUNCTION(BlueprintCallable, Category = Item)
-	void Pickup();
+	void Pickup(ADistanceCharacter* PickerUpper);
 
 	/* What happens when the player drops this item. */
 	UFUNCTION(BlueprintCallable, Category = Item)
@@ -102,4 +111,6 @@ public:
 	void Update(class AInventoryItem* invItem);
 
 	UTexture2D* GetTheSprite() const;
+
+	ADistanceCharacter* GetOwningPawn();
 };

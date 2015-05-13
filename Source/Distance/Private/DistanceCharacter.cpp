@@ -20,7 +20,7 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	EquippedSlot = 0;
 
 	// Set size for player capsule
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(20.f, 60.f);
 
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;
@@ -79,14 +79,12 @@ void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &O
 
 	DOREPLIFETIME(ADistanceCharacter, Health);
 	DOREPLIFETIME(ADistanceCharacter, MaxHealth);
-
-	// This is causing the majority of the issues, the inventory just isn't replicating, having better luck trying to rep manually
 	DOREPLIFETIME(ADistanceCharacter, Inventory);
 }
 
 void ADistanceCharacter::PickupItem(AItem* Item)
 {
-	if (Item)
+	if (Item && Inventory.Num() < 5)
 	{
 		ClientPickupItem(Item);
 		//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), Inventory.Num());
@@ -121,22 +119,17 @@ void ADistanceCharacter::ServerPickupItem_Implementation(AItem* Item)
 	PickupItem(Item);
 }
 
-AItem* ADistanceCharacter::DropItem(int32 InvSlot)//TODO: when you pickup more than 1 item and drop until there is 1 left, clicking on (equipping) the last one will Error
+AItem* ADistanceCharacter::DropItem(int32 InvSlot)
 {
-	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot))
+	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot) && InvSlot != 0)
 	{
-		// Need to create the item in the world,
-		// before removing it from the array
 		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
-		uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
-		EquipItem(0);//default equip lantern
-		UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
+		EquipItem(0);//equip lantern
 		Inventory.RemoveAt(InvSlot);
 		ItemPickedUp();//refresh gui inventory after drop, but not needed if i keep the one in equip item
 		UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
 		return droppedItem;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
 	return NULL;
 }
 
@@ -144,9 +137,7 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Inventory length: %d"), Inventory.Num());
 	UE_LOG(LogTemp, Warning, TEXT("InvSlot to be equipped: %d"), InvSlot);
-	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot))//TODO: fix bug that happens because of drop item
 	{
-		//Inventory[EquippedSlot]->OnUnequip();
 		if (GetItem() != NULL)
 		{
 			GetItem()->OnUnequip();
@@ -160,7 +151,6 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Previous Item is Null!"));
 		}
 		EquippedSlot = InvSlot;
-		//Inventory[EquippedSlot]->OnEquip();
 		EquipItemComponent(EquippedSlot);
 		if (GetItem() != NULL)
 		{
@@ -171,7 +161,6 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 		{
 			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Equipped Item is Null!"));
 		}
-		//Refresh gui inventory with ItemPickedUp()???? if we want some glow thing on current item then id say yes
 		ItemPickedUp();
 	}
 }
@@ -185,6 +174,8 @@ void ADistanceCharacter::EquipItemComponent(int32 InvSlot)
 		ItemComponent->ChildActorClass = ComponentClass;
 		ItemComponent->OnComponentCreated();
 		ItemComponent->ChildActor->AttachRootComponentToActor(this);
+		AItem* currItem = Cast<AItem>(ItemComponent->ChildActor);
+		if (currItem) { currItem->OwningPawn = this; }
 	}
 }
 
@@ -192,7 +183,6 @@ void ADistanceCharacter::UseItem()
 {
 	if (Inventory.IsValidIndex(EquippedSlot) && GetItem() != NULL)
 	{
-		//Inventory[EquippedSlot]->StartUse();
 		GetItem()->StartUse();
 	}
 	else
@@ -219,10 +209,9 @@ TArray<class AInventoryItem*> ADistanceCharacter::GetInventory()
 
 void ADistanceCharacter::ToggleInventory()
 {
-	// Toggle visibility of inventory GUI
+	//cycle inventory items
 	uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
 	EquipItem(tempIndex);
-	UE_LOG(LogTemp, Warning, TEXT("EquippedSlot = %d and Name = %s"), EquippedSlot, *GetItemName());
 }
 
 FString ADistanceCharacter::GetItemName()
@@ -247,33 +236,19 @@ bool ADistanceCharacter::GetIsItemDroppable()
 /* BELOW ARE THE OLD ITEM HANDLING FUNCTIONS. THEY ARE SUBJECT TO CHANGE.
  * PLEASE USE NEW FUNCTIONS ABOVE. */
 
-/**
-* ChangeHealth()
-* 
-* healthAmount is negative if it represents health change from an attack
-* healthAmount is positive if it represents health change from a heal item
-*
-*/
+/*
+ * ChangeHealth()
+ * 
+ * healthAmount is negative if it represents health change from an attack
+ * healthAmount is positive if it represents health change from a heal item
+ *
+ */
 
-void ADistanceCharacter::ChangeHealth(float healthAmount) 
+void ADistanceCharacter::ChangeHealth(float healthAmount)
 {
 	float tempHealth = Health + healthAmount;
-
-	if (tempHealth <= MaxHealth)
-	{
-		if (tempHealth < 0)
-		{
-			Health = 0.0f;
-		}
-		else
-		{
-			Health = tempHealth;
-		}
-	}
-	if (int(Health) % 10 == 0 || abs(healthAmount) >= 10)
-	{
-		UE_LOG(LogDistance, Verbose, TEXT("Changing Health Breakpoint: %f"), Health);
-	}
+	Health = fmax(0.0f, fmin(MaxHealth, tempHealth));
+	UE_LOG(LogDistance, Verbose, TEXT("Changing Health Breakpoint: %f"), Health);
 }
 
 void ADistanceCharacter::RegenerateHealth()
@@ -327,6 +302,11 @@ bool ADistanceCharacter::GetItemEnabled()
 	return GetItem()->isInUse;
 }
 
+bool ADistanceCharacter::GetItemHasOwner()
+{
+	return (GetItem()->GetOwningPawn() != NULL);
+}
+
 void ADistanceCharacter::ChangeSpeed(float speedAmount)
 {
 	GetCharacterMovement()->MaxWalkSpeed = speedAmount;
@@ -351,12 +331,12 @@ AItem* ADistanceCharacter::GetItem()
 	return (AItem *)ItemComponent->ChildActor;
 }
 
-/**
-* Attack()
-*
-* calculates and returns player damage
-*
-*/
+/*
+ * Attack()
+ *
+ * calculates and returns player damage
+ *
+ */
 float ADistanceCharacter::Attack(float extra)
 {
 	float damage = BaseDamage + extra;

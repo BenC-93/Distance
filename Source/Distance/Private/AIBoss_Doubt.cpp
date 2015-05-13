@@ -3,6 +3,7 @@
 #include "Distance.h"
 #include "AIBoss_Doubt.h"
 #include "UnrealNetwork.h"
+#include "ItemShield.h"
 #include "Tentacle.h"
 
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
@@ -13,13 +14,13 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	baseDamage = -1.0f;//TODO: will change along with other vars here
 	drainRate = 0.25f;
 	tentacleHealth = 10.0f;
-	numTentacles = 5;
+	numTentacles = 4;
 
 	distToPlayer = 1;
 	tentacleYaw = 0;
 	chosenTentacleIndex = 0;
 	tentacleCounter = 0;
-	tentacleSpriteLen = 650.0f;//maybe 600
+	tentacleSpriteLen = 300.0f;//maybe 600, works with 650
 
 	/*for (int i = 0; i < numTentacles; i++)
 	{
@@ -38,7 +39,7 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 
 	AITriggerRange = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerRange"));
 	AITriggerRange->Mobility = EComponentMobility::Movable;
-	AITriggerRange->SetBoxExtent(FVector(750.0f, 750.0f, 60.0f), true);
+	AITriggerRange->SetBoxExtent(FVector(1000.0f, 1000.0f, 60.0f), true);
 	AITriggerRange->AttachTo(RootComponent);
 
 	AITriggerRange->OnComponentBeginOverlap.AddDynamic(this, &AAIBoss_Doubt::OnOverlapBegin);
@@ -75,6 +76,7 @@ UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjec
 	class UChildActorComponent* TentacleComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, componentName);
 	//TentacleComponent->ChildActorClass = ATentacle::StaticClass(); //not needed anymore
 	TentacleComponent->OnComponentCreated();
+	TentacleComponent->RelativeLocation = FVector(-465.0f, -370.0f + (i * 170.0f), -280.0f + (i * 3.0f));//add y by 170, add z by 3 each tentacle
 	TentacleComponent->AttachTo(RootComponent);
 	TentacleComponent->SetIsReplicated(true);
 	
@@ -85,16 +87,17 @@ UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjec
 
 void AAIBoss_Doubt::PostInitializeComponents()
 {
-	Super::PostInitializeComponents();
-
 	for (int i = 0; i < TentacleComponentArray.Num(); i++)
 	{
 		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
+		UE_LOG(LogTemp, Warning, TEXT("this line is just before setting tentacle parents"));
 		if (tentacle != NULL)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("trying to set tentacles parents..."));
 			tentacle->SetBossParent(this);
 		}
 	}
+	Super::PostInitializeComponents();
 }
 
 void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
@@ -219,7 +222,7 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
 	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
 
-	if (tempPlayer->GetItemName() == "Shield" && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
+	if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
 		tempPlayer->ChangeSpeed(50);//shield is enabled
 	}
@@ -269,7 +272,7 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 		UE_LOG(LogTemp, Error, TEXT("Error: DrainPlayer, tempPlayer is Null."));
 		return;
 	}
-	if (tempPlayer->GetItemName() == "Shield" && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
+	if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
 		tempPlayer->ChangeItemAmount(baseDamage);//shield is enabled
 	}
@@ -301,7 +304,7 @@ void AAIBoss_Doubt::TentacleTimer()
 	TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
 	//scale
 	float maxScale = distToPlayer / tentacleSpriteLen;
-	UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
+	//UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
 	TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(FMath::Lerp(0.5f, maxScale, tentacleCounter), 1, 1));//havnt found correct scale yet
 	
 	tentacleCounter += 0.1f;
@@ -319,7 +322,7 @@ void AAIBoss_Doubt::AttackTimer()
 {
 	printScreen(FColor::Red, TEXT("Boss making an attack"));
 	//PullPlayer(player);//create tentacle, move tentacle
-	chosenTentacleIndex = FMath::RandRange(0, 3);
+	chosenTentacleIndex = numTentacles - 1; //FMath::RandRange(0, numTentacles - 1);
 	AActor* tentacleActor = TentacleComponentArray[chosenTentacleIndex]->ChildActor;
 	if (tentacleActor)
 	{
@@ -412,12 +415,12 @@ void AAIBoss_Doubt::EndOfBoss()
 
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
 {//TODO: something weird is happening where if player1 does damage its fine, but then if player2 does damage, its as if the boss has full health again, and when the boss has 0 health it still does stuff
-	if (playerController)
+	/*if (playerController)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Total Attack Damage: %f"), healthAmount);
 		if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
 		{
-			/*float tempTentacleHealth = tentacleHealth + healthAmount;
+			//float tempTentacleHealth = tentacleHealth + healthAmount;
 			if (tempTentacleHealth <= 0)//defeated current tentacle
 			{
 				tentacleHealth = 0;
@@ -448,7 +451,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 			{
 				tentacleHealth = tempTentacleHealth;
 			}
-			*/
+			//
 		}
 		else if (playerController->canMove)//else if no player is grabbed, deal damage to the actual boss
 		{
@@ -466,8 +469,39 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or
 				}
 			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
+		//UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
+	}*/
+	float tempHealth = Health + healthAmount;
+	if (tempHealth <= MaxHealth)
+	{
+		if (player)
+		{
+			ReleasePlayer(player);
+		}
+		numTentacles--;
+		//UChildActorComponent* tempTentacle = TentacleComponentArray[numTentacles];
+		//TentacleComponentArray.RemoveAt(numTentacles);
+		//tempTentacle->DestroyComponent();
+		if (numTentacles > -1)
+		{
+			TentacleComponentArray[numTentacles]->DestroyComponent();
+		}
+		if (numTentacles > 0)
+		{
+			StartAttackTimer(3.0f);
+		}
+
+		if (tempHealth <= 0)
+		{
+			Health = 0.0f;//Defeated boss!
+			EndOfBoss();
+		}
+		else
+		{
+			Health = tempHealth;
+		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Boss health: %f Num of Tentacles: %d"), Health, numTentacles);
 }
 
 float AAIBoss_Doubt::GetHealth()

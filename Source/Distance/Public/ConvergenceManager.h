@@ -6,7 +6,8 @@
  * 
  */
 
-enum ConvergenceState : uint32;
+// changed to uint8 to make blueprintable
+enum class ConvergenceState : uint8;
 
 class DISTANCE_API ConvergenceManager
 {

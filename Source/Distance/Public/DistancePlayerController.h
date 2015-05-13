@@ -26,6 +26,11 @@ public:
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerPickupItem(AItem* Item);
 
+	bool converged;
+	float rangeToItem;
+
+	float rangeToShrine;
+
 	bool canMove;
 
 	class AActor* hitActor;
@@ -62,6 +67,15 @@ protected:
 	void OnUseItemPressed();
 	void OnUseItemReleased();
 	void OnInventoryPressed();
+
+	void MoveForward(float val);
+	void MoveRight(float val);
+	void CycleInventory();
+	void ItemPickup();
+	void ItemDrop();
+
+	//temp input
+	void OnOtherUseItemPressed();
 
 	void OnGetLocation();//Temporary Binding, for location testing***************************************
 	void OnConvergenceBegin();//Temporary Binding, for starting Convergence***************************************

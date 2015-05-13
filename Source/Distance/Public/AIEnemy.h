@@ -57,6 +57,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Unit Circle")
 	float ConvertToUnitCircle(float degrees);
 
+	UFUNCTION(BlueprintCallable, Category = "AIEnemy")
+	void RunAway();
+
 	/*UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBeginAttack(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 

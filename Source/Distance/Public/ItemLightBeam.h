@@ -16,6 +16,7 @@ class DISTANCE_API AItemLightBeam : public AItem
 public:
 
 	AItemLightBeam(const class FObjectInitializer& ObjectInitializer);
+	virtual void Tick(float DeltaTime) override;
 	virtual void StartUse() override;
 	virtual void EndUse() override;
 
@@ -23,8 +24,18 @@ public:
 	float chargeAmount;
 	float totalChargedAmount;
 
+	class AActor* targetActor;
+	bool hasAttacked;
+
 	UFUNCTION(BlueprintCallable, Category = Charge)
 	void Charge();
+
+	UFUNCTION(BlueprintCallable, Category = "Timers")
+	void AnimationTimer();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
+	void OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
-	
+	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
+	void OnOverlapEnd(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

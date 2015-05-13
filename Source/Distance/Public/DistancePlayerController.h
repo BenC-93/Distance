@@ -22,6 +22,8 @@ public:
 	bool converged;
 	float rangeToItem;
 
+	float rangeToShrine;
+
 	bool canMove;
 
 	class AActor* hitActor;

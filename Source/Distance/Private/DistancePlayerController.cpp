@@ -5,6 +5,7 @@
 #include "AIEnemy.h"
 #include "AIBoss_Doubt.h"
 #include "ItemCrystal.h"
+#include "Shrine.h"
 #include "AI/Navigation/NavigationSystem.h"
 #include "ConvergenceManager.h"
 
@@ -19,6 +20,8 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	canMove = true;
 	hitActor = NULL;
 	rangeToItem = 250.0f;
+
+	rangeToShrine = 350.0f;
 
 	converged = false;//for testing
 
@@ -98,7 +101,7 @@ void ADistancePlayerController::ItemPickup()
 {
 	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if (ActorItr->IsA(AItemLantern::StaticClass()))
+		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
 		{
 			continue;
 		}
@@ -106,7 +109,6 @@ void ADistancePlayerController::ItemPickup()
 		{
 			if (DistanceCharacterClass->GetInventory().Num() <= 4)
 			{
-				if (*ActorItr == DistanceCharacterClass->GetItem()) { break; }
 				DistanceCharacterClass->PickupItem(*ActorItr);
 			}
 			else
@@ -265,7 +267,23 @@ void ADistancePlayerController::OnUseItemPressed()
 	}
 	if (DistanceCharacterClass->GetItem()->IsA(AItemCrystal::StaticClass()))
 	{
-		Cast<AItemCrystal>(DistanceCharacterClass->GetItem())->StartUse(false);
+		bool shrineFound = false;
+		for (TActorIterator<AShrine> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			float distToShrine = DistanceCharacterClass->GetDistanceTo(*ActorItr);
+			if (distToShrine <= rangeToShrine)
+			{
+				shrineFound = true;	
+			}
+		}
+		if (shrineFound)
+		{
+			Cast<AItemCrystal>(DistanceCharacterClass->GetItem())->StartUse(false);
+		}
+		else
+		{
+			Cast<AItemCrystal>(DistanceCharacterClass->GetItem())->StartUse(true);
+		}
 	}
 	else
 	{

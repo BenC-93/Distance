@@ -159,55 +159,16 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 				}
 			}
 		}
-
-		//BEGIN TERRIBLENESS FOR PLAYER DEALING DAMAGE TO TENTACLE
-		player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-		player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-		if (player1 != NULL)//Temporary Check for player dealing damage to boss*********************************************
+	}
+	if (swallowedPlayer)
+	{
+		//class ADistancePlayerController* swallowedController = Cast<ADistancePlayerController>(swallowedPlayer->GetController());
+		if (playerController->switchedItem)//other player, not the swallowed one
 		{
-			class ADistancePlayerController* tPController1 = Cast<ADistancePlayerController>(player1->GetController());
-			/*if (tPController1->attackBoss)//Players may use the '1' key/number on the keybord to attack*******Not needed anymore
-			{
-				printScreen(FColor::Red, TEXT("Player1 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!"));
-				ChangeHealth(-5.0f);
-				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
-				tPController1->attackBoss = false;
-			}*/
-			if (tPController1->switchedItem)//shield on = when this is false
-			{
-				if (!tPController1->canMove)
-				{
-					printScreen(FColor::Red, TEXT("Player1 was Released by switching Items"));
-					ReleasePlayer(player1);
-				}
-				tPController1->switchedItem = false;
-			}
+			printScreen(FColor::Red, TEXT("Swallowed Player was Released by other player switching Items"));
+			ReleasePlayer(swallowedPlayer);
+			playerController->switchedItem = false;
 		}
-		if (player2 != NULL)
-		{
-			class ADistancePlayerController* tPController2 = Cast<ADistancePlayerController>(player2->GetController());
-			/*if (tPController2->attackBoss)//Not needed anymore
-			{
-				printScreen(FColor::Red, TEXT("Player2 Dealt Damage!!!!!!!!!!!!!!!!!!!!!!!!!"));
-				ChangeHealth(-5.0f);
-				UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
-				tPController2->attackBoss = false;
-			}*/
-			if (tPController2->switchedItem)
-			{
-				if (!tPController2->canMove)
-				{
-					printScreen(FColor::Red, TEXT("Player2 was Released by switching Items"));
-					ReleasePlayer(player2);
-				}
-				tPController2->switchedItem = false;
-			}
-		}
-		if (player1 == NULL && player2 == NULL)
-		{
-			printScreen(FColor::Red, TEXT("What happened, Bad stuff!"));
-		}
-		//END TERRIBLENESS
 	}
 }
 
@@ -387,7 +348,7 @@ void AAIBoss_Doubt::StartSwallowedTimer(float rate)
 
 void AAIBoss_Doubt::EndOfBoss()
 {
-	if (swallowedPlayer != NULL)
+	if (swallowedPlayer != NULL)//or just realease p1 and p2
 	{
 		ReleasePlayer(swallowedPlayer);
 	}

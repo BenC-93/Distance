@@ -4,50 +4,42 @@
 #include "DistanceCharacter.h"
 #include "ItemCrystal.h"
 #include "Spirit.h"
+#include "Shrine.h"
 #include "ConvergenceManager.h"
 
 AItemCrystal::AItemCrystal(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	name = "Crystal";
+	rangeToShrine = 350.f;
 }
 
 void AItemCrystal::StartUse()
 {
-	if (!isInUse)
+	if (!isInUse && OwningPawn != NULL)
 	{
-		printScreen(FColor::Red, TEXT("Beginning Convergence"));
-		ConvergenceManager::StartConvergence();
-		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
-		if (OwningPawn != NULL)
+		bool shrineFound = false;
+		for (TActorIterator<AShrine> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
-			SpawnConvergenceCrystal();
-
-			OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
-		}
-		Drop();
-	}
-}
-
-void AItemCrystal::StartUse(bool spawnSpirit)
-{
-	if (spawnSpirit)
-	{
-		if (!isInUse)
-		{
-			printScreen(FColor::Red, TEXT("Spawning Spirit"));
-			if (OwningPawn != NULL)
+			if (OwningPawn->GetDistanceTo(*ActorItr) <= rangeToShrine)
 			{
-				SpawnSpirit();
-
-				OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
+				printScreen(FColor::Red, TEXT("Shrine Found"));
+				shrineFound = true;
+				break;
 			}
-			Drop();
 		}
-	}
-	else
-	{
-		StartUse();
+		if (shrineFound)
+		{
+			ConvergenceManager::StartConvergence();
+			GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
+			SpawnConvergenceCrystal();
+		}
+		else
+		{
+			SpawnSpirit();
+		}
+		OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
+		Drop();
 	}
 }
 
@@ -55,10 +47,10 @@ void AItemCrystal::SpawnSpirit()
 {
 	ASpirit* spirit = Cast<ASpirit>(GetWorld()->SpawnActor<ASpirit>(SpiritClass, FVector(OwningPawn->GetActorLocation()) - FVector(150.0f, 0.0f, 0.0f), FRotator(OwningPawn->GetActorRotation())));
 	spirit->SetOwner(OwningPawn);
-	if (Role < ROLE_Authority)
+	/*if (Role < ROLE_Authority)
 	{
 		ServerSpawnSpirit();
-	}
+	}*/
 }
 
 bool AItemCrystal::ServerSpawnSpirit_Validate()
@@ -74,10 +66,10 @@ void AItemCrystal::ServerSpawnSpirit_Implementation()
 void AItemCrystal::SpawnConvergenceCrystal()
 {
 	GetWorld()->SpawnActor<AConvergenceCrystal>(ConvergenceCrystalClass, FVector(OwningPawn->GetActorLocation()) - FVector(150.0f, 0.0f, 0.0f), FRotator(OwningPawn->GetActorRotation()));
-	if (Role < ROLE_Authority)
+	/*if (Role < ROLE_Authority)
 	{
-		ServerSpawnConvergenceCrystal();
-	}
+	ServerSpawnSpirit();
+	}*/
 }
 
 bool AItemCrystal::ServerSpawnConvergenceCrystal_Validate()

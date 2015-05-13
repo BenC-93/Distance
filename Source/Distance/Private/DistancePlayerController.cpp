@@ -5,7 +5,6 @@
 #include "AIEnemy.h"
 #include "AIBoss_Doubt.h"
 #include "ItemCrystal.h"
-#include "Shrine.h"
 #include "AI/Navigation/NavigationSystem.h"
 #include "ConvergenceManager.h"
 
@@ -83,7 +82,7 @@ void ADistancePlayerController::MoveRight(float val)
 	DistanceCharacterClass->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
 	if (val > 0.f)
 	{
-		DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
+		DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
 	}
 	else if (val < 0.f)
 	{
@@ -101,7 +100,7 @@ void ADistancePlayerController::ItemPickup()
 {
 	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if (ActorItr->IsA(AItemLantern::StaticClass()))
+		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
 		{
 			continue;
 		}
@@ -109,7 +108,6 @@ void ADistancePlayerController::ItemPickup()
 		{
 			if (DistanceCharacterClass->GetInventory().Num() <= 4)
 			{
-				if (*ActorItr == DistanceCharacterClass->GetItem()) { break; }
 				DistanceCharacterClass->PickupItem(*ActorItr);
 			}
 			else
@@ -266,30 +264,7 @@ void ADistancePlayerController::OnUseItemPressed()
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
-	if (DistanceCharacterClass->GetItem()->IsA(AItemCrystal::StaticClass()))
-	{
-		bool shrineFound = false;
-		for (TActorIterator<AShrine> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-		{
-			float distToShrine = DistanceCharacterClass->GetDistanceTo(*ActorItr);
-			if (distToShrine <= rangeToShrine)
-			{
-				shrineFound = true;	
-			}
-		}
-		if (shrineFound)
-		{
-			Cast<AItemCrystal>(DistanceCharacterClass->GetItem())->StartUse(false);
-		}
-		else
-		{
-			Cast<AItemCrystal>(DistanceCharacterClass->GetItem())->StartUse(true);
-		}
-	}
-	else
-	{
-		DistanceCharacterClass->GetItem()->StartUse();
-	}
+	DistanceCharacterClass->GetItem()->StartUse();
 	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
 }
 
@@ -306,14 +281,7 @@ void ADistancePlayerController::OnOtherUseItemPressed()
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
-	if (DistanceCharacterClass->GetItem()->IsA(AItemCrystal::StaticClass()))
-	{
-		Cast<AItemCrystal>(DistanceCharacterClass->GetItem())->StartUse(true);
-	}
-	else
-	{
-		DistanceCharacterClass->GetItem()->StartUse();
-	}
+	DistanceCharacterClass->GetItem()->StartUse();
 	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
 }
 

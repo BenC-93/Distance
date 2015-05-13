@@ -18,9 +18,10 @@ class DISTANCE_API AItemCrystal : public AItem
 	
 public:
 
+	float rangeToShrine;
+
 	AItemCrystal(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
-	void StartUse(bool spawnSpirit);
 
 	UPROPERTY(Category = Spirit, EditAnywhere)
 	TSubclassOf<class ASpirit> SpiritClass;

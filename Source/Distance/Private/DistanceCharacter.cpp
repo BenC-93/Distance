@@ -117,6 +117,7 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)
 	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot) && InvSlot != 0)
 	{
 		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
+		EquippedSlot = 0;
 		EquipItem(0);//equip lantern
 		Inventory.RemoveAt(InvSlot);
 		spriteInventory.RemoveAt(InvSlot);

@@ -97,6 +97,8 @@ void AAIBoss_Doubt::PostInitializeComponents()
 			tentacle->SetBossParent(this);
 		}
 	}
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
 	Super::PostInitializeComponents();
 }
 

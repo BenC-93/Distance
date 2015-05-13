@@ -19,7 +19,12 @@ void AItemCrystal::StartUse()
 		printScreen(FColor::Red, TEXT("Beginning Convergence"));
 		ConvergenceManager::StartConvergence();
 		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
-		if (OwningPawn != NULL) OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
+		if (OwningPawn != NULL)
+		{
+			SpawnConvergenceCrystal();
+
+			OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
+		}
 		Drop();
 	}
 }
@@ -64,4 +69,23 @@ bool AItemCrystal::ServerSpawnSpirit_Validate()
 void AItemCrystal::ServerSpawnSpirit_Implementation()
 {
 	SpawnSpirit();
+}
+
+void AItemCrystal::SpawnConvergenceCrystal()
+{
+	GetWorld()->SpawnActor<AConvergenceCrystal>(ConvergenceCrystalClass, FVector(OwningPawn->GetActorLocation()) - FVector(150.0f, 0.0f, 0.0f), FRotator(OwningPawn->GetActorRotation()));
+	if (Role < ROLE_Authority)
+	{
+		ServerSpawnConvergenceCrystal();
+	}
+}
+
+bool AItemCrystal::ServerSpawnConvergenceCrystal_Validate()
+{
+	return true;
+}
+
+void AItemCrystal::ServerSpawnConvergenceCrystal_Implementation()
+{
+	SpawnConvergenceCrystal();
 }

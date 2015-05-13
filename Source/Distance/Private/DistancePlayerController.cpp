@@ -101,7 +101,7 @@ void ADistancePlayerController::ItemPickup()
 {
 	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if (ActorItr->IsA(AItemLantern::StaticClass()))
+		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
 		{
 			continue;
 		}
@@ -109,7 +109,6 @@ void ADistancePlayerController::ItemPickup()
 		{
 			if (DistanceCharacterClass->GetInventory().Num() <= 4)
 			{
-				if (*ActorItr == DistanceCharacterClass->GetItem()) { break; }
 				DistanceCharacterClass->PickupItem(*ActorItr);
 			}
 			else

@@ -4,6 +4,7 @@
 #include "AIBoss_Doubt.h"
 #include "UnrealNetwork.h"
 #include "ItemShield.h"
+#include "ConvergenceCrystal.h"
 #include "Tentacle.h"
 
 AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
@@ -11,22 +12,18 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 {
 	Health = 100.0f;
 	MaxHealth = 100.0f;//TODO: will change
-	baseDamage = -1.0f;//TODO: will change along with other vars here
+	baseDamage = -1.0f;//TODO: will change along with other vars here during playtesting
 	drainRate = 0.25f;
 	tentacleHealth = 10.0f;
 	numTentacles = 4;
+
+	targetActor = NULL;
 
 	distToPlayer = 1;
 	tentacleYaw = 0;
 	chosenTentacleIndex = 0;
 	tentacleCounter = 0;
 	tentacleSpriteLen = 300.0f;//maybe 600, works with 650
-
-	/*for (int i = 0; i < numTentacles; i++)
-	{
-		ATentacle* tentacle = new ATentacle(ObjectInitializer);
-		tentacleArray.Add(tentacle);
-	}*/
 
 	swallowedPlayer = NULL;
 
@@ -185,7 +182,13 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
 	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
 
-	if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
+	if (tempPlayer->GetItem() == NULL)
+	{
+		printScreen(FColor::Red, TEXT("Player's item is NULL! LOOK, THIS IS BAD!"));
+		UE_LOG(LogTemp, Error, TEXT("Error: PullPlayer: player's item is NULL!"));
+		tempPlayer->ChangeSpeed(100);
+	}
+	else if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
 		tempPlayer->ChangeSpeed(50);//shield is enabled
 	}
@@ -198,6 +201,37 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 	tempPlayerController->SetNewMoveDestination(GetActorLocation());
 
 	//GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnTentacleAtLocation(TentacleClass, tempPlayer->GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
+}
+
+void AAIBoss_Doubt::PullActor(class AActor* tempActor)
+{
+	if (tempActor == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: PullActor, tempActor is Null."));
+		return;
+	}
+	FVector direction = tempActor->GetActorLocation() - GetActorLocation();
+	direction.Normalize();
+	float speed = 10.0f;
+	FVector newLoc = (direction * speed) + GetActorLocation();
+	//UE_LOG(LogDistance, Error, TEXT("crystal new loc: (%f, %f, %f)"), newLoc.X, newLoc.Y, newLoc.Z);
+	if (GetDistanceTo(tempActor) > 150.0f)
+	{
+		tempActor->SetActorLocation(newLoc);
+	}
+
+}
+
+void AAIBoss_Doubt::ActorPullTimer()
+{
+	if (targetActor)
+	{
+		PullActor(targetActor);
+	}
+	else
+	{
+		UE_LOG(LogDistance, Error, TEXT("TargetActor is NULL"));
+	}
 }
 
 void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)
@@ -237,13 +271,49 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 		UE_LOG(LogTemp, Error, TEXT("Error: DrainPlayer, tempPlayer is Null."));
 		return;
 	}
-	if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
+
+	if (tempPlayer->GetItem() == NULL)
+	{
+		printScreen(FColor::Red, TEXT("Player's item is NULL! LOOK, THIS IS BAD!"));
+		UE_LOG(LogTemp, Error, TEXT("Error: DrainPlayer: player's item is NULL!"));
+		tempPlayer->ChangeHealth(baseDamage);
+	}
+	else if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
 		tempPlayer->ChangeItemAmount(baseDamage);//shield is enabled
 	}
 	else
 	{
 		tempPlayer->ChangeHealth(baseDamage);
+	}
+}
+
+void AAIBoss_Doubt::ActorDrainTimer()
+{
+	if (targetActor)
+	{
+		DrainActor(targetActor);
+	}
+	else
+	{
+		UE_LOG(LogDistance, Error, TEXT("TargetActor is NULL"));
+	}
+}
+
+void AAIBoss_Doubt::DrainActor(class AActor* tempActor)
+{
+	if (tempActor)
+	{
+		//check if crystal
+		if (tempActor->IsA(AConvergenceCrystal::StaticClass()))
+		{
+			class AConvergenceCrystal* tempCrystal = Cast<AConvergenceCrystal>(tempActor);
+			tempCrystal->drainHealthDamage = 5.0f;//change the amount the crystal normally takes damage
+		}
+	}
+	else
+	{
+		UE_LOG(LogDistance, Error, TEXT("tempActor is NULL"));
 	}
 }
 
@@ -359,9 +429,15 @@ void AAIBoss_Doubt::EndOfBoss()
 		ReleasePlayer(player);
 		player = NULL;
 	}
-	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);
-	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
-	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
+
+	ReleasePlayer(player1);
+	ReleasePlayer(player2);
+
+	GetWorldTimerManager().ClearAllTimersForObject(this);
+
+	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);//if the clear all timers thing works, then we dont need these lines
+	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 	printScreen(FColor::Red, TEXT("End of Boss"));
 
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
@@ -378,64 +454,8 @@ void AAIBoss_Doubt::EndOfBoss()
 	}
 }
 
-void AAIBoss_Doubt::ChangeHealth(float healthAmount)//does damage to the boss or it's tentacles if it has any
-{//TODO: something weird is happening where if player1 does damage its fine, but then if player2 does damage, its as if the boss has full health again, and when the boss has 0 health it still does stuff
-	/*if (playerController)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Total Attack Damage: %f"), healthAmount);
-		if (!playerController->canMove && numTentacles > 0)//if a player is grabbed and tentacle has health, deal the damage to the tentacle
-		{
-			//float tempTentacleHealth = tentacleHealth + healthAmount;
-			if (tempTentacleHealth <= 0)//defeated current tentacle
-			{
-				tentacleHealth = 0;
-				//begin extra boss dmg-----
-				float tempHealth = Health - 10;//since we defeated a tentacle, we do small amount of damage to boss too!
-				if (tempHealth <= MaxHealth)
-				{
-					if (tempHealth < 0)
-					{
-						Health = 0.0f;//Defeated boss!
-						EndOfBoss();
-					}
-					else
-					{
-						Health = tempHealth;
-					}
-				}
-				//end extra boss dmg-----
-				ReleasePlayer(player);
-				numTentacles--;
-				if (numTentacles > 0)//there are still tentacles left 
-				{
-					tentacleHealth = 10;//reset tentacle health
-					StartAttackTimer(3.0f);
-				}
-			}
-			else //tentacle still has health
-			{
-				tentacleHealth = tempTentacleHealth;
-			}
-			//
-		}
-		else if (playerController->canMove)//else if no player is grabbed, deal damage to the actual boss
-		{
-			float tempHealth = Health + healthAmount;
-			if (tempHealth <= MaxHealth)
-			{
-				if (tempHealth < 0)
-				{
-					Health = 0.0f;//Defeated boss!
-					EndOfBoss();
-				}
-				else
-				{
-					Health = tempHealth;
-				}
-			}
-		}
-		//UE_LOG(LogTemp, Warning, TEXT("Boss health: %f, Tentacle Health: %f, Num of Tentacles: %d"), Health, tentacleHealth, numTentacles);
-	}*/
+void AAIBoss_Doubt::ChangeHealth(float healthAmount)
+{
 	float tempHealth = Health + healthAmount;
 	if (tempHealth <= MaxHealth)
 	{
@@ -486,8 +506,8 @@ void AAIBoss_Doubt::Attack(float amount)
 
 ACharacter* AAIBoss_Doubt::ClosestPlayer()//assuming player 1 and player 2
 {
-	float p1Dist = AbsoluteVal((GetActorLocation() - player1->GetActorLocation()).Size());
-	float p2Dist = AbsoluteVal((GetActorLocation() - player2->GetActorLocation()).Size());
+	float p1Dist = GetDistanceTo(player1);//AbsoluteVal((GetActorLocation() - player1->GetActorLocation()).Size());
+	float p2Dist = GetDistanceTo(player2);//AbsoluteVal((GetActorLocation() - player2->GetActorLocation()).Size());
 	if (p1Dist < p2Dist)
 	{
 		return player1;
@@ -559,8 +579,21 @@ void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 			{
 				//set swallowed player
 				printScreen(FColor::Red, TEXT("Beginning Draining Swallowed Player."));
-				swallowedPlayer = player;
+				swallowedPlayer = player; // Cast<ADistanceCharacter>(OtherActor);
 				StartSwallowedTimer(drainRate / 1.5f);//drainRate = 0.25f normally
+			}
+			else if (!playerController->canMove && swallowedPlayer != NULL)
+			{
+				printScreen(FColor::Red, TEXT("Beginning Draining second Swallowed Player."));
+				StartDrainTimer(drainRate / 1.5f);//drainRate = 0.25f normally
+				//TODO: stuff since both players are swallowed
+				for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+				{
+					currentPlayer = Cast<ACharacter>(*ActorItr);
+					player = NULL;
+					playerController = NULL;//unless a crystal can be casted up the chain to distplayercontroller, then we set this to null
+					StartAttackTimer(3.0f);
+				}
 			}
 		}
 	}
@@ -590,6 +623,12 @@ void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, c
 			StartDrainTimer(drainRate);
 			
 			UE_LOG(LogTemp, Warning, TEXT("****Player Entered TENTACLE Triggered Area"));
+		}
+		else if (OtherActor->IsA(AConvergenceCrystal::StaticClass()))
+		{
+			targetActor = OtherActor;
+			GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorPullTimer, 0.1f, true);
+			GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorDrainTimer, 0.1f, true);
 		}
 	}
 }

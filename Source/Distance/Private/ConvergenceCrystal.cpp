@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Distance.h"
+#include "AIBoss_Doubt.h"
 #include "ConvergenceCrystal.h"
 
 AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitializer)
@@ -9,8 +10,11 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 	health = 100.0f;
 
 	healthLossRate = 0.5f;
+	drainHealthDamage = 1.0f;
 
 	movementSpeed = 390.0f; //speed in cm/s
+
+	bossDoubt = NULL;
 
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -28,6 +32,15 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 	//move to inbetween players
 	if (player1 && player2)
 	{
+		for (TActorIterator<AAIBoss_Doubt> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			bossDoubt = Cast<AAIBoss_Doubt>(*ActorItr);
+			if (ActorItr->p1InTrigger && ActorItr->p2InTrigger)
+			{
+				return;
+			}
+		}
+
 		FVector midpointVec = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
 		FVector direction = midpointVec - GetActorLocation();
 		float distToMidPoint = direction.Size();
@@ -57,14 +70,16 @@ void AConvergenceCrystal::PostInitializeComponents()
 void AConvergenceCrystal::LoseHealthTimer()
 {
 	//lose health over time
-	if (health - 1.0f <= 0.0f)
+	if (health - drainHealthDamage <= 0.0f)
 	{
 		health = 0;
 		GetWorldTimerManager().ClearTimer(this, &AConvergenceCrystal::LoseHealthTimer);
+		//convergence crystal just died, blow shit up, do stuff, idk...wait i found it out, end the boss
+		bossDoubt->EndOfBoss();
 	}
 	else
 	{
-		health -= 1.0f;
+		health -= drainHealthDamage;
 	}
 	UE_LOG(LogDistance, Warning, TEXT("crystal health: %f"), health);
 }

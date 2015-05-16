@@ -24,6 +24,9 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
+	bool p1InTrigger;
+	bool p2InTrigger;
+
 	UPROPERTY(Category = Items, EditAnywhere)
 	TSubclassOf<class ATentacle> TentacleClass;
 
@@ -103,9 +106,16 @@ public:
 	float tentacleCounter;
 	float tentacleSpriteLen;
 
+	class AActor* targetActor;
+	void PullActor(class AActor* tempActor);
+
 	void PullPlayer(class ACharacter* tempChar);
 	void ReleasePlayer(class ACharacter* tempChar);
 	void DrainPlayer(class ADistanceCharacter* tempPlayer);
+
+	void ActorPullTimer();
+	void DrainActor(class AActor* tempActor);
+	void ActorDrainTimer();
 
 	void TentacleTimer();
 	void StartTentacleTimer(float rate);
@@ -131,9 +141,6 @@ private:
 	int numTentacles;
 	float baseDamage;
 	float drainRate;
-
-	bool p1InTrigger;
-	bool p2InTrigger;
 
 	void Attack(float amount);
 

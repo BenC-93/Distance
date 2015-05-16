@@ -74,19 +74,23 @@ void ADistancePlayerController::SetupInputComponent()
 
 void ADistancePlayerController::MoveForward(float val)
 {
-	DistanceCharacterClass->AddMovementInput(FVector(1.0, 0.0, 0.0), GetInputAxisValue("MoveForward"));
+	if (canMove) {
+		DistanceCharacterClass->AddMovementInput(FVector(1.0, 0.0, 0.0), GetInputAxisValue("MoveForward"));
+	}
 }
 
 void ADistancePlayerController::MoveRight(float val)
 {
-	DistanceCharacterClass->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
-	if (val > 0.f)
-	{
-		DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
-	}
-	else if (val < 0.f)
-	{
-		DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	if (canMove) {
+		DistanceCharacterClass->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
+		if (val > 0.f)
+		{
+			DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+		}
+		else if (val < 0.f)
+		{
+			DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+		}
 	}
 }
 

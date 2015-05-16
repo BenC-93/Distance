@@ -386,8 +386,8 @@ void AAIBoss_Doubt::DrainTimer()
 	DrainPlayer(player);
 	if (player->Health == 0)//we "killed" the player, oops lol
 	{
-		ReleasePlayer(player);
-		EndOfBoss();
+		//ReleasePlayer(player);
+		//EndOfBoss();
 	}
 }
 
@@ -408,7 +408,7 @@ void AAIBoss_Doubt::SwallowedTimer()
 	DrainPlayer(swallowedPlayer);
 	if (swallowedPlayer->Health == 0)//we "killed" the player, oops lol
 	{
-		ReleasePlayer(swallowedPlayer);
+		//ReleasePlayer(swallowedPlayer);
 	}
 }
 

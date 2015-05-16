@@ -103,7 +103,7 @@ void ADistancePlayerController::ItemPickup()
 {
 	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
+		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DCharacter()->GetItem())
 		{
 			continue;
 		}
@@ -281,7 +281,7 @@ void ADistancePlayerController::OnUseItemPressed()
 	}
 
 	DCharacter()->GetItem()->StartUse();
-	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DCharacter()->GetItemEnabled());
 }
 
 //temp
@@ -299,7 +299,7 @@ void ADistancePlayerController::OnOtherUseItemPressed()
 	}
 
 	DCharacter()->GetItem()->StartUse();
-	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DCharacter()->GetItemEnabled());
 }
 
 void ADistancePlayerController::OnUseItemReleased()

@@ -81,7 +81,6 @@ void ADistancePlayerController::MoveForward(float val)
 
 void ADistancePlayerController::MoveRight(float val)
 {
-	printLog(TEXT("input right: %f"), GetInputAxisValue("MoveRight"));
 	Cast<ADistancePlayerProxy>(GetPawn())->MoveFromInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
 	if (val > 0.f)
 	{

@@ -137,32 +137,31 @@ void ADistanceCharacter::EquipItem(int32 InvSlot)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Inventory length: %d"), Inventory.Num());
 	UE_LOG(LogTemp, Warning, TEXT("InvSlot to be equipped: %d"), InvSlot);
+	if (EquippedSlot == 0 && InvSlot == 0) { return; }
+	if (GetItem() != NULL)
 	{
-		if (GetItem() != NULL)
+		GetItem()->OnUnequip();
+		if (Inventory.IsValidIndex(EquippedSlot))
 		{
-			GetItem()->OnUnequip();
-			if (Inventory.IsValidIndex(EquippedSlot))
-			{
-				Inventory[EquippedSlot]->Update(GetItem());
-			}
+			Inventory[EquippedSlot]->Update(GetItem());
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Previous Item is Null!"));
-		}
-		EquippedSlot = InvSlot;
-		EquipItemComponent(EquippedSlot);
-		if (GetItem() != NULL)
-		{
-			GetItem()->OnEquip();
-			GetItem()->Update(Inventory[EquippedSlot]);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Equipped Item is Null!"));
-		}
-		ItemPickedUp();
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Previous Item is Null!"));
+	}
+	EquippedSlot = InvSlot;
+	EquipItemComponent(EquippedSlot);
+	if (GetItem() != NULL)
+	{
+		GetItem()->OnEquip();
+		GetItem()->Update(Inventory[EquippedSlot]);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Equipped Item is Null!"));
+	}
+	ItemPickedUp();
 }
 
 void ADistanceCharacter::EquipItemComponent(int32 InvSlot)

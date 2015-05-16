@@ -21,7 +21,7 @@ public:
 	static void InitializeWithPlayers(class ADistanceCharacter* p1, class ADistanceCharacter* p2);
 	
 	static ConvergenceState StateFromLocation(FVector location);
-	
+
 	static void StartConvergence();
 	
 	static void EndConvergence();

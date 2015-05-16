@@ -38,9 +38,10 @@ void UInventoryItem::SetItemName(FString n)
 
 void UInventoryItem::Update(class AItem* item)
 {
-	ItemClass = item->GetClass();
-	name = item->GetItemName();
-	maxValue = item->maxAmount;
+	// Only update the stuff that changes
+	ItemClass = item->GetClass(); // This might need updating?
+//	name = item->GetItemName();
+//	maxValue = item->maxAmount;
 	currentValue = item->amount;
 }
 

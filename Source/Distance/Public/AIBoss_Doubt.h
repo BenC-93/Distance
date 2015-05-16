@@ -27,8 +27,8 @@ public:
 	bool p1InTrigger;
 	bool p2InTrigger;
 
-	UPROPERTY(Category = Items, EditAnywhere)
-	TSubclassOf<class ATentacle> TentacleClass;
+	//UPROPERTY(Category = Items, EditAnywhere)
+	//TSubclassOf<class ATentacle> TentacleClass;
 
 	ATentacle* GetTentacle(int index);
 
@@ -94,8 +94,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	class ADistancePlayerController* playerController;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Tentacle")
-	TArray<class ATentacle*> tentacleArray;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Tentacle")
+	//TArray<class ATentacle*> tentacleArray;
 
 	UFUNCTION(BlueprintCallable, Category = "Rotations")
 	FRotator FaceActorRotation(FVector myActorLoc, class AActor* OtherActor);

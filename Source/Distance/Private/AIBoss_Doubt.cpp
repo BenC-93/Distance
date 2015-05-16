@@ -29,14 +29,14 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 
 	p1InTrigger = false;
 	p2InTrigger = false;
-
+	//capsule component 360 by 360
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
 	SpriteComponent->AttachTo(RootComponent);
 
 	AITriggerRange = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerRange"));
 	AITriggerRange->Mobility = EComponentMobility::Movable;
-	AITriggerRange->SetBoxExtent(FVector(1000.0f, 1000.0f, 60.0f), true);
+	AITriggerRange->SetBoxExtent(FVector(1600.0f, 1600.0f, 500.0f), true);
 	AITriggerRange->AttachTo(RootComponent);
 
 	AITriggerRange->OnComponentBeginOverlap.AddDynamic(this, &AAIBoss_Doubt::OnOverlapBegin);
@@ -44,7 +44,7 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 
 	AITriggerAttack = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerAttack"));
 	AITriggerAttack->Mobility = EComponentMobility::Movable;
-	AITriggerAttack->SetBoxExtent(FVector(150.0f, 100.0f, 60.0f), true);
+	AITriggerAttack->SetBoxExtent(FVector(750.0f, 650.0f, 500.0f), true);
 	AITriggerAttack->AttachTo(RootComponent);
 
 	TentacleComponent0 = CreateTentacleComponent(0, ObjectInitializer);
@@ -99,12 +99,12 @@ void AAIBoss_Doubt::PostInitializeComponents()
 	Super::PostInitializeComponents();
 }
 
-void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+/*void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AAIBoss_Doubt, tentacleArray);
-}
+	//DOREPLIFETIME(AAIBoss_Doubt, tentacleArray);
+}*/
 
 void AAIBoss_Doubt::Tick(float DeltaTime)
 {
@@ -135,28 +135,30 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 						//printScreen(FColor::Red, "Boss targeting: Player2");
 					}
 				}
-				//if swallowedPlayer == player -> then currentPlayer needs to be other player
-				if (swallowedPlayer != NULL)
-				{
-					if (swallowedPlayer == player)
-					{
-						printScreen(FColor::Red, TEXT("Resetting Target, one player has been swallowed"));
-						if (player == player1)
-						{
-							currentPlayer = player2;
-							player = Cast<ADistanceCharacter>(currentPlayer);
-							playerController = Cast<ADistancePlayerController>(player->GetController());
-						}
-						else
-						{
-							currentPlayer = player1;
-							player = Cast<ADistanceCharacter>(currentPlayer);
-							playerController = Cast<ADistancePlayerController>(player->GetController());
-						}
-						StartAttackTimer(3.0f);//attack the new target
-					}
-				}
 			}
+		}
+	}
+	//if swallowedPlayer == player -> then currentPlayer needs to be other player
+	if (swallowedPlayer && player && !targetActor)
+	{
+		if (player == swallowedPlayer)
+		{
+			printScreen(FColor::Red, TEXT("Resetting Target, one player has been swallowed"));
+			if (player == player1)
+			{
+				currentPlayer = player2;
+				player = Cast<ADistanceCharacter>(currentPlayer);
+				playerController = Cast<ADistancePlayerController>(player->GetController());
+				UE_LOG(LogTemp, Warning, TEXT("current player switched to second player"));
+			}
+			else
+			{
+				currentPlayer = player1;
+				player = Cast<ADistanceCharacter>(currentPlayer);
+				playerController = Cast<ADistancePlayerController>(player->GetController());
+				UE_LOG(LogTemp, Warning, TEXT("current player switched to first player"));
+			}
+			StartAttackTimer(3.0f);//attack the new target
 		}
 	}
 	if (swallowedPlayer)
@@ -167,6 +169,22 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			printScreen(FColor::Red, TEXT("Swallowed Player was Released by other player switching Items"));
 			ReleasePlayer(swallowedPlayer);
 			playerController->switchedItem = false;
+		}
+	}
+	else
+	{
+		if (player1 && player2)
+		{
+			ADistancePlayerController *player1Controller = Cast<ADistancePlayerController>(player1->GetController());
+			ADistancePlayerController *player2Controller = Cast<ADistancePlayerController>(player2->GetController());
+			if (player1Controller->switchedItem)
+			{
+				player1Controller->switchedItem = false;
+			}
+			if (player2Controller->switchedItem)
+			{
+				player2Controller->switchedItem = false;
+			}
 		}
 	}
 }
@@ -475,6 +493,10 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)
 		{
 			StartAttackTimer(3.0f);
 		}
+		else//no more tentacles
+		{
+			EndOfBoss();
+		}
 
 		if (tempHealth <= 0)
 		{
@@ -611,8 +633,10 @@ void AAIBoss_Doubt::OnExitAttackTrigger(class AActor* OtherActor)
 
 void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Error, TEXT("IM ANGRY FACE, HEAR ME ROAR, AND TENTACLES ENTER EVERYTHING!!!!!!"));
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("****THING Entered TENTACLE Triggered Area: %s"), *OtherActor->GetName());
 		if (CheckIfPlayer(OtherActor))
 		{
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
@@ -626,9 +650,12 @@ void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, c
 		}
 		else if (OtherActor->IsA(AConvergenceCrystal::StaticClass()))
 		{
-			targetActor = OtherActor;
-			GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorPullTimer, 0.1f, true);
-			GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorDrainTimer, 0.1f, true);
+			if (swallowedPlayer && player)
+			{
+				targetActor = OtherActor;
+				GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorPullTimer, 0.1f, true);
+				GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorDrainTimer, 0.1f, true);
+			}
 		}
 	}
 }

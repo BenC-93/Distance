@@ -29,6 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = Item)
 	ADistanceCharacter* OwningPawn;
 
+	UPROPERTY(Category = Animation, EditAnywhere)
+	UAnimationAsset* UseAnimation;
+
 	/* Whether item can be dropped once in inventory. 
 	   Used primarily for the 'Lantern' item. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Item)

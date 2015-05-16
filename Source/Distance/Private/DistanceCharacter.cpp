@@ -54,8 +54,8 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	SpriteComponent->SetIsReplicated(true);
 
 	ItemComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("ItemComponent"));
-	ItemComponent->ChildActorClass = AItem::StaticClass();
-	ItemComponent->OnComponentCreated();
+//	ItemComponent->ChildActorClass = AItem::StaticClass();
+//	ItemComponent->OnComponentCreated();
 	ItemComponent->AttachTo(RootComponent);
 	ItemComponent->SetIsReplicated(true);
 

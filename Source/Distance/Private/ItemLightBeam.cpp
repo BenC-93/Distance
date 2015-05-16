@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Distance.h"
+#include "DistanceCharacter.h"
+#include "DistancePlayerController.h"
 #include "ItemLightBeam.h"
 
 AItemLightBeam::AItemLightBeam(const FObjectInitializer& ObjectInitializer)
@@ -51,20 +53,27 @@ void AItemLightBeam::StartUse()
 
 void AItemLightBeam::EndUse()
 {
+	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(GetOwningPawn()->GetController());
 	if (isInUse)
 	{
 		GetWorldTimerManager().ClearTimer(this, &AItemLightBeam::Charge);
 		isInUse = false;
 		canUse = false;
 		//start attack animation
-		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::AnimationTimer, 2.0f, false);
+		
+		playerController->canMove = false;
+		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
+		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::AnimationTimer, 0.85f, false);
 	}
 }
 
 void AItemLightBeam::AnimationTimer()
 {
+	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(GetOwningPawn()->GetController());
+	playerController->canMove = true;
 	canUse = true;
 	hasAttacked = false;
+	GetOwningPawn()->GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 }
 
 void AItemLightBeam::Charge()

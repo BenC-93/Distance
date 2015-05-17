@@ -206,7 +206,10 @@ void ADistancePlayerController::OnSetTargetPressed()
 
 	// Handle different Hit types here!
 	hitActor = Hit.GetActor();
-	if (hitActor && hitActor->IsA(AItem::StaticClass()))//if we click on an Item
+	if (hitActor == NULL){
+		return;
+	}
+	if (hitActor->IsA(AItem::StaticClass()))//if we click on an Item
 	{
 		printScreen(FColor::Red, TEXT("Clicked an Item"));
 		AItem* item = Cast<AItem>(hitActor);

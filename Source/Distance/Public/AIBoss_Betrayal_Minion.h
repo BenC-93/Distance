@@ -21,6 +21,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
 	class UPaperSpriteComponent* SpriteComponent;
 
+	virtual void Tick(float DeltaTime) override;
+
 	//~~~ Health ~~~//
 	float Health;
 	float MaxHealth;
@@ -34,13 +36,15 @@ public:
 	FVector TargetLocation;
 	float TargetSpeed;
 
+	FVector CopyLength;
+
 	void SetTargetActor(AActor* t);
 	AActor* GetTargetActor();
 
 	//~~~ Move states(States) and functions ~~~//
 	MoveState ActiveMoveState;
 
-	void SetMoveState(MoveState m);
+	void SetMoveState(MoveState m, ACharacter* c);
 	MoveState GetMoveState();
 
 	void MoveStatic();
@@ -49,4 +53,9 @@ public:
 	void MoveRandom();
 
 	void StartMoveRandomTimer();
+
+	//~~~ Owning Monster ~~~//
+	class AAIBoss_Betrayal* OwningPawn;
+
+	void SetOwner(class AAIBoss_Betrayal* b);
 };

@@ -24,5 +24,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Amount)
 	void Drain();
+
+	UFUNCTION(BlueprintCallable, Category = "Timers")
+	void AnimationTimer();
 	
 };

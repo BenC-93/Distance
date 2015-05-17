@@ -7,7 +7,7 @@
 AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	health = 100.0f;
+	health = 300.0f;
 
 	healthLossRate = 0.5f;
 	drainHealthDamage = 1.0f;

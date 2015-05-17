@@ -3,6 +3,8 @@
 #include "Distance.h"
 #include "DistanceCharacter.h"
 #include "DistancePlayerController.h"
+#include "AIBoss_Betrayal.h"
+#include "AIBoss_Betrayal_Minion.h"
 #include "ItemLightBeam.h"
 
 AItemLightBeam::AItemLightBeam(const FObjectInitializer& ObjectInitializer)
@@ -31,10 +33,24 @@ void AItemLightBeam::Tick(float DeltaTime)
 	{
 		//UE_LOG(LogDistance, Error, TEXT("timer active and targetActor is: %s"), *targetActor->GetName());
 		//check for boss collision stuff
-		if (targetActor->IsA(ATentacle::StaticClass()))//tentacles
+		if (targetActor->IsA(ATentacle::StaticClass()))
 		{
 			UE_LOG(LogTemp, Error, TEXT("Light beam hit the tentacle!"));
 			Cast<ATentacle>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
+			totalChargedAmount = 0.0f;
+			hasAttacked = true;
+		}
+		else if (targetActor->IsA(AAIBoss_Betrayal::StaticClass()))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Light beam hit the betrayal boss!"));
+			Cast<AAIBoss_Betrayal>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
+			totalChargedAmount = 0.0f;
+			hasAttacked = true;
+		}
+		else if (targetActor->IsA(AAIBoss_Betrayal_Minion::StaticClass()))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Light beam hit the betrayal minion!"));
+			Cast<AAIBoss_Betrayal_Minion>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
 			totalChargedAmount = 0.0f;
 			hasAttacked = true;
 		}

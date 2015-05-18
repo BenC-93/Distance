@@ -32,10 +32,28 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 		}
 		else
 		{
-			FVector temp = TargetLocation - GetActorLocation();
-			temp.Normalize();
-			temp = (DeltaTime * temp * TargetSpeed) + GetActorLocation();
-			SetActorLocation(temp);
+			FVector dist = GetActorLocation() - TargetLocation;
+			if (dist.Size() > 5.f)
+			{
+				FVector temp = TargetLocation - GetActorLocation();
+				temp.Normalize();
+				temp = (DeltaTime * temp * TargetSpeed) + GetActorLocation();
+				if (ActiveMoveState == FOLLOW)
+				{
+					if (GetDistanceTo(TargetActor) > 150.f)
+					{
+						SetActorLocation(temp);
+					}
+				}
+				else
+				{
+					SetActorLocation(temp);
+				}
+			}
+			else
+			{
+				SetActorLocation(TargetLocation);
+			}
 		}
 	}
 
@@ -144,7 +162,7 @@ void AAIBoss_Betrayal_Minion::MoveRandom()
 	float distRange = 300.f;
 	float speedRange = 300.f;
 	FVector temp = FVector(FMath::FRandRange(-distRange, distRange), FMath::FRandRange(-distRange, distRange), 0.f);
-	temp.Normalize();
+	//temp.Normalize();
 	TargetLocation = GetActorLocation() + temp;
 	TargetSpeed = FMath::RandRange(100.f, speedRange);
 }

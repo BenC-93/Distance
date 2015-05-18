@@ -82,22 +82,22 @@ void AAIBoss_Betrayal::BeginCycle()
 		switch (i)
 		{
 			case 0:
-				SpawnMonster(offset, MoveState::RANDOM, NULL);
-				break;
-			case 1:
 				SpawnMonster(offset, MoveState::COPY, player1);
 				break;
-			case 2:
+			case 1:
 				SpawnMonster(offset, MoveState::FOLLOW, player1);
 				break;
-			case 3:
-				SpawnMonster(offset, MoveState::RANDOM, NULL);
+			case 2:
+				SpawnMonster(offset, MoveState::RANDOM, player1);
 				break;
-			case 4:
+			case 3:
 				SpawnMonster(offset, MoveState::COPY, player2);
 				break;
-			case 5:
+			case 4:
 				SpawnMonster(offset, MoveState::FOLLOW, player2);
+				break;
+			case 5:
+				SpawnMonster(offset, MoveState::RANDOM, player2);
 				break;
 			default:
 				SpawnMonster(offset, MoveState::STATIC, NULL);

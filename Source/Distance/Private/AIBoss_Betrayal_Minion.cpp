@@ -12,7 +12,7 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);
 	SpriteComponent->AttachTo(RootComponent);
 
-	Health = MaxHealth = 100.f;
+	Health = MaxHealth = 15.f;
 	TargetActor = this;
 	TargetLocation = GetActorLocation();
 	TargetSpeed = 10.f;
@@ -37,17 +37,17 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 			temp = (DeltaTime * temp * TargetSpeed) + GetActorLocation();
 			SetActorLocation(temp);
 		}
+	}
 
-		if (ActiveMoveState == COPY)
-		{
-			MoveCopy();
-			return;
-		}
-		else if (ActiveMoveState == FOLLOW)
-		{
-			MoveFollow();
-			return;
-		}
+	if (ActiveMoveState == COPY)
+	{
+		MoveCopy();
+		return;
+	}
+	else if (ActiveMoveState == FOLLOW)
+	{
+		MoveFollow();
+		return;
 	}
 }
 
@@ -108,7 +108,7 @@ void AAIBoss_Betrayal_Minion::SetMoveState(MoveState m, ACharacter* c)
 	switch (ActiveMoveState)
 	{
 	case STATIC: MoveStatic(); break;
-	case COPY: CopyLength = TargetActor->GetActorLocation() - GetActorLocation(); MoveCopy(); break;
+	case COPY: CopyLength = TargetActor->GetActorLocation() - GetActorLocation(); CopyLength.Normalize(); MoveCopy(); break;
 	case FOLLOW: MoveFollow(); break;
 	case RANDOM: StartMoveRandomTimer(); break;
 	default: break;
@@ -128,30 +128,30 @@ void AAIBoss_Betrayal_Minion::MoveStatic()
 
 void AAIBoss_Betrayal_Minion::MoveCopy()
 {
-	TargetLocation = TargetActor->GetActorLocation() + CopyLength;
+	TargetLocation = TargetActor->GetActorLocation() + (150 * CopyLength);
 	TargetSpeed = -1.f;
 }
 
 void AAIBoss_Betrayal_Minion::MoveFollow()
 {
 	TargetLocation = TargetActor->GetActorLocation();
-	TargetSpeed = 10.f;
+	TargetSpeed = 300.f;
 }
 
 void AAIBoss_Betrayal_Minion::MoveRandom()
 {
 	//set TargetLocation to a random location nearby
-	float distRange = 25.f;
-	float speedRange = 10.f;
+	float distRange = 300.f;
+	float speedRange = 300.f;
 	FVector temp = FVector(FMath::FRandRange(-distRange, distRange), FMath::FRandRange(-distRange, distRange), 0.f);
 	temp.Normalize();
 	TargetLocation = GetActorLocation() + temp;
-	TargetSpeed = FMath::RandRange(-speedRange, speedRange);
+	TargetSpeed = FMath::RandRange(100.f, speedRange);
 }
 
 void AAIBoss_Betrayal_Minion::StartMoveRandomTimer()
 {
-	float timeTilMove = FMath::FRandRange(1.f, 20.f); //add a range to this func call, then uncomment
+	float timeTilMove = FMath::FRandRange(1.f, 5.f); //add a range to this func call, then uncomment
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::MoveRandom, timeTilMove, true);
 }
 

@@ -2,8 +2,10 @@
 
 #include "Distance.h"
 #include "DItemPickup.h"
+#include "DistanceCharacter.h"
+#include "DItem.h"
 
-DItemPickup::DItemPickup(const FObjectInitializer& ObjectInitializer)
+ADItemPickup::ADItemPickup(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
 	amount = 100.0f;
@@ -23,7 +25,7 @@ DItemPickup::DItemPickup(const FObjectInitializer& ObjectInitializer)
 // This is going to be doing some spawning and destruction, the method should only be called from authority
 void ADItemPickup::OnUsed(APawn *InstigatorPawn)
 {
-	ensure(Role == ROLE_Authority)
+	ensure(Role == ROLE_Authority);
 	ADistanceCharacter* MyCharacter = Cast<ADistanceCharacter>(InstigatorPawn);
 	if (MyCharacter)
 	{
@@ -40,7 +42,7 @@ void ADItemPickup::OnUsed(APawn *InstigatorPawn)
 		else
 		{
 			// TODO: Potentially add actual UI feedback to this thing
-			printScreen(TEXT("Inventory full when picking up item"));
+			UE_LOG(LogDistance, Warning, TEXT("Inventory full when picking up item"));
 		}
 	}
 }

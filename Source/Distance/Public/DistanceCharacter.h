@@ -61,7 +61,9 @@ public:
 	TArray<class UTexture2D*> spriteInventory;
 
 	/* Inventory array */
-	TArray<UInventoryItem*> Inventory;
+	TArray<class ADItem*> Inventory;
+	
+	class ADItem* CurrentItem;
 
 	/* Array index of currently equipped item */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
@@ -117,6 +119,20 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
 	void BPTransitionToNewConvergenceState();
+	
+//
+//  NEW STUFF GOES HERE, SORT LATER
+//
+	
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void AddItem(class ADItem* NewItem);
+	
+	UFUNCTION(BlueprintCallable, Category = Item)
+	bool HasInventorySpace();
+	
+//
+//
+//	
 	
 
 	UFUNCTION(BlueprintCallable, Category = Item)

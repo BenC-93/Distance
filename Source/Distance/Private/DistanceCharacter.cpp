@@ -3,6 +3,7 @@
 #include "Distance.h"
 #include "DistanceCharacter.h"
 #include "Item.h"
+#include "DItem.h"
 #include "Engine.h"
 #include "UnrealNetwork.h"
 #include <cmath>
@@ -252,6 +253,35 @@ void ADistanceCharacter::StartRegeneration()
 	GetWorldTimerManager().SetTimer(this, &ADistanceCharacter::RegenerateHealth, RegenInterval, true);
 	UE_LOG(LogDistance, Verbose, TEXT("Health regeneration timer is set"));
 }
+
+//
+//	New stuff here, sort later
+//
+
+void ADistanceCharacter::AddItem(class ADItem* NewItem)
+{
+	if (NewItem && HasAuthority())
+	{
+		NewItem->OnEnterInventory();
+		Inventory.Add(NewItem);
+		
+		// Equip Automatically?
+		if (Inventory.Num() > 0)
+		{
+			ADItem* NewestItem = Inventory.Last();
+			EquipItem(NewestItem);
+		}
+	}
+}
+
+bool ADistanceCharacter::HasInventorySpace()
+{
+	return Inventory.Num() < 5;
+}
+
+//
+//
+//
 
 void ADistanceCharacter::ChangeItemAmount(float itemAmount)
 {

@@ -82,22 +82,63 @@ UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjec
 	return TentacleComponent;
 }
 
-void AAIBoss_Doubt::PostInitializeComponents()
+/*void AAIBoss_Doubt::PostLoad()
 {
+	Super::PostLoad();
 	for (int i = 0; i < TentacleComponentArray.Num(); i++)
 	{
 		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
 		UE_LOG(LogTemp, Warning, TEXT("this line is just before setting tentacle parents"));
+		if (TentacleComponentArray[i]->ChildActor)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("TentaclesComponentArray is good to go my good sir."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("TentacleComponentArray is NULL"));
+		}
 		if (tentacle != NULL)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("trying to set tentacles parents..."));
+			UE_LOG(LogTemp, Warning, TEXT("Tentacle parents are set"));
 			tentacle->SetBossParent(this);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Tentacles are NULL"));
 		}
 	}
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-	Super::PostInitializeComponents();
 }
+
+void AAIBoss_Doubt::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	for (int i = 0; i < TentacleComponentArray.Num(); i++)
+	{
+		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
+		UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: this line is just before setting tentacle parents"));
+		if (TentacleComponentArray[i]->ChildActor)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: TentaclesComponentArray is good to go my good sir."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PostInitializeComponents: TentacleComponentArray is NULL"));
+		}
+		if (tentacle != NULL)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: Tentacle parents are set"));
+			tentacle->SetBossParent(this);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PostInitializeComponents: Tentacles are NULL"));
+		}
+	}
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+}*/
 
 /*void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {

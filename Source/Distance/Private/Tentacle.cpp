@@ -10,6 +10,8 @@ ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 	health = 10.0f;
 	maxHealth = 10.0f;
 
+	PrimaryActorTick.bCanEverTick = true;
+
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
 	RootComponent = RootSceneComponent;
 
@@ -24,6 +26,55 @@ ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 	TriggerBox->RelativeLocation = FVector(-474.0f, -76.0f, 0.0f);
 	TriggerBox->AttachTo(RootComponent);
 
+}
+
+void ATentacle::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (!closestBoss)
+	{
+		FindParent();
+	}
+}
+
+//tentacles find the closest boss doubt and set them as their parent
+/*void ATentacle::PostLoad()//got rid of postinitializecomponents in aiboss doubt because the tentacles would be null there and in these methods too
+{
+	Super::PostLoad();
+	FindParent();
+}
+
+void ATentacle::PostActorCreated()
+{
+	Super::PostActorCreated();
+	FindParent();
+}*/
+
+void ATentacle::FindParent()//apparently, this cannot be called within any of the post load functions
+{
+	for (TActorIterator<AAIBoss_Doubt> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (!closestBoss)
+		{
+			closestBoss = Cast<AAIBoss_Doubt>(*ActorItr);
+		}
+		else
+		{
+			if (GetDistanceTo(*ActorItr) < GetDistanceTo(closestBoss))
+			{
+				closestBoss = Cast<AAIBoss_Doubt>(*ActorItr);
+			}
+		}
+	}
+	if (closestBoss)
+	{
+		SetBossParent(closestBoss);
+	}
+	else
+	{
+		UE_LOG(LogDistance, Error, TEXT("There is no boss for the tentacle!"));
+	}
 }
 
 void ATentacle::SetBossParent(class AAIBoss_Doubt* parent)

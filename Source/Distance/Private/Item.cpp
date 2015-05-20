@@ -46,7 +46,9 @@ void AItem::OnEquip()
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
-	GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
+	if (!isInUse) {
+		GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
+	}
 }
 
 void AItem::OnUnequip()

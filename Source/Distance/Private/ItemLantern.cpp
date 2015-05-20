@@ -39,6 +39,7 @@ void AItemLantern::StartUse()
 
 void AItemLantern::EndUse()
 {
+	//isInUse = false;
 	return;
 }
 

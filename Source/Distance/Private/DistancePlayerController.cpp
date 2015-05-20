@@ -5,6 +5,7 @@
 #include "AIEnemy.h"
 #include "AIBoss_Doubt.h"
 #include "ItemCrystal.h"
+#include "DItemPickup.h"
 #include "AI/Navigation/NavigationSystem.h"
 #include "ConvergenceManager.h"
 
@@ -102,15 +103,15 @@ void ADistancePlayerController::CycleInventory()
 
 void ADistancePlayerController::ItemPickup()
 {
-	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	for (TActorIterator<ADItemPickup> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
-		{
-			continue;
-		}
+//		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
+//		{
+//			continue;
+//		}
 		if (DistanceCharacterClass->GetDistanceTo(*ActorItr) <= rangeToItem)
 		{
-			if (DistanceCharacterClass->GetInventory().Num() <= 4)
+			if (DistanceCharacterClass->HasInventorySpace())
 			{
 				DistanceCharacterClass->PickupItem(*ActorItr);
 			}
@@ -209,14 +210,14 @@ void ADistancePlayerController::OnSetTargetPressed()
 	if (hitActor == NULL){
 		return;
 	}
-	if (hitActor->IsA(AItem::StaticClass()))//if we click on an Item
+	if (hitActor->IsA(ADItemPickup::StaticClass()))//if we click on an Item
 	{
 		printScreen(FColor::Red, TEXT("Clicked an Item"));
-		AItem* item = Cast<AItem>(hitActor);
+		ADItemPickup* item = Cast<ADItemPickup>(hitActor);
 		if (DistanceCharacterClass->GetDistanceTo(item) < 250.0f)
 		{
 			//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), DistanceCharacterClass->GetInventory().Num());
-			if (DistanceCharacterClass->GetInventory().Num() <= 4)
+			if (DistanceCharacterClass->HasInventorySpace())
 			{
 				DistanceCharacterClass->PickupItem(item);
 			}
@@ -376,13 +377,10 @@ void ADistancePlayerController::OnConvergenceEnd()
 void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
+	// TODO: Create Lantern
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
-	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern(DistanceCharacterClass));
-	
-	//usually commented out
-	//DistanceCharacterClass->EquipItem(0);
-	//DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
+//	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern(DistanceCharacterClass));
 
-	DistanceCharacterClass->EquipItemComponent(0);
-	DistanceCharacterClass->ItemPickedUp();
+//	DistanceCharacterClass->EquipItemComponent(0);
+//	DistanceCharacterClass->ItemPickedUp();
 }

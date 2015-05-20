@@ -19,11 +19,11 @@ public:
 	
 	/* Item's name. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
-	FString name;
+	FString ItemName;
 	
 	/* An abstract value used for various values, depending on item. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Amount)
-	float amount;
+	float ItemAmount;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Root, meta = (AllowPrivateAccess = "true"))
 	class USceneComponent *RootSceneComponent;

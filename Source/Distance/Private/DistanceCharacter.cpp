@@ -4,6 +4,7 @@
 #include "DistanceCharacter.h"
 #include "Item.h"
 #include "DItem.h"
+#include "DItemPickup.h"
 #include "Engine.h"
 #include "UnrealNetwork.h"
 #include <cmath>
@@ -82,95 +83,44 @@ void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &O
 	DOREPLIFETIME(ADistanceCharacter, spriteInventory);
 }
 
-void ADistanceCharacter::AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass)//called at the beginning only once
+void ADistanceCharacter::PickupItem(ADItemPickup* Item)
 {
-	UInventoryItem* NewItem = new UInventoryItem();
-	NewItem->ItemClass = ItemClass;
-	NewItem->SetItemName(TEXT("Lantern"));
-	Inventory.Add(NewItem);
-	spriteInventory.Add(Inventory.Last()->GetItemSprite());
-}
-
-void ADistanceCharacter::PickupItem(AItem* Item)
-{
-	if (Item && Inventory.Num() < 5)
+	if (Item)
 	{
-		Inventory.Add(new UInventoryItem(Item));
-		spriteInventory.Add(Inventory.Last()->GetItemSprite());
-		Item->Pickup(this);
-		printScreen(FColor::Red, TEXT("Pickup happened!"));
-		ItemPickedUp();
+		Item->OnUsed(this);
 	}
 }
 
-bool ADistanceCharacter::ServerPickupItem_Validate(AItem* Item)
+bool ADistanceCharacter::ServerPickupItem_Validate(ADItemPickup* Item)
 {
 	return true;
 }
 
-void ADistanceCharacter::ServerPickupItem_Implementation(AItem* Item)
+void ADistanceCharacter::ServerPickupItem_Implementation(ADItemPickup* Item)
 {
 	PickupItem(Item);
 }
 
 AItem* ADistanceCharacter::DropItem(int32 InvSlot)
 {
-	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot) && InvSlot != 0)
-	{
-		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
-		EquipItem(0);//equip lantern
-		Inventory.RemoveAt(InvSlot);
-		spriteInventory.RemoveAt(InvSlot);
-		ItemPickedUp();//gui refresh
-		UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
-		return droppedItem;
-	}
+	//TODO: ALL THE DROP STUFF
+//	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot) && InvSlot != 0)
+//	{
+//		AItem* droppedItem = GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnItemAtLocation(Inventory[InvSlot]->ItemClass, GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
+//		EquipItem(0);//equip lantern
+//		Inventory.RemoveAt(InvSlot);
+//		spriteInventory.RemoveAt(InvSlot);
+//		ItemPickedUp();//gui refresh
+//		UE_LOG(LogTemp, Warning, TEXT("Inventory num = %d"), Inventory.Num());
+//		return droppedItem;
+//	}
 	return NULL;
 }
 
-void ADistanceCharacter::EquipItem(int32 InvSlot)
+void ADistanceCharacter::EquipItem(ADItem* Item)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Inventory length: %d"), Inventory.Num());
-	UE_LOG(LogTemp, Warning, TEXT("InvSlot to be equipped: %d"), InvSlot);
-	if (EquippedSlot == 0 && InvSlot == 0) { return; }
-	if (GetItem() != NULL)
-	{
-		GetItem()->OnUnequip();
-		if (Inventory.IsValidIndex(EquippedSlot))
-		{
-			Inventory[EquippedSlot]->Update(GetItem());
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Previous Item is Null!"));
-	}
-	EquippedSlot = InvSlot;
-	EquipItemComponent(EquippedSlot);
-	if (GetItem() != NULL)
-	{
-		GetItem()->OnEquip();
-		GetItem()->Update(Inventory[EquippedSlot]);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("EquipItem: Error: Equipped Item is Null!"));
-	}
+	// TODO:Do something to equip
 	ItemPickedUp();
-}
-
-void ADistanceCharacter::EquipItemComponent(int32 InvSlot)
-{
-	if (Inventory.IsValidIndex(InvSlot))
-	{
-		class TSubclassOf<AItem> ComponentClass = Inventory[InvSlot]->ItemClass;
-		ItemComponent->OnComponentDestroyed();
-		ItemComponent->ChildActorClass = ComponentClass;
-		ItemComponent->OnComponentCreated();
-		ItemComponent->ChildActor->AttachRootComponentToActor(this);
-		AItem* currItem = Cast<AItem>(ItemComponent->ChildActor);
-		if (currItem) { currItem->OwningPawn = this; }
-	}
 }
 
 void ADistanceCharacter::UseItem()
@@ -187,26 +137,27 @@ void ADistanceCharacter::UseItem()
 
 TArray<class UTexture2D*> ADistanceCharacter::GetSpriteInventory()
 {
-	return spriteInventory;
-}
-
-TArray<class UInventoryItem*> ADistanceCharacter::GetInventory()
-{
-	return Inventory;
+	TArray<UTexture2D*> Sprites;
+	for (ADItem* Item : Inventory)
+	{
+		if (Item)
+			Sprites.Add(Item->GetItemSprite());
+	}
+	return Sprites;
 }
 
 void ADistanceCharacter::ToggleInventory()
 {
 	//cycle inventory items
 	uint32 tempIndex = (EquippedSlot + 1) % Inventory.Num();
-	EquipItem(tempIndex);
+	EquipItem(Inventory[tempIndex]);
 }
 
 FString ADistanceCharacter::GetItemName()
 {
-	if (Inventory.IsValidIndex(EquippedSlot))
+	if (CurrentItem)
 	{
-		return Inventory[EquippedSlot]->GetItemName();
+		return CurrentItem->GetItemName();
 	}
 	return TEXT("Default");
 }
@@ -262,7 +213,7 @@ void ADistanceCharacter::AddItem(class ADItem* NewItem)
 {
 	if (NewItem && HasAuthority())
 	{
-		NewItem->OnEnterInventory();
+		NewItem->OnEnterInventory(this);
 		Inventory.Add(NewItem);
 		
 		// Equip Automatically?

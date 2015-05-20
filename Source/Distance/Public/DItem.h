@@ -61,5 +61,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent *SpriteComponent;
 	
+	FString GetItemName() const;
+	
+	class UTexture2D* GetItemSprite() const;
+	
+	void SetOwningPawn(ADistanceCharacter* NewOwner);
+	
+	void OnEnterInventory(ADistanceCharacter* NewOwner);
+	
 	
 };

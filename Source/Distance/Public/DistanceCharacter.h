@@ -3,8 +3,6 @@
 #include "GameFramework/Character.h"
 #include "Classes/PaperSpriteComponent.h"
 #include "Classes/Components/ChildActorComponent.h"
-#include "Item.h"
-#include "InventoryItem.h"
 #include "DistanceCharacter.generated.h"
 
 // make ConvergenceState enum blueprintable
@@ -74,16 +72,13 @@ public:
 
 	/* Pick up nearby item object in the world */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void PickupItem(AItem* Item);
+	void PickupItem(class ADItemPickup* Item);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerPickupItem(AItem* Item);
+	void ServerPickupItem(class ADItemPickup* Item);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Inventory)
 	void ItemPickedUp();
-
-	/* Add an item to your inventory from the Item class */
-	void AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass);
 
 	/* Drop currently equipped item */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -91,10 +86,7 @@ public:
 
 	/* Equip a different item that is already in the inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void EquipItem(int32 InvSlot);
-
-	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void EquipItemComponent(int32 itemIndex);
+	void EquipItem(ADItem* Item);
 
 	/* Use the current equipped item (calls Item's Use() function) */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -102,9 +94,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	TArray<class UTexture2D*> GetSpriteInventory();
-
-	/* Returns the inventory array */
-	TArray<class UInventoryItem*> GetInventory();
 
 	/* Toggle visibility of inventory GUI */
 	UFUNCTION(BlueprintCallable, Category = Inventory)

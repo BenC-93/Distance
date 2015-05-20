@@ -8,8 +8,8 @@
 ADItemPickup::ADItemPickup(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
-	amount = 100.0f;
-	name = TEXT("Default");
+	ItemAmount = 100.0f;
+	ItemName = TEXT("Default");
 	
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
 	RootComponent = RootSceneComponent;

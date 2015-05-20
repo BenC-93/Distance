@@ -3,7 +3,7 @@
 #include "Distance.h"
 #include "AIBoss_Betrayal.h"
 #include "AIBoss_Betrayal_Minion.h"
-
+#include "DistanceCharacter.h"
 
 AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -11,6 +11,9 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);
 	SpriteComponent->AttachTo(RootComponent);
+
+	HeldItem = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("HeldItem"));
+	HeldItem->AttachTo(RootComponent);
 
 	Health = MaxHealth = 15.f;
 	TargetActor = this;
@@ -27,6 +30,13 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (GetActorLocation() != TargetLocation)
 	{
+		if (TargetActor != NULL && TargetActor != this)
+		{
+			ADistanceCharacter* player = Cast<ADistanceCharacter>(TargetActor);
+			HeldItem->SetSprite(player->GetItem()->SpriteComponent->GetSprite());
+			HeldItem->SetRelativeRotation(FRotator(0.f, 90.f, -65.f));
+		}
+
 		if (TargetSpeed <= 0.f)
 		{
 			SetActorLocation(TargetLocation);

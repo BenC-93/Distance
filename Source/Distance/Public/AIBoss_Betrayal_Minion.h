@@ -21,6 +21,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
 	class UPaperSpriteComponent* SpriteComponent;
 
+	class UPaperSpriteComponent* HeldItem;
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual FVector GetVelocity() const override;

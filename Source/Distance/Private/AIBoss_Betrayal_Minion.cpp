@@ -19,6 +19,7 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	CopyLength = FVector(0.f, 0.f, 0.f);
 	ActiveMoveState = STATIC;
 	OwningPawn = NULL;
+	currentSpeed = 0.0f;
 }
 
 void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
@@ -37,12 +38,25 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 			{
 				FVector temp = TargetLocation - GetActorLocation();
 				temp.Normalize();
+				if (temp.Y > 0.f)
+				{
+					GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+				}
+				else if (temp.Y < 0.f)
+				{
+					GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+				}
 				temp = (DeltaTime * temp * TargetSpeed) + GetActorLocation();
 				if (ActiveMoveState == FOLLOW)
 				{
 					if (GetDistanceTo(TargetActor) > 150.f)
 					{
 						SetActorLocation(temp);
+						currentSpeed = TargetSpeed;
+					}
+					else
+					{
+						currentSpeed = 0.0f;
 					}
 				}
 				else
@@ -67,6 +81,11 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 		MoveFollow();
 		return;
 	}
+}
+
+FVector AAIBoss_Betrayal_Minion::GetVelocity() const
+{
+	return FVector(currentSpeed, 0.0f, 0.0f);
 }
 
 //~~~ Health ~~~//
@@ -142,12 +161,22 @@ void AAIBoss_Betrayal_Minion::MoveStatic()
 {
 	TargetLocation = GetActorLocation();
 	TargetSpeed = -1.f;
+	currentSpeed = 0.0f;
 }
 
 void AAIBoss_Betrayal_Minion::MoveCopy()
 {
 	TargetLocation = TargetActor->GetActorLocation() + (150 * CopyLength);
 	TargetSpeed = -1.f;
+	currentSpeed = TargetActor->GetVelocity().Size();
+	if (TargetActor->GetVelocity().Y > 0.f)
+	{
+		GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+	}
+	else if (TargetActor->GetVelocity().Y < 0.f)
+	{
+		GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	}
 }
 
 void AAIBoss_Betrayal_Minion::MoveFollow()
@@ -165,11 +194,13 @@ void AAIBoss_Betrayal_Minion::MoveRandom()
 	//temp.Normalize();
 	TargetLocation = GetActorLocation() + temp;
 	TargetSpeed = FMath::RandRange(100.f, speedRange);
+	currentSpeed = TargetSpeed;
 }
 
 void AAIBoss_Betrayal_Minion::StartMoveRandomTimer()
 {
 	float timeTilMove = FMath::FRandRange(1.f, 5.f); //add a range to this func call, then uncomment
+	currentSpeed = 0.0f;
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::MoveRandom, timeTilMove, true);
 }
 

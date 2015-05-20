@@ -506,7 +506,7 @@ void AAIBoss_Doubt::EndOfBoss()
 	{
 		playerController->OnConvergenceEnd();
 		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
-		//Destroy();
+		Destroy();
 	}
 	else
 	{

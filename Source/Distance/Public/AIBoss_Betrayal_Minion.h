@@ -23,6 +23,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	virtual FVector GetVelocity() const override;
+
 	//~~~ Health ~~~//
 	float Health;
 	float MaxHealth;
@@ -56,6 +58,8 @@ public:
 
 	//~~~ Owning Monster ~~~//
 	class AAIBoss_Betrayal* OwningPawn;
+
+	float currentSpeed;
 
 	void SetOwner(class AAIBoss_Betrayal* b);
 };

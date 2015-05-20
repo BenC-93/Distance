@@ -18,6 +18,13 @@ public:
 	AItemShield(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
 	virtual void EndUse() override;
+	virtual void ChangeAmount(float value) override;
+
+	// ooooooh prettyyyyyyy
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
+	float LightIntensity;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
+	class UPointLightComponent* LightSource;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Drain)
 	float drainRate;
@@ -36,12 +43,4 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = Shield)
 	void BPEndDrain();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = Shield)
-	void BPStartRegen();
-
-	UFUNCTION(BlueprintImplementableEvent, Category = Shield)
-	void BPEndRegen();
-
-
-	
 };

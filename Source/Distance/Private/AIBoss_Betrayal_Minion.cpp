@@ -3,7 +3,7 @@
 #include "Distance.h"
 #include "AIBoss_Betrayal.h"
 #include "AIBoss_Betrayal_Minion.h"
-
+#include "DistanceCharacter.h"
 
 AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -12,6 +12,9 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);
 	SpriteComponent->AttachTo(RootComponent);
 
+	HeldItem = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("HeldItem"));
+	HeldItem->AttachTo(RootComponent);
+
 	Health = MaxHealth = 15.f;
 	TargetActor = this;
 	TargetLocation = GetActorLocation();
@@ -19,6 +22,8 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	CopyLength = FVector(0.f, 0.f, 0.f);
 	ActiveMoveState = STATIC;
 	OwningPawn = NULL;
+	currentSpeed = 0.0f;
+	canMove = true;
 }
 
 void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
@@ -26,7 +31,14 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (GetActorLocation() != TargetLocation)
 	{
-		if (TargetSpeed <= 0.f)
+		if (TargetActor != NULL && TargetActor != this)
+		{
+			ADistanceCharacter* player = Cast<ADistanceCharacter>(TargetActor);
+			HeldItem->SetSprite(player->GetItem()->SpriteComponent->GetSprite());
+			HeldItem->SetRelativeRotation(FRotator(0.f, 90.f, -65.f));
+		}
+
+		if (TargetSpeed <= 0.f && canMove)
 		{
 			SetActorLocation(TargetLocation);
 		}
@@ -37,22 +49,41 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 			{
 				FVector temp = TargetLocation - GetActorLocation();
 				temp.Normalize();
+				if (temp.Y > 0.f)
+				{
+					GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+				}
+				else if (temp.Y < 0.f)
+				{
+					GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+				}
 				temp = (DeltaTime * temp * TargetSpeed) + GetActorLocation();
 				if (ActiveMoveState == FOLLOW)
 				{
-					if (GetDistanceTo(TargetActor) > 150.f)
+					if (GetDistanceTo(TargetActor) > 150.f && canMove)
 					{
 						SetActorLocation(temp);
+						currentSpeed = TargetSpeed;
+					}
+					else
+					{
+						currentSpeed = 0.0f;
 					}
 				}
 				else
 				{
-					SetActorLocation(temp);
+					if (canMove)
+					{
+						SetActorLocation(temp);
+					}
 				}
 			}
 			else
 			{
-				SetActorLocation(TargetLocation);
+				if (canMove)
+				{
+					SetActorLocation(TargetLocation);
+				}
 			}
 		}
 	}
@@ -67,6 +98,11 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 		MoveFollow();
 		return;
 	}
+}
+
+FVector AAIBoss_Betrayal_Minion::GetVelocity() const
+{
+	return FVector(currentSpeed, 0.0f, 0.0f);
 }
 
 //~~~ Health ~~~//
@@ -131,6 +167,8 @@ void AAIBoss_Betrayal_Minion::SetMoveState(MoveState m, ACharacter* c)
 	case RANDOM: StartMoveRandomTimer(); break;
 	default: break;
 	}
+
+	StartAttackRandomTimer();
 }
 
 MoveState AAIBoss_Betrayal_Minion::GetMoveState()
@@ -142,12 +180,22 @@ void AAIBoss_Betrayal_Minion::MoveStatic()
 {
 	TargetLocation = GetActorLocation();
 	TargetSpeed = -1.f;
+	currentSpeed = 0.0f;
 }
 
 void AAIBoss_Betrayal_Minion::MoveCopy()
 {
 	TargetLocation = TargetActor->GetActorLocation() + (150 * CopyLength);
 	TargetSpeed = -1.f;
+	currentSpeed = TargetActor->GetVelocity().Size();
+	if (TargetActor->GetVelocity().Y > 0.f)
+	{
+		GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+	}
+	else if (TargetActor->GetVelocity().Y < 0.f)
+	{
+		GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	}
 }
 
 void AAIBoss_Betrayal_Minion::MoveFollow()
@@ -165,11 +213,13 @@ void AAIBoss_Betrayal_Minion::MoveRandom()
 	//temp.Normalize();
 	TargetLocation = GetActorLocation() + temp;
 	TargetSpeed = FMath::RandRange(100.f, speedRange);
+	currentSpeed = TargetSpeed;
 }
 
 void AAIBoss_Betrayal_Minion::StartMoveRandomTimer()
 {
 	float timeTilMove = FMath::FRandRange(1.f, 5.f); //add a range to this func call, then uncomment
+	currentSpeed = 0.0f;
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::MoveRandom, timeTilMove, true);
 }
 
@@ -178,4 +228,32 @@ void AAIBoss_Betrayal_Minion::StartMoveRandomTimer()
 void AAIBoss_Betrayal_Minion::SetOwner(class AAIBoss_Betrayal* b)
 {
 	OwningPawn = b;
+}
+
+void AAIBoss_Betrayal_Minion::AnimationTimer()
+{
+	canMove = true;
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	StartAttackRandomTimer();
+}
+
+void AAIBoss_Betrayal_Minion::AttackTimer()
+{
+	canMove = false;
+	if (AttackAnimation)
+	{
+		GetMesh()->PlayAnimation(AttackAnimation, false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: Minion Attack timer, attack animation is Null."));
+	}
+	currentSpeed = 0.0f;
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::AnimationTimer, 0.85f, false);
+}
+
+void AAIBoss_Betrayal_Minion::StartAttackRandomTimer()
+{
+	float timeTilAttack = FMath::FRandRange(2.f, 10.f);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::AttackTimer, timeTilAttack, false);
 }

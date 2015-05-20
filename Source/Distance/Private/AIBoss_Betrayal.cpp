@@ -233,11 +233,17 @@ void AAIBoss_Betrayal::EndOfBoss()
 
 	printScreen(FColor::Red, TEXT("End of Boss"));
 
+	//destroy all minions
+	for (TActorIterator<AAIBoss_Betrayal_Minion> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->Destroy();
+	}
+
 	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(player1->GetController());
 	if (playerController)
 	{
 		playerController->OnConvergenceEnd();
-		//Destroy();
+		Destroy();
 	}
 	else
 	{

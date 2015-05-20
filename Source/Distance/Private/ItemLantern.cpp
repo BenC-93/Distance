@@ -39,7 +39,7 @@ void AItemLantern::StartUse()
 
 void AItemLantern::EndUse()
 {
-	return;
+	isInUse = false;
 }
 
 void AItemLantern::ChangeAmount(float value)

@@ -18,6 +18,7 @@ void AItemShield::StartUse()
 	if (!isInUse && amount > 0 && canUse)
 	{
 		GetWorldTimerManager().SetTimer(this, &AItemShield::Drain, drainRate, true);
+
 		// start use animation
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);

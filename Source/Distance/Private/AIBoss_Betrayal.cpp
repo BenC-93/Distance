@@ -29,7 +29,7 @@ AAIBoss_Betrayal::AAIBoss_Betrayal(const FObjectInitializer& ObjectInitializer)
 
 	AITriggerRange = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerRange"));
 	AITriggerRange->Mobility = EComponentMobility::Movable;
-	AITriggerRange->SetBoxExtent(FVector(1600.0f, 1600.0f, 500.0f), true);
+	AITriggerRange->SetBoxExtent(FVector(1000.0f, 1000.0f, 500.0f), true);
 	AITriggerRange->AttachTo(RootComponent);
 
 	AITriggerRange->OnComponentBeginOverlap.AddDynamic(this, &AAIBoss_Betrayal::OnOverlapBegin);
@@ -76,10 +76,33 @@ void AAIBoss_Betrayal::BeginCycle()
 	float widthOfMonsters = 150.0f;//estimated for now TODO get exact width of monsters
 	for (int i = 0; i < numOfMinions; i++)
 	{
-		//x: half of the #ofminions so that I can align them spawning with the 3rd monster in the middle of the boss
-		//y: 150.0f below the boss
-		FVector offset = FVector(((numOfMinions / 2) * widthOfMonsters * -1) + (widthOfMonsters * i), 150.0f, 0.0f);
-		SpawnMonster(offset);
+		//y: half of the #ofminions so that I can align them spawning with the 3rd monster in the middle of the boss
+		//x: 150.0f below the boss
+		FVector offset = FVector(150.0f, ((numOfMinions / 2) * widthOfMonsters * -1) + (widthOfMonsters * i), 0.0f);
+		switch (i)
+		{
+			case 0:
+				SpawnMonster(offset, MoveState::COPY, player1);
+				break;
+			case 1:
+				SpawnMonster(offset, MoveState::FOLLOW, player1);
+				break;
+			case 2:
+				SpawnMonster(offset, MoveState::RANDOM, player1);
+				break;
+			case 3:
+				SpawnMonster(offset, MoveState::COPY, player2);
+				break;
+			case 4:
+				SpawnMonster(offset, MoveState::FOLLOW, player2);
+				break;
+			case 5:
+				SpawnMonster(offset, MoveState::RANDOM, player2);
+				break;
+			default:
+				SpawnMonster(offset, MoveState::STATIC, NULL);
+				break;
+		}
 	}
 	//constantly make players lose health
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal::DrainTimer, drainRate, true);
@@ -113,10 +136,11 @@ void AAIBoss_Betrayal::TransformPlayers(bool toMonster)
 	}
 }
 
-void AAIBoss_Betrayal::SpawnMonster(FVector offset)
+void AAIBoss_Betrayal::SpawnMonster(FVector offset, MoveState movestate, class ACharacter* target)
 {
 	AAIBoss_Betrayal_Minion* monster = Cast<AAIBoss_Betrayal_Minion>(GetWorld()->SpawnActor<AAIBoss_Betrayal_Minion>(MonsterClass, FVector(this->GetActorLocation()) - offset, FRotator(this->GetActorRotation())));
-	//monster->SetOwner(this);//TODO uncomment this when ready
+	monster->SetOwner(this);
+	monster->SetMoveState(movestate, target);
 }
 
 void AAIBoss_Betrayal::DrainTimer()

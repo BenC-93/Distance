@@ -17,6 +17,10 @@ public:
 
 	ATentacle(const FObjectInitializer& ObjectInitializer);
 
+	virtual void Tick(float DeltaTime) override;
+	//void PostLoad() override;
+	//void PostActorCreated() override;
+
 	float health;
 	float maxHealth;
 
@@ -29,7 +33,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Triggers)
 	class UBoxComponent *TriggerBox;
 
+	class AAIBoss_Doubt* closestBoss;
+
 	class AAIBoss_Doubt* doubtParent;
+
+	void FindParent();
 
 	void SetBossParent(class AAIBoss_Doubt* parent);
 

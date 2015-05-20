@@ -22,7 +22,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void PostInitializeComponents() override;
+	//virtual void PostLoad() override;
+	//virtual void PostInitializeComponents() override;
 
 	bool p1InTrigger;
 	bool p2InTrigger;

@@ -64,4 +64,16 @@ public:
 	float currentSpeed;
 
 	void SetOwner(class AAIBoss_Betrayal* b);
+
+	bool canMove;
+
+	void AnimationTimer();
+
+	void AttackTimer();
+
+	UPROPERTY(Category = Animation, EditAnywhere)
+	UAnimationAsset* AttackAnimation;
+
+	void StartAttackRandomTimer();
+
 };

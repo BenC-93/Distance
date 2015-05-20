@@ -23,6 +23,7 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	ActiveMoveState = STATIC;
 	OwningPawn = NULL;
 	currentSpeed = 0.0f;
+	canMove = true;
 }
 
 void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
@@ -37,7 +38,7 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 			HeldItem->SetRelativeRotation(FRotator(0.f, 90.f, -65.f));
 		}
 
-		if (TargetSpeed <= 0.f)
+		if (TargetSpeed <= 0.f && canMove)
 		{
 			SetActorLocation(TargetLocation);
 		}
@@ -59,7 +60,7 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 				temp = (DeltaTime * temp * TargetSpeed) + GetActorLocation();
 				if (ActiveMoveState == FOLLOW)
 				{
-					if (GetDistanceTo(TargetActor) > 150.f)
+					if (GetDistanceTo(TargetActor) > 150.f && canMove)
 					{
 						SetActorLocation(temp);
 						currentSpeed = TargetSpeed;
@@ -71,12 +72,18 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 				}
 				else
 				{
-					SetActorLocation(temp);
+					if (canMove)
+					{
+						SetActorLocation(temp);
+					}
 				}
 			}
 			else
 			{
-				SetActorLocation(TargetLocation);
+				if (canMove)
+				{
+					SetActorLocation(TargetLocation);
+				}
 			}
 		}
 	}
@@ -160,6 +167,8 @@ void AAIBoss_Betrayal_Minion::SetMoveState(MoveState m, ACharacter* c)
 	case RANDOM: StartMoveRandomTimer(); break;
 	default: break;
 	}
+
+	StartAttackRandomTimer();
 }
 
 MoveState AAIBoss_Betrayal_Minion::GetMoveState()
@@ -219,4 +228,32 @@ void AAIBoss_Betrayal_Minion::StartMoveRandomTimer()
 void AAIBoss_Betrayal_Minion::SetOwner(class AAIBoss_Betrayal* b)
 {
 	OwningPawn = b;
+}
+
+void AAIBoss_Betrayal_Minion::AnimationTimer()
+{
+	canMove = true;
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	StartAttackRandomTimer();
+}
+
+void AAIBoss_Betrayal_Minion::AttackTimer()
+{
+	canMove = false;
+	if (AttackAnimation)
+	{
+		GetMesh()->PlayAnimation(AttackAnimation, false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: Minion Attack timer, attack animation is Null."));
+	}
+	currentSpeed = 0.0f;
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::AnimationTimer, 0.85f, false);
+}
+
+void AAIBoss_Betrayal_Minion::StartAttackRandomTimer()
+{
+	float timeTilAttack = FMath::FRandRange(2.f, 10.f);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::AttackTimer, timeTilAttack, false);
 }

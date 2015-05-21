@@ -42,5 +42,4 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Shield)
 	void BPEndDrain();
-
 };

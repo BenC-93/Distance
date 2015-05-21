@@ -20,9 +20,16 @@ public:
 	virtual void StartUse() override;
 	virtual void EndUse() override;
 
+	// ooooooh prettyyyyyyy
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
+	float LightIntensity;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
+	class UPointLightComponent* LightSource;
+
 	float chargeRate;
 	float chargeAmount;
 	float totalChargedAmount;
+	float lightChargeAmount;
 
 	class AActor* targetActor;
 	bool hasAttacked;

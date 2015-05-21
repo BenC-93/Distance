@@ -8,8 +8,8 @@ AItemShield::AItemShield(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	name = "Shield";
-	drainRate = 1.0f;
-	drainAmount = -2.0f;
+	drainRate = 0.1f;
+	drainAmount = -1.0f;
 
 	
 
@@ -45,11 +45,12 @@ void AItemShield::EndUse()
 	if (isInUse)
 	{
 		GetWorldTimerManager().ClearTimer(this, &AItemShield::Drain);
-		// stop blueprint drain events
-		BPEndDrain();
 		isInUse = false;
 		//BPStartRegen();
 		LightSource->SetVisibility(false);
+
+		// stop blueprint drain events
+		BPEndDrain();
 	}
 }
 

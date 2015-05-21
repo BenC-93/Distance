@@ -49,6 +49,8 @@ void AItem::OnEquip()
 	if (!isInUse) {
 		GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
 	}
+	// any blueprint events
+	BPOnEquip();
 }
 
 void AItem::OnUnequip()

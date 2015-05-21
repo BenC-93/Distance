@@ -80,6 +80,10 @@ public:
 	float drainCounter;
 	float drainRate;
 
+	float scaleRateOpp;
+	float scaleRateSame;
+	float scaleRateNorm;
+
 	float deathCounter;
 
 	const float spriteLen = 125.0f;// 506.0f;

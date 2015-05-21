@@ -21,10 +21,14 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	baseDamage = -1.0f;
 	drainRate = 0.1f;//half or tenth of a second
 
+	scaleRateOpp = 2.0f;//shrink rate when player chases down the shadow
+	scaleRateSame = 5.0f;//grow rate while player runs away
+	scaleRateNorm = 2.0f;//grow rate while player runs in any direction within trigger
+
 	deathCounter = 10;
 
-	scaleCounter = 4.0f;
-	scaleLimit = 7.0f;
+	scaleCounter = 3.5f;//initial size of shadow
+	scaleLimit = 7.0f;//max size of shadow
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
@@ -133,7 +137,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				//UE_LOG(LogTemp, Warning, TEXT("Same direction"));//speed up ai
 				if (scaleCounter + DeltaTime < scaleLimit)
 				{
-					scaleCounter += 5 * DeltaTime;
+					scaleCounter += scaleRateSame * DeltaTime;
 					//UE_LOG(LogTemp, Warning, TEXT("AI speed: %f"), GetCharacterMovement()->MaxWalkSpeed);
 				}
 			}
@@ -142,7 +146,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				//UE_LOG(LogTemp, Warning, TEXT("Opposite direction"));
 				if (scaleCounter > 0.8 && scaleCounter - DeltaTime > 0)
 				{
-					scaleCounter -= 1 * DeltaTime;
+					scaleCounter -= scaleRateOpp * DeltaTime;
 					//health += 2;//make enemy full when approaching?
 					//slow down player?
 					float playerSpeed = player->GetCharacterMovement()->MaxWalkSpeed;
@@ -158,7 +162,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				//UE_LOG(LogTemp, Warning, TEXT("some other direction"));
 				if (scaleCounter + DeltaTime < scaleLimit)//in general, grow
 				{
-					scaleCounter += 2 * DeltaTime;
+					scaleCounter += scaleRateNorm * DeltaTime;
 					//UE_LOG(LogTemp, Warning, TEXT("AI speed: %f"), GetCharacterMovement()->MaxWalkSpeed);
 				}
 			}

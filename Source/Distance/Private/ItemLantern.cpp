@@ -48,4 +48,12 @@ void AItemLantern::ChangeAmount(float value)
 	Super::ChangeAmount(value);
 	LightIntensity = 100.0f * amount;
 	LightSource->SetIntensity(LightIntensity);
+	if (amount < maxAmount)
+	{
+		GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(this, &AItem::Regenerate);
+	}
 }

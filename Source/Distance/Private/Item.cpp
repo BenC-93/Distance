@@ -12,8 +12,8 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	isInUse = false;
 	amount = 100.0f;
 	maxAmount = 100.0f;
-	regenRate = 1.0f;
-	regenAmount = 1.0f;
+	regenRate = 0.1f;
+	regenAmount = 0.3f;
 	name = TEXT("Default");
 	OwningPawn = NULL;
 

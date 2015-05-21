@@ -21,14 +21,16 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	baseDamage = -1.0f;
 	drainRate = 0.1f;//half or tenth of a second
 
-	scaleRateOpp = 2.0f;//shrink rate when player chases down the shadow
-	scaleRateSame = 5.0f;//grow rate while player runs away
+	scaleRateOpp = 1.5f;//shrink rate when player chases down the shadow was 1
+	scaleRateSame = 7.0f;//grow rate while player runs away was 5
 	scaleRateNorm = 2.0f;//grow rate while player runs in any direction within trigger
+
+	range = 15.0f;//range in degrees + and - for the encounter to determine if the player is running away or at the monster
 
 	deathCounter = 10;
 
 	scaleCounter = 3.5f;//initial size of shadow
-	scaleLimit = 7.0f;//max size of shadow
+	scaleLimit = 10.0f;//max size of shadow
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
@@ -114,7 +116,7 @@ void AAIEnemy::Tick(float DeltaTime)
 	if (player != NULL)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Distance to Player: %f"), GetDistanceTo(player));
-		if (moveToPlayer && !GetWorldTimerManager().IsTimerActive(this, &AAIEnemy::DrainTimer))//Determines if ai moves faster towards player or player moves slower trying to escape
+		if (!GetWorldTimerManager().IsTimerActive(this, &AAIEnemy::DrainTimer))//Determines if ai moves faster towards player or player moves slower trying to escape
 		{
 			float distToPlayer = GetDistanceTo(player);
 			//orient shadow towards player//y,z,x
@@ -130,8 +132,15 @@ void AAIEnemy::Tick(float DeltaTime)
 			myYaw = ConvertToUnitCircle(myYaw);
 			
 			//UE_LOG(LogTemp, Warning, TEXT("Shadow Yaw: %f, Player Yaw: %f"), myYaw, playerYaw);
-
-			float range = 10.0f;
+			if (distToPlayer < 500.0f)//make it easier when you get closer to the lonliness monster
+			{
+				UE_LOG(LogTemp, Error, TEXT("Increased range for player gettting close to monster"));
+				range = 25.0f;
+			}
+			else
+			{
+				range = 15.0f;
+			}
 			if (myYaw > playerYaw - range && myYaw < playerYaw + range)//going in same direction
 			{//grow shadow even faster
 				//UE_LOG(LogTemp, Warning, TEXT("Same direction"));//speed up ai
@@ -158,7 +167,7 @@ void AAIEnemy::Tick(float DeltaTime)
 				RunAway();*/
 			}
 			else
-			{//not needed, just for testing purposes
+			{
 				//UE_LOG(LogTemp, Warning, TEXT("some other direction"));
 				if (scaleCounter + DeltaTime < scaleLimit)//in general, grow
 				{
@@ -168,7 +177,7 @@ void AAIEnemy::Tick(float DeltaTime)
 			}
 
 			//UE_LOG(LogTemp, Warning, TEXT("ShadowLen: %f, DistToPlayer: %f"), (scaleCounter * spriteLen), distToPlayer);
-			if (spriteLen * scaleCounter > distToPlayer)//if the player is within the shadow becuase the shadow is too big and doesnt follow the player,
+			if (spriteLen * scaleCounter > distToPlayer + 50.0f)//if the player is within the shadow becuase the shadow is too big and doesnt follow the player,
 			{
 				if (scaleCounter > 0.8 && scaleCounter - DeltaTime > 0)
 				{
@@ -185,6 +194,14 @@ void AAIEnemy::Tick(float DeltaTime)
 			}
 			//UE_LOG(LogTemp, Warning, TEXT("scaleCounter: %f"), scaleCounter);
 			
+		}
+		if (scaleCounter >= scaleLimit)
+		{
+			moveToPlayer = true;
+		}
+		else
+		{
+			moveToPlayer = false;
 		}
 	}
 }
@@ -213,7 +230,7 @@ void AAIEnemy::DrainTimer()
 			return;
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("Equipped item name, %s"), *player->GetItemName());
-		if (moveToPlayer && player->GetItem()->IsA(AItemLantern::StaticClass()) && player->GetItemAmount() > 0.0f && player->GetItemEnabled())
+		if (player->GetItem()->IsA(AItemLantern::StaticClass()) && player->GetItemAmount() > 0.0f && player->GetItemEnabled())
 		{
 			//drain light
 			if (health < maxHealth)
@@ -225,7 +242,7 @@ void AAIEnemy::DrainTimer()
 		}
 		else//drain health
 		{
-			if (moveToPlayer && health < maxHealth)
+			if (health < maxHealth)
 			{
 				//UE_LOG(LogTemp, Error, TEXT("Equipped item name, %s"), *player->GetItemName());
 				health += 1;
@@ -310,7 +327,6 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 		if (CheckIfPlayer(OtherActor))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("-----Player Entered Triggered Area"));
-			moveToPlayer = true;//outer trigger boolean
 			moveAway = false;
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods

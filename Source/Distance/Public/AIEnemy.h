@@ -84,6 +84,8 @@ public:
 	float scaleRateSame;
 	float scaleRateNorm;
 
+	float range;
+
 	float deathCounter;
 
 	const float spriteLen = 125.0f;// 506.0f;

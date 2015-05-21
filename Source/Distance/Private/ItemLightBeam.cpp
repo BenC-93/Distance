@@ -64,6 +64,7 @@ void AItemLightBeam::StartUse()
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Charge, chargeRate, true);
 		//start charging animation
 		isInUse = true;
+		GetWorldTimerManager().ClearTimer(this, &AItemLightBeam::Regenerate);
 	}
 }
 
@@ -80,6 +81,7 @@ void AItemLightBeam::EndUse()
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::AnimationTimer, 0.85f, false);
+		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Regenerate, regenRate, true);
 	}
 }
 

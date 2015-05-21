@@ -72,6 +72,11 @@ void ADistanceCharacter::BeginPlay()
 	ItemPickedUp();
 }
 
+FName ADistanceCharacter::GetItemSocketPoint()
+{
+	return ItemSocketPoint;
+}
+
 void ADistanceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

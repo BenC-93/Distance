@@ -14,7 +14,7 @@ class ADistanceCharacter;
  */
 UCLASS(Blueprintable)
 class DISTANCE_API AItem : public AActor
-
+{
 	GENERATED_BODY()
 	
 public:

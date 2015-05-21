@@ -394,8 +394,15 @@ void AAIBoss_Doubt::TentacleTimer()
 		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
 		return;
 	}
-	//rotate //y,z,x
-	TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	if (currentPlayer->GetActorLocation().Y > GetActorLocation().Y)
+	{
+		//rotate //y,z,x
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	}
+	else
+	{
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw + 180), tentacleCounter), 0));
+	}
 	//scale
 	float maxScale = distToPlayer / tentacleSpriteLen;
 	//UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);

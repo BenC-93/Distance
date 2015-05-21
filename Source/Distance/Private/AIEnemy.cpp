@@ -18,7 +18,7 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 
 	health = 0.0f;
 	maxHealth = 100.0f;
-	baseDamage = -1.0f;
+	baseDamage = -2.0f;
 	drainRate = 0.1f;//half or tenth of a second
 
 	scaleRateOpp = 1.5f;//shrink rate when player chases down the shadow was 1
@@ -235,7 +235,7 @@ void AAIEnemy::DrainTimer()
 			//drain light
 			if (health < maxHealth)
 			{
-				health += 1;
+				health += baseDamage * -1;
 				player->ChangeItemAmount(baseDamage);
 				//UE_LOG(LogTemp, Warning, TEXT("Light decremented, %f"), player->GetItemAmount());
 			}
@@ -245,7 +245,7 @@ void AAIEnemy::DrainTimer()
 			if (health < maxHealth)
 			{
 				//UE_LOG(LogTemp, Error, TEXT("Equipped item name, %s"), *player->GetItemName());
-				health += 1;
+				health += baseDamage * -1;
 				player->ChangeHealth(baseDamage);
 				//UE_LOG(LogTemp, Warning, TEXT("Health decremented, %f"), player->Health);
 			}

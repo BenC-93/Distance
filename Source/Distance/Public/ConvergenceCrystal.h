@@ -39,6 +39,8 @@ public:
 
 	AConvergenceCrystal(const class FObjectInitializer& ObjectInitializer);
 
+	virtual void BeginPlay() override;
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void PostInitializeComponents() override;
@@ -48,6 +50,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent *SpriteComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
+	class UCameraComponent* ConvergenceCam;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	class USpringArmComponent* CameraBoom;
 
 	UFUNCTION(BlueprintCallable, Category = "Timers")
 	void LoseHealthTimer();

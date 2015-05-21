@@ -69,5 +69,28 @@ public:
 	
 	void OnEnterInventory(ADistanceCharacter* NewOwner);
 	
+	/* Item's primary action for when it is use by the player. */
+	UFUNCTION(BlueprintCallable, Category = Use)
+	virtual void StartUse();
+	
+	UFUNCTION(BlueprintCallable, Category = Use)
+	virtual void EndUse();
+	
+	/* What happens when the player equips the item. */
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void OnEquip();
+	
+	/* What happens when the player unequips the item. */
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void OnUnequip();
+	
+	/* Changes 'ItemAmount' variable by value, within the bounds [0.0, MaxItemAmount]. */
+	UFUNCTION(BlueprintCallable, Category = Amount)
+	virtual void ChangeAmount(float value);
+	
+	void Regenerate();
+	
+	class ADistanceCharacter* GetOwningPawn();
+	
 	
 };

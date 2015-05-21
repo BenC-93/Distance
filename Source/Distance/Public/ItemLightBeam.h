@@ -2,18 +2,21 @@
 
 #pragma once
 
-#include "Item.h"
+#include "DItem.h"
 #include "ItemLightBeam.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DISTANCE_API AItemLightBeam : public AItem
+class DISTANCE_API AItemLightBeam : public ADItem
 {
 	GENERATED_BODY()
 	
 public:
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Triggers)
+	class UBoxComponent *TriggerBox;
 
 	AItemLightBeam(const class FObjectInitializer& ObjectInitializer);
 	virtual void Tick(float DeltaTime) override;

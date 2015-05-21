@@ -48,20 +48,21 @@ void ADistanceGameMode::PostLogin(APlayerController* NewPlayer)
 	ConvergenceManager::InitializeWithPlayers(p1, p2);
 }
 
-class AItem* ADistanceGameMode::SpawnLantern(ACharacter* player)
+class ADItemPickup* ADistanceGameMode::SpawnLantern(ACharacter* player)
 {
 	printScreen(FColor::Red, TEXT("Spawning The thing"));
-	TSubclassOf<class AItem> ItemClass;
+	TSubclassOf<class ADItemPickup> ItemClass;
 	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
-	//ACharacter* player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter(); //GetPlayerCharacter(GetWorld(), 0);
-	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
+	FVector Location = player->GetActorLocation();
+	FRotator Rotation = player->GetActorRotation();
+	return GetWorld()->SpawnActor<ADItemPickup>(ItemClass, player->GetActorLocation(), player->GetActorRotation());
 }
 
-class AItem* ADistanceGameMode::SpawnItemAtLocation(TSubclassOf<class AItem> indexClass, FVector location)
+class ADItemPickup* ADistanceGameMode::SpawnItemAtLocation(TSubclassOf<class ADItemPickup> indexClass, FVector location)
 {
 	printScreen(FColor::Red, TEXT("Spawning Item"));
-	return GetWorld()->SpawnActor<AItem>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	return GetWorld()->SpawnActor<ADItemPickup>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
 class ATentacle* ADistanceGameMode::SpawnTentacleAtLocation(TSubclassOf<class ATentacle> indexClass, FVector location)
@@ -73,13 +74,13 @@ class ATentacle* ADistanceGameMode::SpawnTentacleAtLocation(TSubclassOf<class AT
 void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
 	printScreen(FColor::Red, TEXT("Spawning Random Item"));
-	TSubclassOf<class AItem> ItemClass;
+	TSubclassOf<class ADItemPickup> ItemClass;
 	uint32 ItemIndex = FMath::RandRange(1, ItemTypes.Num()-1);
 	ItemClass = ItemFromIndex(ItemIndex);
 	GetWorld()->SpawnActor<AItem>(ItemClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
-class TSubclassOf<class AItem> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex)
+TSubclassOf<class ADItemPickup> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex)
 {
 	if (ItemTypes.IsValidIndex(ItemIndex))
 	{

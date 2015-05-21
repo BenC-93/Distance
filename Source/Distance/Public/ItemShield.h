@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "Item.h"
+#include "DItem.h"
 #include "ItemShield.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DISTANCE_API AItemShield : public AItem
+class DISTANCE_API AItemShield : public ADItem
 {
 	GENERATED_BODY()
 	

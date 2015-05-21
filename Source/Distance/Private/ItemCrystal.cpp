@@ -10,13 +10,13 @@
 AItemCrystal::AItemCrystal(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	name = "Crystal";
+	ItemName = "Crystal";
 	rangeToShrine = 350.f;
 }
 
 void AItemCrystal::StartUse()
 {
-	if (!isInUse && OwningPawn != NULL)
+	if (!bIsInUse && OwningPawn != NULL)
 	{
 		bool shrineFound = false;
 		for (TActorIterator<AShrine> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -39,7 +39,7 @@ void AItemCrystal::StartUse()
 			SpawnSpirit();
 		}
 		OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
-		Drop();
+//		Drop(); //TODO: Replace this thing
 	}
 }
 

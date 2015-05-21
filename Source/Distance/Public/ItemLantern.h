@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "Item.h"
+#include "DItem.h"
 #include "ItemLantern.generated.h"
 
 /**
  * 
  */
 UCLASS(Blueprintable)
-class DISTANCE_API AItemLantern : public AItem
+class DISTANCE_API AItemLantern : public ADItem
 {
 	GENERATED_BODY()
 

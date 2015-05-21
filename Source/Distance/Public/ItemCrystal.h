@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Item.h"
+#include "DItem.h"
 #include "ConvergenceCrystal.h"
 #include "ItemCrystal.generated.h"
 
@@ -12,7 +12,7 @@ class ADistanceCharacter;
  * 
  */
 UCLASS()
-class DISTANCE_API AItemCrystal : public AItem
+class DISTANCE_API AItemCrystal : public ADItem
 {
 	GENERATED_BODY()
 	

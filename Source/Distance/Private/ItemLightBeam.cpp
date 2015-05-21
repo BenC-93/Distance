@@ -10,7 +10,7 @@
 AItemLightBeam::AItemLightBeam(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	name = "LightBeam";
+	ItemName = "LightBeam";
 	chargeRate = 0.1f;
 	chargeAmount = 0.5f;
 	totalChargedAmount = 0.0f;
@@ -20,6 +20,9 @@ AItemLightBeam::AItemLightBeam(const FObjectInitializer& ObjectInitializer)
 
 	PrimaryActorTick.bCanEverTick = true;
 
+	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
+	TriggerBox->Mobility = EComponentMobility::Movable;
+	TriggerBox->AttachTo(RootComponent);
 	TriggerBox->SetBoxExtent(FVector(70.0f, 50.0f, 125.0f), true);
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AItemLightBeam::OnOverlapBegin);
 	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AItemLightBeam::OnOverlapEnd);
@@ -59,22 +62,22 @@ void AItemLightBeam::Tick(float DeltaTime)
 
 void AItemLightBeam::StartUse()
 {
-	if (!isInUse && amount > 0 && canUse == true)
+	if (!bIsInUse && ItemAmount > 0 && bCanUse == true)
 	{
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Charge, chargeRate, true);
 		//start charging animation
-		isInUse = true;
+		bIsInUse = true;
 	}
 }
 
 void AItemLightBeam::EndUse()
 {
 	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(GetOwningPawn()->GetController());
-	if (isInUse)
+	if (bIsInUse)
 	{
 		GetWorldTimerManager().ClearTimer(this, &AItemLightBeam::Charge);
-		isInUse = false;
-		canUse = false;
+		bIsInUse = false;
+		bCanUse = false;
 		//start attack animation
 		
 		playerController->canMove = false;
@@ -87,7 +90,7 @@ void AItemLightBeam::AnimationTimer()
 {
 	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(GetOwningPawn()->GetController());
 	playerController->canMove = true;
-	canUse = true;
+	bCanUse = true;
 	hasAttacked = false;
 	GetOwningPawn()->GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 }

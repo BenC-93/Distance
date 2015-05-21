@@ -50,3 +50,45 @@ void ADItem::OnEnterInventory(ADistanceCharacter* NewOwner)
 {
 	SetOwningPawn(NewOwner);
 }
+
+void ADItem::StartUse()
+{
+	bIsInUse = true; //this should be the first thing that happens
+}
+
+void ADItem::EndUse()
+{
+	bIsInUse = false; //this should be the last thing that happens
+}
+
+void ADItem::OnEquip()
+{
+	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// Do any special effects like particles, or effects to the player
+	// (that need to happen for all items)
+	GetWorldTimerManager().SetTimer(this, &ADItem::Regenerate, RegenRate, true);
+}
+
+void ADItem::OnUnequip()
+{
+	// Do any special effects like particles, or effects to the player
+	// (that need to happen for all items)
+	GetWorldTimerManager().ClearTimer(this, &ADItem::Regenerate);
+}
+
+void ADItem::ChangeAmount(float value)
+{
+	float tempAmount = ItemAmount + value;
+	tempAmount = fmax(0.0f, fmin(MaxItemAmount, tempAmount));
+	ItemAmount = tempAmount;
+}
+
+void ADItem::Regenerate()
+{
+	ChangeAmount(RegenAmount);
+}
+
+ADistanceCharacter* ADItem::GetOwningPawn()
+{
+	return OwningPawn;
+}

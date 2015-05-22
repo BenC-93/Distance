@@ -122,7 +122,8 @@ void ADistanceCharacter::EquipItem(ADItem* Item)
 	// TODO:Do something to equip
 	Item->OnEquip();
 	CurrentItem = Item;
-	CurrentItem->AttachRootComponentTo(RootComponent); // TEMP
+	FName Socket = TEXT("ItemSocket");
+	CurrentItem->AttachRootComponentTo(GetMesh(), Socket, EAttachLocation::SnapToTarget); // TEMP
 	ItemPickedUp();
 }
 

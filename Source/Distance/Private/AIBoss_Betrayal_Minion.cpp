@@ -116,6 +116,7 @@ void AAIBoss_Betrayal_Minion::ChangeHealth(float h)
 		Destroy();
 	}
 	Health = fmax(0.f, fmin(temp, GetMaxHealth()));
+	UE_LOG(LogTemp, Warning, TEXT("Minion health: %f"), Health);
 }
 
 float AAIBoss_Betrayal_Minion::GetHealth()

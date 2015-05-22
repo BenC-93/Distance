@@ -37,6 +37,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class AAIBoss_Doubt* bossDoubt;
 
+	UPROPERTY(EditAnywhere)
+	class AAIBoss_Betrayal* bossBetrayal;
+
 	AConvergenceCrystal(const class FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;

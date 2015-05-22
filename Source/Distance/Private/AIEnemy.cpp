@@ -134,7 +134,7 @@ void AAIEnemy::Tick(float DeltaTime)
 			//UE_LOG(LogTemp, Warning, TEXT("Shadow Yaw: %f, Player Yaw: %f"), myYaw, playerYaw);
 			if (distToPlayer < 500.0f)//make it easier when you get closer to the lonliness monster
 			{
-				UE_LOG(LogTemp, Error, TEXT("Increased range for player gettting close to monster"));
+				//UE_LOG(LogTemp, Error, TEXT("Increased range for player gettting close to monster"));
 				range = 25.0f;
 			}
 			else
@@ -326,7 +326,7 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("-----Player Entered Triggered Area"));
+			//UE_LOG(LogTemp, Warning, TEXT("-----Player Entered Triggered Area"));
 			moveAway = false;
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
@@ -342,7 +342,7 @@ void AAIEnemy::OnOverlapEnd_Implementation(class AActor* OtherActor, class UPrim
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("-------Player Exited Triggered Area fool!"));
+			//UE_LOG(LogTemp, Warning, TEXT("-------Player Exited Triggered Area fool!"));
 		}
 	}
 }
@@ -353,7 +353,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Player Entered drain trigger"));
+			//UE_LOG(LogTemp, Warning, TEXT("Player Entered drain trigger"));
 			//UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);
@@ -373,7 +373,7 @@ void AAIEnemy::OnExitAttackTrigger(class AActor* OtherActor)
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Player Exited drain trigger."));
+			//UE_LOG(LogTemp, Warning, TEXT("Player Exited drain trigger."));
 			GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
 			DrainParticleSys->Deactivate();
 		}

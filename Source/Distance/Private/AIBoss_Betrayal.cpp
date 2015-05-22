@@ -11,7 +11,7 @@ AAIBoss_Betrayal::AAIBoss_Betrayal(const FObjectInitializer& ObjectInitializer)
 	MaxHealth = 100.0f;
 
 	baseDamage = -1.0f;
-	drainRate = 0.25f;
+	drainRate = 0.5f;
 
 	timeBetweenCycles = 15.0f;//in seconds
 
@@ -71,7 +71,7 @@ void AAIBoss_Betrayal::PostInitializeComponents()
 void AAIBoss_Betrayal::BeginCycle()
 {
 	TransformPlayers(true);
-	numOfMinions = 6.0f;//set the number of minions for the cycle
+	numOfMinions = 2.0f;//set the number of minions for the cycle //was 6 TODO: adjust
 	//summon monsters
 	float widthOfMonsters = 150.0f;//estimated for now TODO get exact width of monsters
 	for (int i = 0; i < numOfMinions; i++)
@@ -80,9 +80,9 @@ void AAIBoss_Betrayal::BeginCycle()
 		//x: 150.0f below the boss
 		FVector offset = FVector(150.0f, ((numOfMinions / 2) * widthOfMonsters * -1) + (widthOfMonsters * i), 0.0f);
 		switch (i)
-		{
+		{//TODO: adjust, usual order is copy, follow, random
 			case 0:
-				SpawnMonster(offset, MoveState::COPY, player1);
+				SpawnMonster(offset, MoveState::FOLLOW, player1);
 				break;
 			case 1:
 				SpawnMonster(offset, MoveState::FOLLOW, player1);
@@ -122,6 +122,7 @@ void AAIBoss_Betrayal::EndCycle()
 	TransformPlayers(false);
 	//stop constantly makingn players lose health
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Betrayal::DrainTimer);
+	UE_LOG(LogTemp, Error, TEXT("End of Cycle: %f cycles left"), numOfCycles);
 }
 
 void AAIBoss_Betrayal::TransformPlayers(bool toMonster)
@@ -192,9 +193,11 @@ void AAIBoss_Betrayal::NotifyDeath()//notifies the boss when one of its minion d
 	if (numOfMinions > 0)//minion died, reduce number of minions
 	{
 		numOfMinions--;
+		UE_LOG(LogTemp, Warning, TEXT("A minion died, %f minions left."), numOfMinions);
 	}
 	else//no more minions
 	{
+		UE_LOG(LogTemp, Error, TEXT("Last minion died, %f minions left."), numOfMinions);
 		if (numOfCycles > 0)//cycle has ended, begin next cycle
 		{
 			//end cycle cleanup

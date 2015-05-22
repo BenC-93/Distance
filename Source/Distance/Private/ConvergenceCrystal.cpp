@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "AIBoss_Doubt.h"
+#include "AIBoss_Betrayal.h"
 #include "ConvergenceCrystal.h"
 
 AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitializer)
@@ -60,6 +61,15 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 			}
 		}
 
+		for (TActorIterator<AAIBoss_Betrayal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			bossBetrayal = Cast<AAIBoss_Betrayal>(*ActorItr);
+			if (ActorItr->p1InTrigger || ActorItr->p2InTrigger)
+			{
+				return;
+			}
+		}
+
 		FVector midpointVec = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
 		FVector direction = midpointVec - GetActorLocation();
 		float distToMidPoint = direction.Size();
@@ -97,7 +107,8 @@ void AConvergenceCrystal::LoseHealthTimer()
 		ConvergenceCam->SetActive(false);
 		if (player1) { Cast<APlayerController>(player1->GetController())->SetViewTarget(player1); }
 		if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(player2); }
-		bossDoubt->EndOfBoss();
+		//bossDoubt->EndOfBoss();//check if player controller is null
+		bossBetrayal->EndOfBoss();
 	}
 	else
 	{

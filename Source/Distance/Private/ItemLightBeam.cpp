@@ -62,6 +62,13 @@ void AItemLightBeam::Tick(float DeltaTime)
 			totalChargedAmount = 0.0f;
 			hasAttacked = true;
 		}
+		else if (targetActor->IsA(ADistanceCharacter::StaticClass()))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Light beam hit the the other player!"));
+			Cast<ADistanceCharacter>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
+			totalChargedAmount = 0.0f;
+			hasAttacked = true;
+		}
 	}
 }
 
@@ -132,6 +139,6 @@ void AItemLightBeam::OnOverlapEnd_Implementation(class AActor* OtherActor, class
 	{
 		//UE_LOG(LogDistance, Warning, TEXT("Exit Overlap with: %s"), *OtherActor->GetName());
 		targetActor = NULL;
-		UE_LOG(LogDistance, Warning, TEXT("TargetActor is NULL"));
+		//UE_LOG(LogDistance, Warning, TEXT("TargetActor is NULL"));
 	}
 }

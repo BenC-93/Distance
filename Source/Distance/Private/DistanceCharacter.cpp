@@ -120,6 +120,9 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)
 void ADistanceCharacter::EquipItem(ADItem* Item)
 {
 	// TODO:Do something to equip
+	Item->OnEquip();
+	CurrentItem = Item;
+	CurrentItem->AttachRootComponentTo(RootComponent); // TEMP
 	ItemPickedUp();
 }
 
@@ -166,7 +169,7 @@ bool ADistanceCharacter::GetIsItemDroppable()
 {
 	if (GetItem())
 	{
-		return GetItem()->droppable;
+		return GetItem()->bIsDroppable;
 	}
 	return false;
 }
@@ -248,7 +251,7 @@ float ADistanceCharacter::GetItemAmount()
 	{
 		return -1;
 	}
-	return GetItem()->amount;
+	return GetItem()->ItemAmount;
 }
 
 float ADistanceCharacter::GetMaxItemAmount()
@@ -257,7 +260,7 @@ float ADistanceCharacter::GetMaxItemAmount()
 	{
 		return -1;
 	}
-	return GetItem()->maxAmount;
+	return GetItem()->MaxItemAmount;
 }
 
 bool ADistanceCharacter::GetItemEnabled()
@@ -266,7 +269,7 @@ bool ADistanceCharacter::GetItemEnabled()
 	{
 		return false;
 	}
-	return GetItem()->isInUse;
+	return GetItem()->bIsInUse;
 }
 
 bool ADistanceCharacter::GetItemHasOwner()
@@ -279,9 +282,9 @@ void ADistanceCharacter::ChangeSpeed(float speedAmount)
 	GetCharacterMovement()->MaxWalkSpeed = speedAmount;
 }
 
-AItem* ADistanceCharacter::GetItem()
+ADItem* ADistanceCharacter::GetItem()
 {
-	return (AItem *)ItemComponent->ChildActor;
+	return CurrentItem;
 }
 
 /*

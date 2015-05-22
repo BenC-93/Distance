@@ -53,7 +53,7 @@ public:
 	ConvergenceState PlayerConvergenceState;
 	
 	/* Currently held item */
-	AItem* GetItem();
+	ADItem* GetItem();
 
 	UPROPERTY(Replicated)
 	TArray<class UTexture2D*> spriteInventory;

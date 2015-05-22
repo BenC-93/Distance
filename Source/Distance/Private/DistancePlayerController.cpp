@@ -300,7 +300,7 @@ void ADistancePlayerController::OnUseItemReleased()
 		UE_LOG(LogTemp, Error, TEXT("DistanceCharacter is null."));
 		return;
 	}
-	AItem* item = DistanceCharacterClass->GetItem();
+	ADItem* item = DistanceCharacterClass->GetItem();
 	if (item == NULL)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
@@ -379,7 +379,7 @@ void ADistancePlayerController::Possess(class APawn *InPawn)
 	Super::Possess(InPawn);
 	// TODO: Create Lantern
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
-//	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern(DistanceCharacterClass));
+	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern(DistanceCharacterClass));
 
 //	DistanceCharacterClass->EquipItemComponent(0);
 //	DistanceCharacterClass->ItemPickedUp();

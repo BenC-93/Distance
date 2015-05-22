@@ -99,14 +99,14 @@ void AAIEnemy::Tick(float DeltaTime)
 	}
 	if (prepareToDie)//used for buffer time so the ai can run away
 	{
-		if (deathCounter == 10)//right before running away
-		{
+		//if (deathCounter == 10)//right before running away
+		//{
 			player->ChangeSpeed(600);
 			ShadowSpriteComponent->SetRelativeScale3D(FVector(1, 1, 1));
 			DrainParticleSys->Deactivate();
 			DrainParticleSys->DestroyComponent();
 			//DrainParticleSys->bIsActive = false;
-		}
+		//}
 		if (deathCounter - 1 >= 0)//used to decrement the death counter and so it doesnt go below 0
 		{
 			deathCounter--;

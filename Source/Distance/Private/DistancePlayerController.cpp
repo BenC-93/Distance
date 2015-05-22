@@ -59,7 +59,7 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
 
 	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnGetLocation);//Temporary Binding, for location testing***************************************
-	InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnConvergenceBegin);//Temporary Binding, for starting convergence***************************************
+	//InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnConvergenceBegin);//Temporary Binding, for starting convergence***************************************
 
 	InputComponent->BindAxis("MoveForward", this, &ADistancePlayerController::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ADistancePlayerController::MoveRight);

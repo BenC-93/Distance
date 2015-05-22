@@ -105,6 +105,7 @@ void AAIEnemy::Tick(float DeltaTime)
 			ShadowSpriteComponent->SetRelativeScale3D(FVector(1, 1, 1));
 			DrainParticleSys->Deactivate();
 			DrainParticleSys->DestroyComponent();
+			ShadowSpriteComponent->DestroyComponent();
 			//DrainParticleSys->bIsActive = false;
 		//}
 		if (deathCounter - 1 >= 0)//used to decrement the death counter and so it doesnt go below 0

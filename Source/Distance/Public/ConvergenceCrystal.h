@@ -62,4 +62,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Timers")
 	void LoseHealthTimer();
+	
+	virtual void Destroyed() override;
 };

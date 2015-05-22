@@ -98,11 +98,6 @@ void AConvergenceCrystal::LoseHealthTimer()
 	if (health - drainHealthDamage <= 0.0f)
 	{
 		health = 0;
-		GetWorldTimerManager().ClearTimer(this, &AConvergenceCrystal::LoseHealthTimer);
-		//convergence crystal just died, blow shit up, do stuff, idk...wait i found it out, end the boss
-		ConvergenceCam->SetActive(false);
-		if (player1) { Cast<APlayerController>(player1->GetController())->SetViewTarget(player1); }
-		if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(player2); }
 		//bossDoubt->EndOfBoss();//check if player controller is null
 		bossBetrayal->EndOfBoss();
 		Destroy();
@@ -112,4 +107,13 @@ void AConvergenceCrystal::LoseHealthTimer()
 		health -= drainHealthDamage;
 	}
 	UE_LOG(LogDistance, Warning, TEXT("crystal health: %f"), health);
+}
+
+void AConvergenceCrystal::Destroyed()
+{
+	GetWorldTimerManager().ClearTimer(this, &AConvergenceCrystal::LoseHealthTimer);
+	//convergence crystal just died, blow shit up, do stuff, idk...wait i found it out, end the boss
+	ConvergenceCam->SetActive(false);
+	if (player1) { Cast<APlayerController>(player1->GetController())->SetViewTarget(player1); }
+	if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(player2); }
 }

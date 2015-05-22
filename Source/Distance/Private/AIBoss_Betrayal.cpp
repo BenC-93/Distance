@@ -71,7 +71,7 @@ void AAIBoss_Betrayal::PostInitializeComponents()
 void AAIBoss_Betrayal::BeginCycle()
 {
 	TransformPlayers(true);
-	numOfMinions = 2.0f;//set the number of minions for the cycle //was 6 TODO: adjust
+	numOfMinions = 6.0f;//set the number of minions for the cycle //was 6 TODO: adjust
 	//summon monsters
 	float widthOfMonsters = 150.0f;//estimated for now TODO get exact width of monsters
 	for (int i = 0; i < numOfMinions; i++)
@@ -82,7 +82,7 @@ void AAIBoss_Betrayal::BeginCycle()
 		switch (i)
 		{//TODO: adjust, usual order is copy, follow, random
 			case 0:
-				SpawnMonster(offset, MoveState::FOLLOW, player1);
+				SpawnMonster(offset, MoveState::COPY, player1);
 				break;
 			case 1:
 				SpawnMonster(offset, MoveState::FOLLOW, player1);
@@ -195,9 +195,8 @@ void AAIBoss_Betrayal::NotifyDeath()//notifies the boss when one of its minion d
 		numOfMinions--;
 		UE_LOG(LogTemp, Warning, TEXT("A minion died, %f minions left."), numOfMinions);
 	}
-	else//no more minions
+	if (numOfMinions <= 0)//no more minions
 	{
-		UE_LOG(LogTemp, Error, TEXT("Last minion died, %f minions left."), numOfMinions);
 		if (numOfCycles > 0)//cycle has ended, begin next cycle
 		{
 			//end cycle cleanup

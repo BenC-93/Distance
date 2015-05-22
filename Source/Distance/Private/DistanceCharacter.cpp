@@ -168,6 +168,11 @@ void ADistanceCharacter::EquipItemComponent(int32 InvSlot)
 	if (Inventory.IsValidIndex(InvSlot))
 	{
 		class TSubclassOf<AItem> ComponentClass = Inventory[InvSlot]->ItemClass;
+		if (!ItemComponent)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Error: EquipItem, Item component is null before equipping another item."));
+			return;
+		}
 		ItemComponent->OnComponentDestroyed();
 		ItemComponent->ChildActorClass = ComponentClass;
 		ItemComponent->OnComponentCreated();

@@ -64,10 +64,6 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 		for (TActorIterator<AAIBoss_Betrayal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
 			bossBetrayal = Cast<AAIBoss_Betrayal>(*ActorItr);
-			if (ActorItr->p1InTrigger || ActorItr->p2InTrigger)
-			{
-				return;
-			}
 		}
 
 		FVector midpointVec = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
@@ -109,6 +105,7 @@ void AConvergenceCrystal::LoseHealthTimer()
 		if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(player2); }
 		//bossDoubt->EndOfBoss();//check if player controller is null
 		bossBetrayal->EndOfBoss();
+		Destroy();
 	}
 	else
 	{

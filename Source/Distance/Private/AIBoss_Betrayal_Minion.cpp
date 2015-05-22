@@ -15,7 +15,7 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	HeldItem = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("HeldItem"));
 	HeldItem->AttachTo(RootComponent);
 
-	Health = MaxHealth = 15.f;
+	Health = MaxHealth = 10.f;
 	TargetActor = this;
 	TargetLocation = GetActorLocation();
 	TargetSpeed = 10.f;

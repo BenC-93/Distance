@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "DistancePlayerController.h"
+#include "ConvergenceCrystal.h"
 #include "AIBoss_Betrayal.h"
 
 AAIBoss_Betrayal::AAIBoss_Betrayal(const FObjectInitializer& ObjectInitializer)
@@ -237,6 +238,11 @@ void AAIBoss_Betrayal::EndOfBoss()
 
 	//destroy all minions
 	for (TActorIterator<AAIBoss_Betrayal_Minion> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->Destroy();
+	}
+
+	for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		ActorItr->Destroy();
 	}

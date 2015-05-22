@@ -28,13 +28,13 @@ void AItemCrystal::StartUse()
 				break;
 			}
 		}
-		if (shrineFound)
+		if (shrineFound && OwningPawn->PlayerConvergenceState != ConvergenceState::CONVERGENCE)
 		{
 			ConvergenceManager::StartConvergence();
 			GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
 			SpawnConvergenceCrystal();
 		}
-		else
+		else if (OwningPawn->PlayerConvergenceState != ConvergenceState::CONVERGENCE)
 		{
 			SpawnSpirit();
 		}

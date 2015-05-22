@@ -113,6 +113,7 @@ void AConvergenceCrystal::Destroyed()
 {
 	GetWorldTimerManager().ClearTimer(this, &AConvergenceCrystal::LoseHealthTimer);
 	//convergence crystal just died, blow shit up, do stuff, idk...wait i found it out, end the boss
+	GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
 	ConvergenceCam->SetActive(false);
 	if (player1) { Cast<APlayerController>(player1->GetController())->SetViewTarget(player1); }
 	if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(player2); }

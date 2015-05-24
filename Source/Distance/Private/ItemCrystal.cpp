@@ -38,8 +38,10 @@ void AItemCrystal::StartUse()
 		{
 			SpawnSpirit();
 		}
-		//OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
-//		Drop(); //TODO: Replace this thing
+		
+		// Remove from inventory and consume
+		OwningPawn->RemoveItem(this);
+		Destroy();
 	}
 }
 

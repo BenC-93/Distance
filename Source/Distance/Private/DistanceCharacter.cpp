@@ -2,7 +2,6 @@
 
 #include "Distance.h"
 #include "DistanceCharacter.h"
-#include "Item.h"
 #include "DItem.h"
 #include "DItemPickup.h"
 #include "Engine.h"
@@ -126,22 +125,12 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)
 
 void ADistanceCharacter::EquipItem(ADItem* Item)
 {
-	// Unequip previous item, if available
-	if (CurrentItem)
+	if (Item)
 	{
-		CurrentItem->OnUnequip();
+		SetCurrentItem(Item);
 	}
 	
-	// Find the item index of the item to be equipped, making sure it's in the inventory
-	int32 IndexOfItem;
-	if (ensure(Inventory.Find(Item, IndexOfItem)))
-	{
-		EquippedSlot = IndexOfItem;
-	}
-	
-	// Equip, set references, and notify the UI
-	Item->OnEquip();
-	CurrentItem = Item;
+	// Notify the UI
 	ItemPickedUp();
 }
 
@@ -236,6 +225,39 @@ void ADistanceCharacter::StartRegeneration()
 //	New stuff here, sort later
 //
 
+void ADistanceCharacter::SetCurrentItem(class ADItem* NewItem, class ADItem* LastItem)
+{
+	ADItem* LocalLastItem = nullptr;
+	if (LastItem)
+	{
+		LocalLastItem = LastItem;
+	}
+	else if (NewItem != CurrentItem)
+	{
+		LocalLastItem = CurrentItem;
+	}
+	
+	// Unequip Current
+	if (LocalLastItem)
+	{
+		LocalLastItem->OnUnequip();
+	}
+	
+	// Find the item index of the item to be equipped, making sure it's in the inventory
+	int32 IndexOfItem;
+	if (ensure(Inventory.Find(NewItem, IndexOfItem)))
+	{
+		EquippedSlot = IndexOfItem;
+	}
+	
+	CurrentItem = NewItem;
+	
+	if (NewItem)
+	{
+		NewItem->OnEquip();
+	}
+}
+
 void ADistanceCharacter::AddItem(class ADItem* NewItem)
 {
 	if (NewItem && HasAuthority())
@@ -249,6 +271,37 @@ void ADistanceCharacter::AddItem(class ADItem* NewItem)
 			ADItem* NewestItem = Inventory.Last();
 			EquipItem(NewestItem);
 		}
+	}
+}
+
+void ADistanceCharacter::RemoveItem(ADItem* Item)
+{
+	if (Item && HasAuthority())
+	{
+		bool bIsCurrent = CurrentItem == Item;
+		
+		if (Inventory.Contains(Item))
+		{
+			Item->OnLeaveInventory();
+		}
+		Inventory.RemoveSingle(Item);
+		
+		// Replace the item just removed
+		if (ensure(Inventory.Num() > 0))
+		{
+			if (bIsCurrent)
+			{
+				SetCurrentItem(Inventory[0]);
+			}
+		}
+		else
+		{
+			// This shouldn't happen given our item framework
+			SetCurrentItem(nullptr);
+		}
+		
+		// Refresh the UI
+		ItemPickedUp();
 	}
 }
 

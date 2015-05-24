@@ -52,6 +52,15 @@ void ADItem::OnEnterInventory(ADistanceCharacter* NewOwner)
 	SetOwningPawn(NewOwner);
 }
 
+void ADItem::OnLeaveInventory()
+{
+	if (HasAuthority())
+	{
+		SetOwningPawn(nullptr);
+	}
+	OnUnequip();
+}
+
 void ADItem::StartUse()
 {
 	bIsInUse = true; //this should be the first thing that happens

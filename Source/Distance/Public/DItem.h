@@ -69,6 +69,8 @@ public:
 	
 	void OnEnterInventory(ADistanceCharacter* NewOwner);
 	
+	void OnLeaveInventory();
+	
 	/* Item's primary action for when it is use by the player. */
 	UFUNCTION(BlueprintCallable, Category = Use)
 	virtual void StartUse();

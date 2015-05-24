@@ -127,7 +127,12 @@ public:
 	void AddItem(class ADItem* NewItem);
 	
 	UFUNCTION(BlueprintCallable, Category = Item)
+	void RemoveItem(class ADItem* Item);
+	
+	UFUNCTION(BlueprintCallable, Category = Item)
 	bool HasInventorySpace();
+
+	void SetCurrentItem(class ADItem* NewItem, class ADItem* LastItem = nullptr);
 	
 //
 //

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "GameFramework/Character.h"
+#include "AIBoss.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "DistanceCharacter.h"
 #include "DistancePlayerController.h"
@@ -13,7 +13,7 @@
  * 
  */
 UCLASS()
-class DISTANCE_API AAIBoss_Doubt : public ACharacter
+class DISTANCE_API AAIBoss_Doubt : public AAIBoss
 {
 	GENERATED_BODY()
 	
@@ -136,8 +136,6 @@ public:
 	
 private:
 
-	float Health;
-	float MaxHealth;
 	float tentacleHealth;
 	int numTentacles;
 	float baseDamage;

@@ -501,6 +501,11 @@ void AAIBoss_Doubt::EndOfBoss()
 
 	GetWorldTimerManager().ClearAllTimersForObject(this);
 
+	for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->Destroy();
+	}
+
 	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);//if the clear all timers thing works, then we dont need these lines
 	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
 	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);

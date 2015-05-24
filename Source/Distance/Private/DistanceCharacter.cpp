@@ -54,6 +54,8 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SpriteComponent->SetIsReplicated(true);
+	
+	ItemSocket = TEXT("ItemSocket");
 
 	ItemComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("ItemComponent"));
 //	ItemComponent->ChildActorClass = AItem::StaticClass();
@@ -119,11 +121,22 @@ AItem* ADistanceCharacter::DropItem(int32 InvSlot)
 
 void ADistanceCharacter::EquipItem(ADItem* Item)
 {
-	// TODO:Do something to equip
+	// Unequip previous item, if available
+	if (CurrentItem)
+	{
+		CurrentItem->OnUnequip();
+	}
+	
+	// Find the item index of the item to be equipped, making sure it's in the inventory
+	int32 IndexOfItem;
+	if (ensure(Inventory.Find(Item, IndexOfItem)))
+	{
+		EquippedSlot = IndexOfItem;
+	}
+	
+	// Equip, set references, and notify the UI
 	Item->OnEquip();
 	CurrentItem = Item;
-	FName Socket = TEXT("ItemSocket");
-	CurrentItem->AttachRootComponentTo(GetMesh(), Socket, EAttachLocation::SnapToTarget); // TEMP
 	ItemPickedUp();
 }
 
@@ -173,6 +186,11 @@ bool ADistanceCharacter::GetIsItemDroppable()
 		return GetItem()->bIsDroppable;
 	}
 	return false;
+}
+
+FName ADistanceCharacter::GetItemAttachPoint()
+{
+	return ItemSocket;
 }
 
 /* BELOW ARE THE OLD ITEM HANDLING FUNCTIONS. THEY ARE SUBJECT TO CHANGE.

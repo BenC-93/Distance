@@ -32,6 +32,9 @@ class ADistanceCharacter : public ACharacter
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UChildActorComponent* ItemComponent;
+	
+	UPROPERTY(EditDefaultsOnly, Category = Item)
+	FName ItemSocket;
 
 public:
 	ADistanceCharacter(const FObjectInitializer& ObjectInitializer);
@@ -105,6 +108,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Light)
 	bool GetIsItemDroppable();
+	
+	FName GetItemAttachPoint();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
 	void BPTransitionToNewConvergenceState();

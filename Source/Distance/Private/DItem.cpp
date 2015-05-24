@@ -23,6 +23,7 @@ ADItem::ADItem(const FObjectInitializer& ObjectInitializer)
 	
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->AttachTo(RootComponent);
+	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 FString ADItem::GetItemName() const
@@ -63,7 +64,7 @@ void ADItem::EndUse()
 
 void ADItem::OnEquip()
 {
-	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AttachToPawn();
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
 	GetWorldTimerManager().SetTimer(this, &ADItem::Regenerate, RegenRate, true);
@@ -71,9 +72,24 @@ void ADItem::OnEquip()
 
 void ADItem::OnUnequip()
 {
+	DetachFromPawn();
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
 	GetWorldTimerManager().ClearTimer(this, &ADItem::Regenerate);
+}
+
+void ADItem::AttachToPawn()
+{
+	USkeletalMeshComponent* PawnMesh = OwningPawn->GetMesh();
+	FName AttachPoint = OwningPawn->GetItemAttachPoint();
+	RootComponent->SetHiddenInGame(false);
+	RootComponent->AttachTo(PawnMesh, AttachPoint, EAttachLocation::SnapToTarget);
+}
+
+void ADItem::DetachFromPawn()
+{
+	RootComponent->DetachFromParent();
+	RootComponent->SetHiddenInGame(true);
 }
 
 void ADItem::ChangeAmount(float value)

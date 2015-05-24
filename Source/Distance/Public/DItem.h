@@ -84,6 +84,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Item)
 	void OnUnequip();
 	
+	void AttachToPawn();
+	
+	void DetachFromPawn();
+	
 	/* Changes 'ItemAmount' variable by value, within the bounds [0.0, MaxItemAmount]. */
 	UFUNCTION(BlueprintCallable, Category = Amount)
 	virtual void ChangeAmount(float value);

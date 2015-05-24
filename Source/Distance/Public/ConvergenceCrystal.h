@@ -28,6 +28,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Crystal)
 	float movementSpeed;
 
+	// used for sprite bobbing
+	float zflip;
+	float zmin;
+	float zmax;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
+	float LightIntensity;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
+	class UPointLightComponent* LightSource;
+
 	UPROPERTY(EditAnywhere)
 	class ACharacter* player1;
 

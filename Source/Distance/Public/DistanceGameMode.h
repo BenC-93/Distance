@@ -20,14 +20,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Convergence")
 	void InitializeConvergence(class ADistanceCharacter* p1, class ADistanceCharacter* p2);
 
-	UFUNCTION(BlueprintCallable, Category = Items)
+	UFUNCTION(BlueprintCallable, Category = Spawning)
 	class ADItemPickup* SpawnLantern(ACharacter* player);
 	
-	UFUNCTION(BlueprintCallable, Category = Items)
+	UFUNCTION(BlueprintCallable, Category = Spawning)
 	class ADItemPickup* SpawnItemAtLocation(TSubclassOf<class ADItemPickup> indexClass, FVector location);
 
-	UFUNCTION(BlueprintCallable, Category = Items)
+	UFUNCTION(BlueprintCallable, Category = Spawning)
 	class ATentacle* SpawnTentacleAtLocation(TSubclassOf<class ATentacle> indexClass, FVector location);
+
+	UFUNCTION(BlueprintCallable, Category = Spawning)
+	void SpawnBossAtLocation(TSubclassOf<class ACharacter> indexClass, FVector location);
 
 	UFUNCTION(BlueprintCallable, Category = Items)
 	void SpawnRandomItemAtLocation(FVector location);

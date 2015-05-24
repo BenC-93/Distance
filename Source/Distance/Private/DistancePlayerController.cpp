@@ -60,17 +60,17 @@ void ADistancePlayerController::SetupInputComponent()
 	InputComponent->BindAction("Inventory", IE_Pressed, this, &ADistancePlayerController::OnInventoryPressed);
 
 	InputComponent->BindAction("AttackBoss", IE_Pressed, this, &ADistancePlayerController::OnGetLocation);//Temporary Binding, for location testing***************************************
-	InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnConvergenceBegin);//Temporary Binding, for starting convergence***************************************
+	//InputComponent->BindAction("SwitchItem", IE_Pressed, this, &ADistancePlayerController::OnConvergenceBegin);//Temporary Binding, for starting convergence***************************************
 
 	InputComponent->BindAxis("MoveForward", this, &ADistancePlayerController::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ADistancePlayerController::MoveRight);
 	InputComponent->BindAction("CycleInventory", IE_Pressed, this, &ADistancePlayerController::CycleInventory);
 	InputComponent->BindAction("ItemPickup", IE_Pressed, this, &ADistancePlayerController::ItemPickup);
-	InputComponent->BindAction("ItemDrop", IE_Pressed, this, &ADistancePlayerController::ItemDrop);
+	//InputComponent->BindAction("ItemDrop", IE_Pressed, this, &ADistancePlayerController::ItemDrop);
 
 	//Temp input for crystal
-	InputComponent->BindAction("OtherUseItem", IE_Pressed, this, &ADistancePlayerController::OnOtherUseItemPressed);
-	InputComponent->BindAction("OtherUseItem", IE_Released, this, &ADistancePlayerController::OnUseItemReleased);
+	//InputComponent->BindAction("OtherUseItem", IE_Pressed, this, &ADistancePlayerController::OnOtherUseItemPressed);
+	//InputComponent->BindAction("OtherUseItem", IE_Released, this, &ADistancePlayerController::OnUseItemReleased);
 }
 
 void ADistancePlayerController::MoveForward(float val)

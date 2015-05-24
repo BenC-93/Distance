@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "AIBoss_Doubt.h"
+#include "AIBoss_Betrayal.h"
 #include "ConvergenceCrystal.h"
 
 AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitializer)
@@ -24,6 +25,25 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -70.f);
 	SpriteComponent->AttachTo(RootComponent);
+
+	CameraBoom = ObjectInitializer.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraBoom"));
+	CameraBoom->AttachTo(RootComponent);
+	CameraBoom->bAbsoluteRotation = true; // Don't want arm to rotate when character does
+	CameraBoom->TargetArmLength = 800.f;
+	CameraBoom->RelativeRotation = FRotator(-70.f, 0.f, 0.f);
+	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
+
+	// Create a camera...
+	ConvergenceCam = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(this, TEXT("ConvergenceCam"));
+	ConvergenceCam->AttachTo(CameraBoom, USpringArmComponent::SocketName);
+	ConvergenceCam->bUsePawnControlRotation = false;
+}
+
+void AConvergenceCrystal::BeginPlay()
+{
+	ConvergenceCam->SetActive(true);
+	if (player1) { Cast<APlayerController>(player1->GetController())->SetViewTarget(this); }
+	if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(this); }
 }
 
 void AConvergenceCrystal::Tick(float DeltaTime)
@@ -39,6 +59,11 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 			{
 				return;
 			}
+		}
+
+		for (TActorIterator<AAIBoss_Betrayal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			bossBetrayal = Cast<AAIBoss_Betrayal>(*ActorItr);
 		}
 
 		FVector midpointVec = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
@@ -73,13 +98,23 @@ void AConvergenceCrystal::LoseHealthTimer()
 	if (health - drainHealthDamage <= 0.0f)
 	{
 		health = 0;
-		GetWorldTimerManager().ClearTimer(this, &AConvergenceCrystal::LoseHealthTimer);
-		//convergence crystal just died, blow shit up, do stuff, idk...wait i found it out, end the boss
-		bossDoubt->EndOfBoss();
+		//bossDoubt->EndOfBoss();//check if player controller is null
+		bossBetrayal->EndOfBoss();
+		Destroy();
 	}
 	else
 	{
 		health -= drainHealthDamage;
 	}
 	UE_LOG(LogDistance, Warning, TEXT("crystal health: %f"), health);
+}
+
+void AConvergenceCrystal::Destroyed()
+{
+	GetWorldTimerManager().ClearTimer(this, &AConvergenceCrystal::LoseHealthTimer);
+	//convergence crystal just died, blow shit up, do stuff, idk...wait i found it out, end the boss
+	GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
+	ConvergenceCam->SetActive(false);
+	if (player1) { Cast<APlayerController>(player1->GetController())->SetViewTarget(player1); }
+	if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(player2); }
 }

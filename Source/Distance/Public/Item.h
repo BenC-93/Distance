@@ -80,6 +80,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Item)
 	void OnEquip();
 
+	/* For blueprint events to start on equip. */
+	UFUNCTION(BlueprintImplementableEvent, Category = Shield)
+	void BPOnEquip();
+
 	/* What happens when the player unequips the item. */
 	UFUNCTION(BlueprintCallable, Category = Item)
 	void OnUnequip();

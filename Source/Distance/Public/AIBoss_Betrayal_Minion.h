@@ -21,7 +21,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
 	class UPaperSpriteComponent* SpriteComponent;
 
+	class UPaperSpriteComponent* HeldItem;
+
 	virtual void Tick(float DeltaTime) override;
+
+	virtual FVector GetVelocity() const override;
 
 	//~~~ Health ~~~//
 	float Health;
@@ -57,5 +61,19 @@ public:
 	//~~~ Owning Monster ~~~//
 	class AAIBoss_Betrayal* OwningPawn;
 
+	float currentSpeed;
+
 	void SetOwner(class AAIBoss_Betrayal* b);
+
+	bool canMove;
+
+	void AnimationTimer();
+
+	void AttackTimer();
+
+	UPROPERTY(Category = Animation, EditAnywhere)
+	UAnimationAsset* AttackAnimation;
+
+	void StartAttackRandomTimer();
+
 };

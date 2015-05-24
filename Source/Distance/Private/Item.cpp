@@ -12,8 +12,8 @@ AItem::AItem(const FObjectInitializer& ObjectInitializer)
 	isInUse = false;
 	amount = 100.0f;
 	maxAmount = 100.0f;
-	regenRate = 1.0f;
-	regenAmount = 1.0f;
+	regenRate = 0.1f;
+	regenAmount = 0.3f;
 	name = TEXT("Default");
 	OwningPawn = NULL;
 
@@ -46,7 +46,11 @@ void AItem::OnEquip()
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
-	GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
+	if (!isInUse) {
+		GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
+	}
+	// any blueprint events
+	BPOnEquip();
 }
 
 void AItem::OnUnequip()

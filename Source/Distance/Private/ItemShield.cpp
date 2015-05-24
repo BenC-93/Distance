@@ -8,8 +8,17 @@ AItemShield::AItemShield(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	ItemName = "Shield";
-	drainRate = 1.0f;
-	drainAmount = -2.0f;
+	drainRate = 0.1f;
+	drainAmount = -1.0f;
+
+	
+
+	LightIntensity = 100.0f * ItemAmount;
+
+	LightSource = ObjectInitializer.CreateDefaultSubobject<UPointLightComponent>(this, "LightSource");
+	LightSource->AttachTo(RootComponent);
+	LightSource->Intensity = LightIntensity;
+	LightSource->bVisible = false;
 }
 
 void AItemShield::StartUse()
@@ -17,12 +26,17 @@ void AItemShield::StartUse()
 	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(GetOwningPawn()->GetController());
 	if (!bIsInUse && ItemAmount > 0 && bCanUse)
 	{
+		
 		GetWorldTimerManager().SetTimer(this, &AItemShield::Drain, drainRate, true);
+		// start blueprint drain events
+		BPStartDrain();
+
 		// start use animation
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
 		GetWorldTimerManager().SetTimer(this, &AItemShield::AnimationTimer, 0.68f, false);
 		bIsInUse = true;
+		LightSource->SetVisibility(true);
 	}
 }
 
@@ -32,6 +46,11 @@ void AItemShield::EndUse()
 	{
 		GetWorldTimerManager().ClearTimer(this, &AItemShield::Drain);
 		bIsInUse = false;
+		//BPStartRegen();
+		LightSource->SetVisibility(false);
+
+		// stop blueprint drain events
+		BPEndDrain();
 	}
 }
 
@@ -46,4 +65,11 @@ void AItemShield::AnimationTimer()
 void AItemShield::Drain()
 {
 	ChangeAmount(drainAmount);
+}
+
+void AItemShield::ChangeAmount(float value)
+{
+	Super::ChangeAmount(value);
+	LightIntensity = 100.0f * ItemAmount;
+	LightSource->SetIntensity(LightIntensity);
 }

@@ -39,6 +39,7 @@ void AItemLantern::StartUse()
 
 void AItemLantern::EndUse()
 {
+	//isInUse = false;
 	return;
 }
 
@@ -47,4 +48,12 @@ void AItemLantern::ChangeAmount(float value)
 	Super::ChangeAmount(value);
 	LightIntensity = 100.0f * ItemAmount;
 	LightSource->SetIntensity(LightIntensity);
+	if (ItemAmount < MaxItemAmount)
+	{
+		GetWorldTimerManager().SetTimer(this, &ADItem::Regenerate, RegenRate, true);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(this, &ADItem::Regenerate);
+	}
 }

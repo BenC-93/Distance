@@ -71,6 +71,12 @@ class ATentacle* ADistanceGameMode::SpawnTentacleAtLocation(TSubclassOf<class AT
 	return GetWorld()->SpawnActor<ATentacle>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
+void ADistanceGameMode::SpawnBossAtLocation(TSubclassOf<class ACharacter> indexClass, FVector location)
+{
+	printScreen(FColor::Red, TEXT("Spawning Boss"));
+	GetWorld()->SpawnActor<ACharacter>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+}
+
 void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
 	printScreen(FColor::Red, TEXT("Spawning Random Item"));

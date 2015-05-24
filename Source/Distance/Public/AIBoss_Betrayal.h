@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "GameFramework/Character.h"
+#include "AIBoss.h"
 #include "Classes/PaperSpriteComponent.h"
 #include "AIBoss_Betrayal_Minion.h"
 #include "AIBoss_Betrayal.generated.h"
@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class DISTANCE_API AAIBoss_Betrayal : public ACharacter
+class DISTANCE_API AAIBoss_Betrayal : public AAIBoss
 {
 	GENERATED_BODY()
 	
@@ -92,8 +92,6 @@ public:
 
 private:
 
-	float Health;
-	float MaxHealth;
 	float baseDamage;
 	float drainRate;
 	float timeBetweenCycles;

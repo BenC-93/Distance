@@ -55,6 +55,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Convergence)
 	ConvergenceState PlayerConvergenceState;
 	
+	UPROPERTY(EditDefaultsOnly, Category = HeldItem)
+	FName ItemSocketPoint;
+
+	FName GetItemSocketPoint();
+
 	/* Currently held item */
 	ADItem* GetItem();
 

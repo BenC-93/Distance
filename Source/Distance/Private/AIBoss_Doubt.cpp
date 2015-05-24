@@ -82,22 +82,63 @@ UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjec
 	return TentacleComponent;
 }
 
-void AAIBoss_Doubt::PostInitializeComponents()
+/*void AAIBoss_Doubt::PostLoad()
 {
+	Super::PostLoad();
 	for (int i = 0; i < TentacleComponentArray.Num(); i++)
 	{
 		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
 		UE_LOG(LogTemp, Warning, TEXT("this line is just before setting tentacle parents"));
+		if (TentacleComponentArray[i]->ChildActor)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("TentaclesComponentArray is good to go my good sir."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("TentacleComponentArray is NULL"));
+		}
 		if (tentacle != NULL)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("trying to set tentacles parents..."));
+			UE_LOG(LogTemp, Warning, TEXT("Tentacle parents are set"));
 			tentacle->SetBossParent(this);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Tentacles are NULL"));
 		}
 	}
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-	Super::PostInitializeComponents();
 }
+
+void AAIBoss_Doubt::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	for (int i = 0; i < TentacleComponentArray.Num(); i++)
+	{
+		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
+		UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: this line is just before setting tentacle parents"));
+		if (TentacleComponentArray[i]->ChildActor)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: TentaclesComponentArray is good to go my good sir."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PostInitializeComponents: TentacleComponentArray is NULL"));
+		}
+		if (tentacle != NULL)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: Tentacle parents are set"));
+			tentacle->SetBossParent(this);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PostInitializeComponents: Tentacles are NULL"));
+		}
+	}
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+}*/
 
 /*void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
@@ -353,8 +394,15 @@ void AAIBoss_Doubt::TentacleTimer()
 		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
 		return;
 	}
-	//rotate //y,z,x
-	TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	if (currentPlayer->GetActorLocation().Y > GetActorLocation().Y)
+	{
+		//rotate //y,z,x
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	}
+	else
+	{
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw + 180), tentacleCounter), 0));
+	}
 	//scale
 	float maxScale = distToPlayer / tentacleSpriteLen;
 	//UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
@@ -453,6 +501,11 @@ void AAIBoss_Doubt::EndOfBoss()
 
 	GetWorldTimerManager().ClearAllTimersForObject(this);
 
+	for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->Destroy();
+	}
+
 	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);//if the clear all timers thing works, then we dont need these lines
 	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
 	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
@@ -465,7 +518,7 @@ void AAIBoss_Doubt::EndOfBoss()
 	{
 		playerController->OnConvergenceEnd();
 		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
-		//Destroy();
+		Destroy();
 	}
 	else
 	{

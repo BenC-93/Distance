@@ -14,6 +14,7 @@ AItemLightBeam::AItemLightBeam(const FObjectInitializer& ObjectInitializer)
 	chargeRate = 0.1f;
 	chargeAmount = 0.5f;
 	totalChargedAmount = 0.0f;
+	lightChargeAmount = 0.0f;
 
 	targetActor = NULL;
 	hasAttacked = false;//so the tick if statement only happens once per attack
@@ -26,6 +27,13 @@ AItemLightBeam::AItemLightBeam(const FObjectInitializer& ObjectInitializer)
 	TriggerBox->SetBoxExtent(FVector(70.0f, 50.0f, 125.0f), true);
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AItemLightBeam::OnOverlapBegin);
 	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AItemLightBeam::OnOverlapEnd);
+
+	LightIntensity = 100.0f * lightChargeAmount;
+
+	LightSource = ObjectInitializer.CreateDefaultSubobject<UPointLightComponent>(this, "LightSource");
+	LightSource->AttachTo(RootComponent);
+	LightSource->Intensity = LightIntensity;
+	LightSource->bVisible = false;
 }
 
 void AItemLightBeam::Tick(float DeltaTime)
@@ -57,6 +65,13 @@ void AItemLightBeam::Tick(float DeltaTime)
 			totalChargedAmount = 0.0f;
 			hasAttacked = true;
 		}
+		else if (targetActor->IsA(ADistanceCharacter::StaticClass()))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Light beam hit the the other player!"));
+			Cast<ADistanceCharacter>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
+			totalChargedAmount = 0.0f;
+			hasAttacked = true;
+		}
 	}
 }
 
@@ -64,10 +79,14 @@ void AItemLightBeam::StartUse()
 {
 	if (!bIsInUse && ItemAmount > 0 && bCanUse == true)
 	{
+		lightChargeAmount = 0.0f;
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Charge, chargeRate, true);
 		//start charging animation
+		LightSource->SetVisibility(true);
 		bIsInUse = true;
+		GetWorldTimerManager().ClearTimer(this, &AItemLightBeam::Regenerate);
 	}
+	
 }
 
 void AItemLightBeam::EndUse()
@@ -83,6 +102,8 @@ void AItemLightBeam::EndUse()
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::AnimationTimer, 0.85f, false);
+		LightSource->SetVisibility(false);
+		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Regenerate, RegenRate, true);
 	}
 }
 
@@ -99,6 +120,11 @@ void AItemLightBeam::Charge()
 {
 	ChangeAmount(-chargeAmount);
 	totalChargedAmount += chargeAmount;//might need to multiply by some factor for more or less damage dealing
+	lightChargeAmount += chargeAmount;
+
+	// light increases while charging
+	LightIntensity = 100.0f * lightChargeAmount;
+	LightSource->SetIntensity(LightIntensity);
 }
 
 void AItemLightBeam::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -116,6 +142,6 @@ void AItemLightBeam::OnOverlapEnd_Implementation(class AActor* OtherActor, class
 	{
 		//UE_LOG(LogDistance, Warning, TEXT("Exit Overlap with: %s"), *OtherActor->GetName());
 		targetActor = NULL;
-		UE_LOG(LogDistance, Warning, TEXT("TargetActor is NULL"));
+		//UE_LOG(LogDistance, Warning, TEXT("TargetActor is NULL"));
 	}
 }

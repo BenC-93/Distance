@@ -37,7 +37,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	class AAIBoss_Doubt* bossDoubt;
 
+	UPROPERTY(EditAnywhere)
+	class AAIBoss_Betrayal* bossBetrayal;
+
 	AConvergenceCrystal(const class FObjectInitializer& ObjectInitializer);
+
+	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -49,6 +54,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent *SpriteComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
+	class UCameraComponent* ConvergenceCam;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	class USpringArmComponent* CameraBoom;
+
 	UFUNCTION(BlueprintCallable, Category = "Timers")
 	void LoseHealthTimer();
+	
+	virtual void Destroyed() override;
 };

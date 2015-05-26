@@ -8,11 +8,11 @@ AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
 {
 //	SpriteComponent->SetSprite(ConstructorHelpers::FClassFinder<UPaperSprite>(TEXT("/Game/Sprites/Lantern_Sprite")));
 
-	name = TEXT("Lantern");
-	droppable = false;
+	ItemName = TEXT("Lantern");
+	bIsDroppable = false;
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	LightIntensity = 100.0f * amount;
+	LightIntensity = 100.0f * ItemAmount;
 
 	LightSource = ObjectInitializer.CreateDefaultSubobject<UPointLightComponent>(this, "LightSource");
 	LightSource->AttachTo(RootComponent);
@@ -24,14 +24,14 @@ AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
 
 void AItemLantern::StartUse()
 {
-	if (isInUse)
+	if (bIsInUse)
 	{
-		isInUse = false;
+		bIsInUse = false;
 		LightSource->SetVisibility(false);
 	}
 	else
 	{
-		isInUse = true;
+		bIsInUse = true;
 		LightSource->SetVisibility(true);
 
 	}
@@ -46,14 +46,14 @@ void AItemLantern::EndUse()
 void AItemLantern::ChangeAmount(float value)
 {
 	Super::ChangeAmount(value);
-	LightIntensity = 100.0f * amount;
+	LightIntensity = 100.0f * ItemAmount;
 	LightSource->SetIntensity(LightIntensity);
-	if (amount < maxAmount)
+	if (ItemAmount < MaxItemAmount)
 	{
-		GetWorldTimerManager().SetTimer(this, &AItem::Regenerate, regenRate, true);
+		GetWorldTimerManager().SetTimer(this, &ADItem::Regenerate, RegenRate, true);
 	}
 	else
 	{
-		GetWorldTimerManager().ClearTimer(this, &AItem::Regenerate);
+		GetWorldTimerManager().ClearTimer(this, &ADItem::Regenerate);
 	}
 }

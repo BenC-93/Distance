@@ -7,13 +7,13 @@
 AItemShield::AItemShield(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	name = "Shield";
+	ItemName = "Shield";
 	drainRate = 0.1f;
 	drainAmount = -1.0f;
 
 	
 
-	LightIntensity = 100.0f * amount;
+	LightIntensity = 100.0f * ItemAmount;
 
 	LightSource = ObjectInitializer.CreateDefaultSubobject<UPointLightComponent>(this, "LightSource");
 	LightSource->AttachTo(RootComponent);
@@ -24,7 +24,7 @@ AItemShield::AItemShield(const FObjectInitializer& ObjectInitializer)
 void AItemShield::StartUse()
 {
 	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(GetOwningPawn()->GetController());
-	if (!isInUse && amount > 0 && canUse)
+	if (!bIsInUse && ItemAmount > 0 && bCanUse)
 	{
 		
 		GetWorldTimerManager().SetTimer(this, &AItemShield::Drain, drainRate, true);
@@ -35,17 +35,17 @@ void AItemShield::StartUse()
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
 		GetWorldTimerManager().SetTimer(this, &AItemShield::AnimationTimer, 0.68f, false);
-		isInUse = true;
+		bIsInUse = true;
 		LightSource->SetVisibility(true);
 	}
 }
 
 void AItemShield::EndUse()
 {
-	if (isInUse)
+	if (bIsInUse)
 	{
 		GetWorldTimerManager().ClearTimer(this, &AItemShield::Drain);
-		isInUse = false;
+		bIsInUse = false;
 		//BPStartRegen();
 		LightSource->SetVisibility(false);
 
@@ -58,7 +58,7 @@ void AItemShield::AnimationTimer()
 {
 	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(GetOwningPawn()->GetController());
 	playerController->canMove = true;
-	canUse = true;
+	bCanUse = true;
 	GetOwningPawn()->GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 }
 
@@ -70,6 +70,6 @@ void AItemShield::Drain()
 void AItemShield::ChangeAmount(float value)
 {
 	Super::ChangeAmount(value);
-	LightIntensity = 100.0f * amount;
+	LightIntensity = 100.0f * ItemAmount;
 	LightSource->SetIntensity(LightIntensity);
 }

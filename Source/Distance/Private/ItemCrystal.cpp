@@ -10,20 +10,21 @@
 AItemCrystal::AItemCrystal(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	name = "Crystal";
+	ItemName = "Crystal";
 	rangeToShrine = 350.f;
 }
 
 void AItemCrystal::StartUse()
 {
-	if (!isInUse && OwningPawn != NULL)
+	if (!bIsInUse && OwningPawn != NULL)
 	{
 		bool shrineFound = false;
 		for (TActorIterator<AShrine> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
 			if (OwningPawn->GetDistanceTo(*ActorItr) <= rangeToShrine)
 			{
-				printScreen(FColor::Red, TEXT("Shrine Found"));
+				//printScreen(FColor::Red, TEXT("Shrine Found"));
+				UE_LOG(LogDistance, Warning, TEXT("Shrine Found"));
 				shrineFound = true;
 				break;
 			}
@@ -38,8 +39,10 @@ void AItemCrystal::StartUse()
 		{
 			SpawnSpirit();
 		}
-		OwningPawn->DropItem(OwningPawn->EquippedSlot)->Destroy();
-		Drop();
+		
+		// Remove from inventory and consume
+		OwningPawn->RemoveItem(this);
+		Destroy();
 	}
 }
 

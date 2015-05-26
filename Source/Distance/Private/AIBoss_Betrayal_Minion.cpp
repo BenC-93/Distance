@@ -4,6 +4,7 @@
 #include "AIBoss_Betrayal.h"
 #include "AIBoss_Betrayal_Minion.h"
 #include "DistanceCharacter.h"
+#include "DItem.h"
 
 AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -34,7 +35,8 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 		if (TargetActor != NULL && TargetActor != this)
 		{
 			ADistanceCharacter* player = Cast<ADistanceCharacter>(TargetActor);
-			HeldItem->SetSprite(player->GetItem()->SpriteComponent->GetSprite());
+			// TODO: this isn't going to work
+//			HeldItem->SetSprite(player->GetItem()->SpriteComponent->GetSprite());
 			HeldItem->SetRelativeRotation(FRotator(0.f, 90.f, -65.f));
 		}
 

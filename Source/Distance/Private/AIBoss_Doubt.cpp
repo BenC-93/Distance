@@ -23,13 +23,21 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	tentacleYaw = 0;
 	chosenTentacleIndex = 0;
 	tentacleCounter = 0;
-	tentacleSpriteLen = 300.0f;//maybe 600, works with 650
+	tentacleSpriteLen = 290.0f;//actual sprite len is 616, cut in half is 308 because the bp is scaled to .5, i go less so that it overreaches by a little
 
 	swallowedPlayer = NULL;
+	secondSwallowedPlayer = NULL;
+
+	drainTarget1 = NULL;
+	drainTarget2 = NULL;
+
+	isPullingObject = false;
 
 	p1InTrigger = false;
 	p2InTrigger = false;
-	//capsule component 360 by 360
+
+	bossHasBegun = false;
+
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
 	SpriteComponent->AttachTo(RootComponent);
@@ -71,7 +79,6 @@ UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjec
 	
 	FName componentName = FName(*FString::Printf(TEXT("TentacleComponent %d"), i));
 	class UChildActorComponent* TentacleComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, componentName);
-	//TentacleComponent->ChildActorClass = ATentacle::StaticClass(); //not needed anymore
 	TentacleComponent->OnComponentCreated();
 	TentacleComponent->RelativeLocation = FVector(-465.0f, -370.0f + (i * 170.0f), -280.0f + (i * 3.0f));//add y by 170, add z by 3 each tentacle
 	TentacleComponent->AttachTo(RootComponent);
@@ -82,76 +89,10 @@ UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjec
 	return TentacleComponent;
 }
 
-/*void AAIBoss_Doubt::PostLoad()
-{
-	Super::PostLoad();
-	for (int i = 0; i < TentacleComponentArray.Num(); i++)
-	{
-		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
-		UE_LOG(LogTemp, Warning, TEXT("this line is just before setting tentacle parents"));
-		if (TentacleComponentArray[i]->ChildActor)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("TentaclesComponentArray is good to go my good sir."));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("TentacleComponentArray is NULL"));
-		}
-		if (tentacle != NULL)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Tentacle parents are set"));
-			tentacle->SetBossParent(this);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Tentacles are NULL"));
-		}
-	}
-	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-}
-
-void AAIBoss_Doubt::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	for (int i = 0; i < TentacleComponentArray.Num(); i++)
-	{
-		ATentacle* tentacle = ((ATentacle *)TentacleComponentArray[i]->ChildActor);
-		UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: this line is just before setting tentacle parents"));
-		if (TentacleComponentArray[i]->ChildActor)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: TentaclesComponentArray is good to go my good sir."));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("PostInitializeComponents: TentacleComponentArray is NULL"));
-		}
-		if (tentacle != NULL)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PostInitializeComponents: Tentacle parents are set"));
-			tentacle->SetBossParent(this);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("PostInitializeComponents: Tentacles are NULL"));
-		}
-	}
-	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-}*/
-
-/*void AAIBoss_Doubt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	//DOREPLIFETIME(AAIBoss_Doubt, tentacleArray);
-}*/
-
 void AAIBoss_Doubt::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//float temptentaclehealth = ((ATentacle *)TentacleComponent->ChildActor)->health;
-	//UE_LOG(LogTemp, Warning, TEXT("Tentacle Health: %f"), temptentaclehealth);
+
 	if (player != NULL)
 	{
 		if (Health > 0)
@@ -166,50 +107,56 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 						currentPlayer = player1;
 						player = Cast<ADistanceCharacter>(currentPlayer);
 						playerController = Cast<ADistancePlayerController>(player->GetController());
-						//printScreen(FColor::Red, "Boss targeting: Player1");
 					}
 					else
 					{
 						currentPlayer = player2;
 						player = Cast<ADistanceCharacter>(currentPlayer);
 						playerController = Cast<ADistancePlayerController>(player->GetController());
-						//printScreen(FColor::Red, "Boss targeting: Player2");
 					}
 				}
 			}
 		}
 	}
 	//if swallowedPlayer == player -> then currentPlayer needs to be other player
-	if (swallowedPlayer && player && !targetActor)
+	if (swallowedPlayer && player && !CheckIfBothPlayersSwallowed())
 	{
 		if (player == swallowedPlayer)
 		{
-			printScreen(FColor::Red, TEXT("Resetting Target, one player has been swallowed"));
+			//printScreen(FColor::Red, TEXT("Resetting Target, one player has been swallowed"));
+			//UE_LOG(LogTemp, Warning, TEXT("Resetting Target, one player has been swallowed"));
 			if (player == player1)
 			{
 				currentPlayer = player2;
 				player = Cast<ADistanceCharacter>(currentPlayer);
 				playerController = Cast<ADistancePlayerController>(player->GetController());
-				UE_LOG(LogTemp, Warning, TEXT("current player switched to second player"));
+				//UE_LOG(LogTemp, Warning, TEXT("current player switched to second player"));
 			}
 			else
 			{
 				currentPlayer = player1;
 				player = Cast<ADistanceCharacter>(currentPlayer);
 				playerController = Cast<ADistancePlayerController>(player->GetController());
-				UE_LOG(LogTemp, Warning, TEXT("current player switched to first player"));
+				//UE_LOG(LogTemp, Warning, TEXT("current player switched to first player"));
 			}
 			StartAttackTimer(3.0f);//attack the new target
 		}
 	}
 	if (swallowedPlayer)
 	{
-		//class ADistancePlayerController* swallowedController = Cast<ADistancePlayerController>(swallowedPlayer->GetController());
-		if (playerController->switchedItem)//other player, not the swallowed one
+		if (playerController)
 		{
-			printScreen(FColor::Red, TEXT("Swallowed Player was Released by other player switching Items"));
-			ReleasePlayer(swallowedPlayer);
-			playerController->switchedItem = false;
+			if (playerController->switchedItem)//other player, not the swallowed one
+			{
+				//printScreen(FColor::Red, TEXT("Swallowed Player was Released by other player switching Items"));
+				UE_LOG(LogTemp, Error, TEXT("Swallowed Player was Released by other player switching Items"));
+				ReleasePlayer(swallowedPlayer);
+				playerController->switchedItem = false;
+			}
+		}
+		else
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Tick: checking if player switched items: current playercontroller target is null, might have both players swallowed"));
 		}
 	}
 	else
@@ -228,6 +175,36 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			}
 		}
 	}
+	if (isPullingObject && pullingObject && !GetWorldTimerManager().IsTimerActive(this, &AAIBoss_Doubt::TentacleTimer) && TentacleComponentArray.IsValidIndex(chosenTentacleIndex))//shrink and rotate tentacle that is pulling the player to match the player getting pulled in
+	{
+		//UE_LOG(LogTemp, Error, TEXT("shrinking tentalces"));
+		AActor* tentacleActor = TentacleComponentArray[chosenTentacleIndex]->ChildActor;
+		float distToObject = GetDistanceTo(pullingObject);
+		if (tentacleActor)
+		{
+			distToObject = tentacleActor->GetDistanceTo(pullingObject);
+		}
+
+		float myYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), pullingObject).Yaw;
+		if (pullingObject->GetActorLocation().Y > GetActorLocation().Y)
+		{
+			//rotate //y,z,x
+			TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, (myYaw - 180), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+		}
+		else
+		{
+			TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, (myYaw + 185), 0));
+		}
+		float maxScale = distToObject / tentacleSpriteLen;
+		//UE_LOG(LogTemp, Warning, TEXT("scale: %f dist: %f spritelen: %f"), maxScale, distToObject, tentacleSpriteLen);
+		TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(maxScale, 1, 1));
+		FVector currentScale = TentacleComponentArray[chosenTentacleIndex]->GetComponentScale();
+		//UE_LOG(LogTemp, Warning, TEXT("actual scale: %f, %f, %f"), currentScale.X, currentScale.Y, currentScale.Z);
+	}
+	else if (!isPullingObject && !GetWorldTimerManager().IsTimerActive(this, &AAIBoss_Doubt::TentacleTimer) && TentacleComponentArray.IsValidIndex(chosenTentacleIndex))
+	{
+		//TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(1, 1, 1));
+	}
 }
 
 void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
@@ -237,29 +214,26 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 		UE_LOG(LogTemp, Error, TEXT("Error: PullPlayer, tempChar is Null."));
 		return;
 	}
-
+	pullingObject = Cast<AActor>(tempChar);
 	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
 	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
 
 	if (tempPlayer->GetItem() == NULL)
 	{
-		printScreen(FColor::Red, TEXT("Player's item is NULL! LOOK, THIS IS BAD!"));
+		//printScreen(FColor::Red, TEXT("Player's item is NULL! LOOK, THIS IS BAD!"));
 		UE_LOG(LogTemp, Error, TEXT("Error: PullPlayer: player's item is NULL!"));
 		tempPlayer->ChangeSpeed(100);
 	}
 	else if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
-		tempPlayer->ChangeSpeed(50);//shield is enabled
+		tempPlayer->ChangeSpeed(10);//shield is enabled
 	}
 	else
 	{
 		tempPlayer->ChangeSpeed(100);
 	}
-
 	tempPlayerController->canMove = false;
 	tempPlayerController->SetNewMoveDestination(GetActorLocation());
-
-	//GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnTentacleAtLocation(TentacleClass, tempPlayer->GetActorLocation() - FVector(150.0f, 0.0f, 0.0f));
 }
 
 void AAIBoss_Doubt::PullActor(class AActor* tempActor)
@@ -269,6 +243,7 @@ void AAIBoss_Doubt::PullActor(class AActor* tempActor)
 		UE_LOG(LogTemp, Error, TEXT("Error: PullActor, tempActor is Null."));
 		return;
 	}
+	pullingObject = tempActor;
 	FVector direction = tempActor->GetActorLocation() - GetActorLocation();
 	direction.Normalize();
 	float speed = 10.0f;
@@ -317,9 +292,19 @@ void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)
 	}
 	else
 	{
-		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+		if (drainTarget1 && tempPlayer == drainTarget1)
+		{
+			GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+			drainTarget1 = NULL;
+		}
+		else if(drainTarget2 && tempPlayer == drainTarget2)
+		{
+			GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AnotherDrainTimer);
+			drainTarget2 = NULL;
+		}
+		
 	}
-	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);//TODO: do we really want this, its been there forever, but now i dont know
 	//printScreen(FColor::Red, "Player was Released Normally");
 }
 
@@ -333,13 +318,13 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 
 	if (tempPlayer->GetItem() == NULL)
 	{
-		printScreen(FColor::Red, TEXT("Player's item is NULL! LOOK, THIS IS BAD!"));
+		//printScreen(FColor::Red, TEXT("Player's item is NULL! LOOK, THIS IS BAD!"));
 		UE_LOG(LogTemp, Error, TEXT("Error: DrainPlayer: player's item is NULL!"));
 		tempPlayer->ChangeHealth(baseDamage);
 	}
 	else if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
-		tempPlayer->ChangeItemAmount(baseDamage);//shield is enabled
+		tempPlayer->ChangeItemAmount(baseDamage);//shield is enabled TODO: do we want to drain shield, we used to want to, do we still?
 	}
 	else
 	{
@@ -388,28 +373,105 @@ FRotator AAIBoss_Doubt::FaceActorRotation(FVector myActorLoc, class AActor* Othe
 
 void AAIBoss_Doubt::TentacleTimer()
 {
-	if (tentacleCounter >= 1.0f)
+	if (tentacleCounter >= 1.0f)//End of the tentacle scaling
 	{
-		printScreen(FColor::Red, TEXT("Stopping tentacle timer"));
+		//printScreen(FColor::Red, TEXT("Stopping tentacle timer"));
+		//UE_LOG(LogTemp, Warning, TEXT("Stopping tentacle timer"));
 		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
+
+		//check if we didnt hit a player, try again with a new target, or same, depending
+		if (!isPullingObject && !CheckIfBothPlayersSwallowed())
+		{
+			currentPlayer = Cast<ADistanceCharacter>(FindTarget());
+			player = Cast<ADistanceCharacter>(currentPlayer);
+			playerController = Cast<ADistancePlayerController>(player->GetController());
+
+			StartAttackTimer(3.0f);
+		}
+
 		return;
 	}
 	if (currentPlayer->GetActorLocation().Y > GetActorLocation().Y)
 	{
 		//rotate //y,z,x
-		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 195), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 180), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
 	}
 	else
 	{
-		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw + 180), tentacleCounter), 0));
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw + 185), tentacleCounter), 0));
 	}
 	//scale
 	float maxScale = distToPlayer / tentacleSpriteLen;
 	//UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
-	TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(FMath::Lerp(0.5f, maxScale, tentacleCounter), 1, 1));//havnt found correct scale yet
+	TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(FMath::Lerp(0.5f, maxScale, tentacleCounter), 1, 1));
 	
 	tentacleCounter += 0.1f;
 	//UE_LOG(LogTemp, Error, TEXT("Tentacle Counter: %f"), tentacleCounter);
+}
+
+void AAIBoss_Doubt::CrystalTentacleTimer()
+{
+	if (tentacleCounter >= 1.0f)//End of the tentacle scaling
+	{
+		//printScreen(FColor::Red, TEXT("Stopping tentacle timer"));
+		UE_LOG(LogTemp, Warning, TEXT("Stopping tentacle timer"));
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
+
+		//check if we didnt hit a player, try again with a new target, or same, depending
+		if (!isPullingObject)
+		{
+			StartCrystalAttackTimer(3.0f);
+		}
+
+		return;
+	}
+	if (targetActor&& targetActor->GetActorLocation().Y > GetActorLocation().Y)
+	{
+		//rotate //y,z,x
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 180), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	}
+	else
+	{
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw + 185), tentacleCounter), 0));
+	}
+	//scale
+	float maxScale = distToPlayer / tentacleSpriteLen;
+	//UE_LOG(LogTemp, Error, TEXT("Max Scale: %f"), maxScale);
+	TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(FMath::Lerp(0.5f, maxScale, tentacleCounter), 1, 1));
+
+	tentacleCounter += 0.1f;
+	//UE_LOG(LogTemp, Error, TEXT("Tentacle Counter: %f"), tentacleCounter);
+}
+
+void AAIBoss_Doubt::StartCrystalTentacleTimer(float rate)
+{
+	tentacleCounter = 0.0f;
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::CrystalTentacleTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::CrystalTentacleTimer, rate, true);
+}
+
+class ACharacter* AAIBoss_Doubt::FindTarget()
+{
+	if (swallowedPlayer)
+	{
+		if (swallowedPlayer == player1)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Target found: player2"));
+			return player2;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Target found: player1"));
+			return player1;
+		}
+	}
+	else if (!swallowedPlayer && !CheckIfBothPlayersSwallowed())//no swallowed players
+	{
+		UE_LOG(LogTemp, Error, TEXT("Target found: closest player"));
+		return ClosestPlayer();
+	}
+	UE_LOG(LogTemp, Error, TEXT("No Target found: using player1 as default"));
+	return player1;//default return if something goes wrong
 }
 
 void AAIBoss_Doubt::StartTentacleTimer(float rate)
@@ -421,10 +483,16 @@ void AAIBoss_Doubt::StartTentacleTimer(float rate)
 
 void AAIBoss_Doubt::AttackTimer()
 {
-	printScreen(FColor::Red, TEXT("Boss making an attack"));
-	//PullPlayer(player);//create tentacle, move tentacle
+	//printScreen(FColor::Red, TEXT("Boss making an attack"));
+	UE_LOG(LogTemp, Warning, TEXT("Boss making an attack"));
 	chosenTentacleIndex = numTentacles - 1; //FMath::RandRange(0, numTentacles - 1);
 	AActor* tentacleActor = TentacleComponentArray[chosenTentacleIndex]->ChildActor;
+	
+	if (!currentPlayer)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: attack timer, something is terrible wrong, we dont know what to attack"));
+		return;
+	}
 	if (tentacleActor)
 	{
 		distToPlayer = tentacleActor->GetDistanceTo(currentPlayer);
@@ -435,6 +503,7 @@ void AAIBoss_Doubt::AttackTimer()
 		distToPlayer = GetDistanceTo(currentPlayer);
 		tentacleYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), currentPlayer).Yaw;
 	}
+
 	StartTentacleTimer(0.1f);
 
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
@@ -446,11 +515,54 @@ void AAIBoss_Doubt::StartAttackTimer(float rate)
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::AttackTimer, rate, true);
 }
 
+void AAIBoss_Doubt::CrystalAttackTimer()
+{
+	//printScreen(FColor::Red, TEXT("Boss making an attack"));
+	UE_LOG(LogTemp, Warning, TEXT("Boss making an attack on crystal"));
+	chosenTentacleIndex = numTentacles - 1; //FMath::RandRange(0, numTentacles - 1);
+	AActor* tentacleActor = TentacleComponentArray[chosenTentacleIndex]->ChildActor;
+	
+	if (targetActor)
+	{
+		if (tentacleActor)
+		{
+			distToPlayer = tentacleActor->GetDistanceTo(targetActor);
+			tentacleYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), targetActor).Yaw;
+		}
+		else
+		{
+			distToPlayer = GetDistanceTo(targetActor);
+			tentacleYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), targetActor).Yaw;
+		}
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::CrystalAttackTimer);
+		UE_LOG(LogTemp, Error, TEXT("Boss has no target to attack the crystal"));
+		return;
+	}
+
+	StartCrystalTentacleTimer(0.1f);
+
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::CrystalAttackTimer);
+}
+
+void AAIBoss_Doubt::StartCrystalAttackTimer(float rate)
+{
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::CrystalAttackTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::CrystalAttackTimer, rate, true);
+}
+
 void AAIBoss_Doubt::DrainTimer()
 {
 	//printScreen(FColor::Red, "Draining");
-	DrainPlayer(player);
-	if (player->Health == 0)//we "killed" the player, oops lol
+	if (!drainTarget1)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: DrainTimer, draintarget1 is null."));
+		return;
+	}
+	DrainPlayer(drainTarget1);
+	if (drainTarget1->Health == 0)//we "killed" the player, oops lol
 	{
 		//ReleasePlayer(player);
 		//EndOfBoss();
@@ -461,6 +573,28 @@ void AAIBoss_Doubt::StartDrainTimer(float rate)
 {
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::DrainTimer, rate, true);
+}
+
+void AAIBoss_Doubt::AnotherDrainTimer()
+{
+	//printScreen(FColor::Red, "Draining");
+	if (!drainTarget2)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: DrainTimer, draintarget2 is null."));
+		return;
+	}
+	DrainPlayer(drainTarget2);
+	if (drainTarget2->Health == 0)//we "killed" the player, oops lol
+	{
+		//ReleasePlayer(player);
+		//EndOfBoss();
+	}
+}
+
+void AAIBoss_Doubt::StartAnotherDrainTimer(float rate)
+{
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AnotherDrainTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::AnotherDrainTimer, rate, true);
 }
 
 void AAIBoss_Doubt::SwallowedTimer()
@@ -480,35 +614,71 @@ void AAIBoss_Doubt::SwallowedTimer()
 
 void AAIBoss_Doubt::StartSwallowedTimer(float rate)
 {
+	//check if swallowedplayer is draintarget 1 or 2 and clear that timer and set the target to null
+	if (drainTarget1 && secondSwallowedPlayer == drainTarget1)
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+		drainTarget1 = NULL;
+	}
+	if (drainTarget2 && secondSwallowedPlayer == drainTarget2)
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AnotherDrainTimer);
+		drainTarget2 = NULL;
+	}
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::SwallowedTimer, rate, true);
 }
 
+void AAIBoss_Doubt::SecondSwallowedTimer()
+{
+	if (secondSwallowedPlayer == NULL)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: SecondSwallowedTimer, swallowedPlayer is Null."));
+		return;
+	}
+	//printScreen(FColor::Red, "Draining Swallowed Player");
+	DrainPlayer(secondSwallowedPlayer);
+	if (secondSwallowedPlayer->Health == 0)//we "killed" the player, oops lol
+	{
+		//ReleasePlayer(swallowedPlayer);
+	}
+}
+
+void AAIBoss_Doubt::StartSecondSwallowedTimer(float rate)
+{
+	//check if swallowedplayer is draintarget 1 or 2 and clear that timer and set the target to null
+	if (drainTarget1 && secondSwallowedPlayer == drainTarget1)
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+		drainTarget1 = NULL;
+	}
+	if (drainTarget2 && secondSwallowedPlayer == drainTarget2)
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AnotherDrainTimer);
+		drainTarget2 = NULL;
+	}
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SecondSwallowedTimer);
+	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::SecondSwallowedTimer, rate, true);
+}
+
 void AAIBoss_Doubt::EndOfBoss()
 {
-	if (swallowedPlayer != NULL)//or just realease p1 and p2
-	{
-		ReleasePlayer(swallowedPlayer);
-	}
-	if (playerController && !playerController->canMove)
-	{
-		ReleasePlayer(player);
-		player = NULL;
-	}
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
 
 	ReleasePlayer(player1);
 	ReleasePlayer(player2);
 
 	GetWorldTimerManager().ClearAllTimersForObject(this);
 
-	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);//if the clear all timers thing works, then we dont need these lines
-	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
-	//GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
-	printScreen(FColor::Red, TEXT("End of Boss"));
+	for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->Destroy();
+	}
 
-	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	player = Cast<ADistanceCharacter>(currentPlayer);
-	playerController = Cast<ADistancePlayerController>(player->GetController());
+	//Set everything to null here if we decide not to destroy boss at end
+
+	playerController = Cast<ADistancePlayerController>(player1->GetController());
 	if (playerController)
 	{
 		playerController->OnConvergenceEnd();
@@ -612,11 +782,15 @@ void AAIBoss_Doubt::OnOverlapBegin_Implementation(class AActor* OtherActor, clas
 			{
 				p2InTrigger = true;
 			}
-			UE_LOG(LogTemp, Warning, TEXT("****Player Entered BOSS Triggered Area"));
-			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
-			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
-			playerController = Cast<ADistancePlayerController>(player->GetController());
-			StartAttackTimer(3.0f);
+			if (!bossHasBegun)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("****Player Entered BOSS Triggered Area"));
+				currentPlayer = Cast<ADistanceCharacter>(OtherActor);
+				player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
+				playerController = Cast<ADistancePlayerController>(player->GetController());
+				StartAttackTimer(3.0f);//created the case where the player dodges the tentacle and we should start attack again, so we only have to do this once
+				bossHasBegun = true;
+			}
 		}
 	}
 }
@@ -646,26 +820,37 @@ void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			if (!playerController->canMove && swallowedPlayer == NULL)//Can't move, therefore, i've dragged them in, and swallowed them
+			if (OtherActor == pullingObject && !playerController->canMove && swallowedPlayer == NULL)//Can't move, therefore, i've dragged them in, and swallowed them
 			{
 				//set swallowed player
-				printScreen(FColor::Red, TEXT("Beginning Draining Swallowed Player."));
+				//printScreen(FColor::Red, TEXT("Beginning Draining Swallowed Player."));
+				UE_LOG(LogTemp, Warning, TEXT("Beginning Draining Swallowed Player."));
 				swallowedPlayer = player; // Cast<ADistanceCharacter>(OtherActor);
 				StartSwallowedTimer(drainRate / 1.5f);//drainRate = 0.25f normally
+				isPullingObject = false;
 			}
-			else if (!playerController->canMove && swallowedPlayer != NULL)
+			else if (!playerController->canMove && swallowedPlayer != NULL)//previously was !playerController->canMove && swallowedPlayer != NULL
 			{
-				printScreen(FColor::Red, TEXT("Beginning Draining second Swallowed Player."));
-				StartDrainTimer(drainRate / 1.5f);//drainRate = 0.25f normally
-				//TODO: stuff since both players are swallowed
+				secondSwallowedPlayer = player;
+				//printScreen(FColor::Red, TEXT("Beginning Draining second Swallowed Player."));
+				UE_LOG(LogTemp, Warning, TEXT("Beginning Draining second Swallowed Player."));
+				StartSecondSwallowedTimer(drainRate / 1.5f);
 				for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 				{
-					currentPlayer = Cast<ACharacter>(*ActorItr);
+					targetActor = Cast<AActor>(*ActorItr);
+					currentPlayer = NULL;
 					player = NULL;
-					playerController = NULL;//unless a crystal can be casted up the chain to distplayercontroller, then we set this to null
-					StartAttackTimer(3.0f);
+					playerController = NULL;
+					isPullingObject = true;
+					StartCrystalAttackTimer(3.0f);//begin attack on crystal
+					UE_LOG(LogTemp, Warning, TEXT("Starting attack on crystal."));
 				}
 			}
+		}
+		else if (CheckIfBothPlayersSwallowed() && targetActor && OtherActor->IsA(AConvergenceCrystal::StaticClass()))//we swallowed the crystal
+		{
+			isPullingObject = false;
+			EndOfBoss();
 		}
 	}
 }
@@ -682,10 +867,9 @@ void AAIBoss_Doubt::OnExitAttackTrigger(class AActor* OtherActor)
 
 void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Error, TEXT("IM ANGRY FACE, HEAR ME ROAR, AND TENTACLES ENTER EVERYTHING!!!!!!"));
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("****THING Entered TENTACLE Triggered Area: %s"), *OtherActor->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("****THING Entered TENTACLE Triggered Area: %s"), *OtherActor->GetName());
 		if (CheckIfPlayer(OtherActor))
 		{
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
@@ -693,23 +877,41 @@ void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, c
 			playerController = Cast<ADistancePlayerController>(player->GetController());
 
 			PullPlayer(player);
-			StartDrainTimer(drainRate);
+			if (drainTarget2 == NULL)
+			{
+				drainTarget2 = player;
+				StartAnotherDrainTimer(drainRate);
+				UE_LOG(LogTemp, Warning, TEXT("starting drain using another timer"));
+			}
+			else if (drainTarget1 == NULL)
+			{
+				drainTarget1 = player;
+				StartDrainTimer(drainRate);
+				UE_LOG(LogTemp, Warning, TEXT("starting drain using timer"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("WTF, cant decide on a drain target so no draining happens"));
+			}
+			isPullingObject = true;
 			
 			UE_LOG(LogTemp, Warning, TEXT("****Player Entered TENTACLE Triggered Area"));
 		}
 		else if (OtherActor->IsA(AConvergenceCrystal::StaticClass()))
 		{
-			if (swallowedPlayer && player)
+			if (CheckIfBothPlayersSwallowed())
 			{
+				UE_LOG(LogTemp, Warning, TEXT("TargetActor is set"));
 				targetActor = OtherActor;
 				GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorPullTimer, 0.1f, true);
 				GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorDrainTimer, 0.1f, true);
+				isPullingObject = true;
 			}
 		}
 	}
 }
 
-bool AAIBoss_Doubt::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% positive im checking this correctly
+bool AAIBoss_Doubt::CheckIfPlayer(class AActor* OtherActor)
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
@@ -727,6 +929,21 @@ bool AAIBoss_Doubt::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% posi
 		//printScreen(FColor::Red, "Player 2 checked");
 		//UE_LOG(LogTemp, Warning, TEXT("Player 2 checked"));
 		return true;
+	}
+	return false;
+}
+
+bool AAIBoss_Doubt::CheckIfBothPlayersSwallowed()
+{
+	if (player1 && player2)//needed becuase adjusting the blueprints in editor calls code and will crash if I dont check everything.
+	{
+		class ADistancePlayerController* tempController1 = Cast<ADistancePlayerController>(player1->GetController());
+		class ADistancePlayerController* tempController2 = Cast<ADistancePlayerController>(player2->GetController());
+		if (!tempController1->canMove && !tempController2->canMove && swallowedPlayer && secondSwallowedPlayer)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Both players are swallowed."));
+			return true;
+		}
 	}
 	return false;
 }

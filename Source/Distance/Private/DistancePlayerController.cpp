@@ -5,6 +5,7 @@
 #include "AIEnemy.h"
 #include "AIBoss_Doubt.h"
 #include "ItemCrystal.h"
+#include "DItemPickup.h"
 #include "AI/Navigation/NavigationSystem.h"
 #include "ConvergenceManager.h"
 
@@ -102,21 +103,22 @@ void ADistancePlayerController::CycleInventory()
 
 void ADistancePlayerController::ItemPickup()
 {
-	for (TActorIterator<AItem> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	for (TActorIterator<ADItemPickup> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
-		{
-			continue;
-		}
+//		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
+//		{
+//			continue;
+//		}
 		if (DistanceCharacterClass->GetDistanceTo(*ActorItr) <= rangeToItem)
 		{
-			if (DistanceCharacterClass->GetInventory().Num() <= 4)
+			if (DistanceCharacterClass->HasInventorySpace())
 			{
 				DistanceCharacterClass->PickupItem(*ActorItr);
 			}
 			else
 			{
-				printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+				//printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+				UE_LOG(LogTemp, Warning, TEXT("Inventory Full! Did Not pick up item!"));
 			}
 			break;
 		}
@@ -206,20 +208,25 @@ void ADistancePlayerController::OnSetTargetPressed()
 
 	// Handle different Hit types here!
 	hitActor = Hit.GetActor();
-	if (hitActor && hitActor->IsA(AItem::StaticClass()))//if we click on an Item
+	if (hitActor == NULL){
+		return;
+	}
+	if (hitActor->IsA(ADItemPickup::StaticClass()))//if we click on an Item
 	{
-		printScreen(FColor::Red, TEXT("Clicked an Item"));
-		AItem* item = Cast<AItem>(hitActor);
+		//printScreen(FColor::Red, TEXT("Clicked an Item"));
+		UE_LOG(LogTemp, Warning, TEXT("Clicked an Item"));
+		ADItemPickup* item = Cast<ADItemPickup>(hitActor);
 		if (DistanceCharacterClass->GetDistanceTo(item) < 250.0f)
 		{
 			//UE_LOG(LogTemp, Error, TEXT("Inventory length: %d"), DistanceCharacterClass->GetInventory().Num());
-			if (DistanceCharacterClass->GetInventory().Num() <= 4)
+			if (DistanceCharacterClass->HasInventorySpace())
 			{
 				DistanceCharacterClass->PickupItem(item);
 			}
 			else
 			{
-				printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+				//printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+				UE_LOG(LogTemp, Error, TEXT("Inventory Full! Did Not pick up item!"));
 			}
 		}
 		else
@@ -230,18 +237,21 @@ void ADistancePlayerController::OnSetTargetPressed()
 	}
 	else if (hitActor->IsA(AAIEnemy::StaticClass()))
 	{
-		printScreen(FColor::Red, TEXT("Clicked an enemy"));
+		//printScreen(FColor::Red, TEXT("Clicked an enemy"));
+		UE_LOG(LogTemp, Warning, TEXT("Clicked an enemy"));
 		enemyActor = hitActor;
 		SetNewMoveDestination(Hit.ImpactPoint);
 	}
 	else if (hitActor->IsA(AAIBoss_Doubt::StaticClass()))
 	{
-		printScreen(FColor::Red, TEXT("Clicked a boss"));
+		//printScreen(FColor::Red, TEXT("Clicked a boss"));
+		UE_LOG(LogTemp, Warning, TEXT("Clicked a boss"));
 		enemyActor = hitActor;
 	}
 	else if (hitActor->IsA(ATentacle::StaticClass()))
 	{
-		printScreen(FColor::Red, TEXT("Clicked a Tentacle"));
+		//printScreen(FColor::Red, TEXT("Clicked a Tentacle"));
+		UE_LOG(LogTemp, Warning, TEXT("Clicked a Tentacle"));
 		enemyActor = hitActor;
 	}
 	else if (Hit.bBlockingHit && canMove)
@@ -296,7 +306,7 @@ void ADistancePlayerController::OnUseItemReleased()
 		UE_LOG(LogTemp, Error, TEXT("DistanceCharacter is null."));
 		return;
 	}
-	AItem* item = DistanceCharacterClass->GetItem();
+	ADItem* item = DistanceCharacterClass->GetItem();
 	if (item == NULL)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
@@ -351,13 +361,15 @@ void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for con
 {
 	if (!converged)
 	{
-		printScreen(FColor::Red, TEXT("Beginning Convergence"));
+		//printScreen(FColor::Red, TEXT("Beginning Convergence"));
+		UE_LOG(LogTemp, Warning, TEXT("Beginning Convergence"));
 		ConvergenceManager::StartConvergence();
 		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
 	}
 	else//make sure to get rid of this code when done testing with pushing a button to converge and diverge
 	{
-		printScreen(FColor::Red, TEXT("Ending Convergence"));
+		//printScreen(FColor::Red, TEXT("Ending Convergence"));
+		UE_LOG(LogTemp, Warning, TEXT("Ending Convergence"));
 		ConvergenceManager::EndConvergence();
 		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
 	}
@@ -366,20 +378,18 @@ void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for con
 
 void ADistancePlayerController::OnConvergenceEnd()
 {
-	printScreen(FColor::Red, TEXT("Ending Convergence"));
+	//printScreen(FColor::Red, TEXT("Ending Convergence"));
+	UE_LOG(LogTemp, Warning, TEXT("Ending Convergence"));
 	ConvergenceManager::EndConvergence();
 }
 
 void ADistancePlayerController::Possess(class APawn *InPawn)
 {
 	Super::Possess(InPawn);
+	// TODO: Create Lantern
 	DistanceCharacterClass = Cast<ADistanceCharacter>(InPawn);
 	DistanceCharacterClass->PickupItem(GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnLantern(DistanceCharacterClass));
-	
-	//usually commented out
-	//DistanceCharacterClass->EquipItem(0);
-	//DistanceCharacterClass->AddItemOfClassToInventory(((ADistanceGameMode*)GetWorld()->GetAuthGameMode())->ItemFromIndex(0));
 
-	DistanceCharacterClass->EquipItemComponent(0);
-	DistanceCharacterClass->ItemPickedUp();
+//	DistanceCharacterClass->EquipItemComponent(0);
+//	DistanceCharacterClass->ItemPickedUp();
 }

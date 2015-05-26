@@ -20,6 +20,9 @@ public:
 	float health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Crystal)
+	float maxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Crystal)
 	float healthLossRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Crystal)
@@ -28,6 +31,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Crystal)
 	float movementSpeed;
 
+	// used for sprite bobbing
+	float zflip;
+	float zmin;
+	float zmax;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
+	float LightIntensity;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
+	class UPointLightComponent* LightSource;
+
 	UPROPERTY(EditAnywhere)
 	class ACharacter* player1;
 
@@ -35,10 +49,7 @@ public:
 	class ACharacter* player2;
 
 	UPROPERTY(EditAnywhere)
-	class AAIBoss_Doubt* bossDoubt;
-
-	UPROPERTY(EditAnywhere)
-	class AAIBoss_Betrayal* bossBetrayal;
+	class AAIBoss* boss;
 
 	AConvergenceCrystal(const class FObjectInitializer& ObjectInitializer);
 

@@ -112,6 +112,7 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)
 
 		while (!GetNavComponent()->FindPathToLocation(loc))
 		{
+			// TODO: This can get stuck in an infinite loop
 			loc += FVector(1, 0, 0) + dir;
 			UE_LOG(LogTemp, Warning, TEXT("Changed Locationg for running away"));
 		}

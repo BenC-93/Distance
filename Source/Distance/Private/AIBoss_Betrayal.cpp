@@ -30,7 +30,7 @@ AAIBoss_Betrayal::AAIBoss_Betrayal(const FObjectInitializer& ObjectInitializer)
 
 	AITriggerRange = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("AITriggerRange"));
 	AITriggerRange->Mobility = EComponentMobility::Movable;
-	AITriggerRange->SetBoxExtent(FVector(1000.0f, 1000.0f, 500.0f), true);
+	AITriggerRange->SetBoxExtent(FVector(500.0f, 500.0f, 500.0f), true);
 	AITriggerRange->AttachTo(RootComponent);
 
 	AITriggerRange->OnComponentBeginOverlap.AddDynamic(this, &AAIBoss_Betrayal::OnOverlapBegin);
@@ -130,7 +130,7 @@ void AAIBoss_Betrayal::TransformPlayers(bool toMonster)
 {
 	if (toMonster)
 	{
-		//change sprites for players to monsters TODO
+		//change sprites for players to monsters TODO unless we are positively not transforming players, if thats the case, remove this method completly
 	}
 	else
 	{
@@ -277,7 +277,8 @@ void AAIBoss_Betrayal::OnOverlapBegin_Implementation(class AActor* OtherActor, c
 			if (!bossBattleBegun)
 			{
 				bossBattleBegun = true;
-				BeginCycle();
+				//starttimer that begins cycle
+				GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal::BeginCycle, 3.0f, false);//give initial spawn wait time
 			}
 		}
 	}

@@ -48,44 +48,49 @@ void ADistanceGameMode::PostLogin(APlayerController* NewPlayer)
 	ConvergenceManager::InitializeWithPlayers(p1, p2);
 }
 
-class AItem* ADistanceGameMode::SpawnLantern(ACharacter* player)
+class ADItemPickup* ADistanceGameMode::SpawnLantern(ACharacter* player)
 {
-	printScreen(FColor::Red, TEXT("Spawning The thing"));
-	TSubclassOf<class AItem> ItemClass;
+	//printScreen(FColor::Red, TEXT("Spawning The thing"));
+	TSubclassOf<class ADItemPickup> ItemClass;
 	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
-	//ACharacter* player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter(); //GetPlayerCharacter(GetWorld(), 0);
-	return Cast<AItem>(GetWorld()->SpawnActor<AItem>(ItemClass, FVector(player->GetActorLocation()), FRotator(player->GetActorRotation())));
+	FVector Location = player->GetActorLocation();
+	FRotator Rotation = player->GetActorRotation();
+	return GetWorld()->SpawnActor<ADItemPickup>(ItemClass, player->GetActorLocation(), player->GetActorRotation());
 }
 
-class AItem* ADistanceGameMode::SpawnItemAtLocation(TSubclassOf<class AItem> indexClass, FVector location)
+class ADItemPickup* ADistanceGameMode::SpawnItemAtLocation(TSubclassOf<class ADItemPickup> indexClass, FVector location)
 {
-	printScreen(FColor::Red, TEXT("Spawning Item"));
-	return GetWorld()->SpawnActor<AItem>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	//printScreen(FColor::Red, TEXT("Spawning Item"));
+	UE_LOG(LogDistance, Warning, TEXT("Spawning Item"));
+	return GetWorld()->SpawnActor<ADItemPickup>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
-class ATentacle* ADistanceGameMode::SpawnTentacleAtLocation(TSubclassOf<class ATentacle> indexClass, FVector location)
+class ATentacle* ADistanceGameMode::SpawnTentacleAtLocation(TSubclassOf<class ATentacle> indexClass, FVector location)//TODO: check if we need this anymore
 {
-	printScreen(FColor::Red, TEXT("Spawning Tentacle"));
+	//printScreen(FColor::Red, TEXT("Spawning Tentacle"));
+	UE_LOG(LogDistance, Error, TEXT("Spawning Tentacle"));
 	return GetWorld()->SpawnActor<ATentacle>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
 void ADistanceGameMode::SpawnBossAtLocation(TSubclassOf<class ACharacter> indexClass, FVector location)
 {
-	printScreen(FColor::Red, TEXT("Spawning Boss"));
+	//printScreen(FColor::Red, TEXT("Spawning Boss"));
+	UE_LOG(LogDistance, Warning, TEXT("Spawning Boss"));
 	GetWorld()->SpawnActor<ACharacter>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
 void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
-	printScreen(FColor::Red, TEXT("Spawning Random Item"));
-	TSubclassOf<class AItem> ItemClass;
+	//printScreen(FColor::Red, TEXT("Spawning Random Item"));
+	UE_LOG(LogDistance, Warning, TEXT("Spawning Random Item"));
+	TSubclassOf<class ADItemPickup> ItemClass;
 	uint32 ItemIndex = FMath::RandRange(1, ItemTypes.Num()-1);
 	ItemClass = ItemFromIndex(ItemIndex);
-	GetWorld()->SpawnActor<AItem>(ItemClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	GetWorld()->SpawnActor<ADItemPickup>(ItemClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
-class TSubclassOf<class AItem> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex)
+TSubclassOf<class ADItemPickup> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex)
 {
 	if (ItemTypes.IsValidIndex(ItemIndex))
 	{

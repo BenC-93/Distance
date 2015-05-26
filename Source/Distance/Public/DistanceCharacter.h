@@ -3,8 +3,6 @@
 #include "GameFramework/Character.h"
 #include "Classes/PaperSpriteComponent.h"
 #include "Classes/Components/ChildActorComponent.h"
-#include "Item.h"
-#include "InventoryItem.h"
 #include "DistanceCharacter.generated.h"
 
 // make ConvergenceState enum blueprintable
@@ -34,6 +32,9 @@ class ADistanceCharacter : public ACharacter
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UChildActorComponent* ItemComponent;
+	
+	UPROPERTY(EditDefaultsOnly, Category = Item)
+	FName ItemSocket;
 
 public:
 	ADistanceCharacter(const FObjectInitializer& ObjectInitializer);
@@ -60,13 +61,15 @@ public:
 	FName GetItemSocketPoint();
 
 	/* Currently held item */
-	AItem* GetItem();
+	ADItem* GetItem();
 
 	UPROPERTY(Replicated)
 	TArray<class UTexture2D*> spriteInventory;
 
 	/* Inventory array */
-	TArray<UInventoryItem*> Inventory;
+	TArray<class ADItem*> Inventory;
+	
+	class ADItem* CurrentItem;
 
 	/* Array index of currently equipped item */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Inventory)
@@ -77,16 +80,13 @@ public:
 
 	/* Pick up nearby item object in the world */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void PickupItem(AItem* Item);
+	void PickupItem(class ADItemPickup* Item);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerPickupItem(AItem* Item);
+	void ServerPickupItem(class ADItemPickup* Item);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Inventory)
 	void ItemPickedUp();
-
-	/* Add an item to your inventory from the Item class */
-	void AddItemOfClassToInventory(class TSubclassOf<class AItem> ItemClass);
 
 	/* Drop currently equipped item */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -94,10 +94,7 @@ public:
 
 	/* Equip a different item that is already in the inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void EquipItem(int32 InvSlot);
-
-	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void EquipItemComponent(int32 itemIndex);
+	void EquipItem(ADItem* Item);
 
 	/* Use the current equipped item (calls Item's Use() function) */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -105,9 +102,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	TArray<class UTexture2D*> GetSpriteInventory();
-
-	/* Returns the inventory array */
-	TArray<class UInventoryItem*> GetInventory();
 
 	/* Toggle visibility of inventory GUI */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -119,9 +113,30 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Light)
 	bool GetIsItemDroppable();
+	
+	FName GetItemAttachPoint();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
 	void BPTransitionToNewConvergenceState();
+	
+//
+//  NEW STUFF GOES HERE, SORT LATER
+//
+	
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void AddItem(class ADItem* NewItem);
+	
+	UFUNCTION(BlueprintCallable, Category = Item)
+	void RemoveItem(class ADItem* Item);
+	
+	UFUNCTION(BlueprintCallable, Category = Item)
+	bool HasInventorySpace();
+
+	void SetCurrentItem(class ADItem* NewItem, class ADItem* LastItem = nullptr);
+	
+//
+//
+//	
 	
 
 	UFUNCTION(BlueprintCallable, Category = Item)

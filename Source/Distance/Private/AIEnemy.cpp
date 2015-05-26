@@ -381,7 +381,7 @@ void AAIEnemy::OnExitAttackTrigger(class AActor* OtherActor)
 	}
 }
 
-bool AAIEnemy::CheckIfPlayer(class AActor* OtherActor)//TODO: not 100% positive im checking this correctly
+bool AAIEnemy::CheckIfPlayer(class AActor* OtherActor)
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);

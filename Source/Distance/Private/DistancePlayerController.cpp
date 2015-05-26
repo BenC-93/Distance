@@ -117,7 +117,8 @@ void ADistancePlayerController::ItemPickup()
 			}
 			else
 			{
-				printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+				//printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+				UE_LOG(LogTemp, Warning, TEXT("Inventory Full! Did Not pick up item!"));
 			}
 			break;
 		}
@@ -212,7 +213,8 @@ void ADistancePlayerController::OnSetTargetPressed()
 	}
 	if (hitActor->IsA(ADItemPickup::StaticClass()))//if we click on an Item
 	{
-		printScreen(FColor::Red, TEXT("Clicked an Item"));
+		//printScreen(FColor::Red, TEXT("Clicked an Item"));
+		UE_LOG(LogTemp, Warning, TEXT("Clicked an Item"));
 		ADItemPickup* item = Cast<ADItemPickup>(hitActor);
 		if (DistanceCharacterClass->GetDistanceTo(item) < 250.0f)
 		{
@@ -223,7 +225,8 @@ void ADistancePlayerController::OnSetTargetPressed()
 			}
 			else
 			{
-				printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+				//printScreen(FColor::Red, TEXT("Inventory Full! Did Not pick up item!"));
+				UE_LOG(LogTemp, Error, TEXT("Inventory Full! Did Not pick up item!"));
 			}
 		}
 		else
@@ -234,18 +237,21 @@ void ADistancePlayerController::OnSetTargetPressed()
 	}
 	else if (hitActor->IsA(AAIEnemy::StaticClass()))
 	{
-		printScreen(FColor::Red, TEXT("Clicked an enemy"));
+		//printScreen(FColor::Red, TEXT("Clicked an enemy"));
+		UE_LOG(LogTemp, Warning, TEXT("Clicked an enemy"));
 		enemyActor = hitActor;
 		SetNewMoveDestination(Hit.ImpactPoint);
 	}
 	else if (hitActor->IsA(AAIBoss_Doubt::StaticClass()))
 	{
-		printScreen(FColor::Red, TEXT("Clicked a boss"));
+		//printScreen(FColor::Red, TEXT("Clicked a boss"));
+		UE_LOG(LogTemp, Warning, TEXT("Clicked a boss"));
 		enemyActor = hitActor;
 	}
 	else if (hitActor->IsA(ATentacle::StaticClass()))
 	{
-		printScreen(FColor::Red, TEXT("Clicked a Tentacle"));
+		//printScreen(FColor::Red, TEXT("Clicked a Tentacle"));
+		UE_LOG(LogTemp, Warning, TEXT("Clicked a Tentacle"));
 		enemyActor = hitActor;
 	}
 	else if (Hit.bBlockingHit && canMove)
@@ -355,13 +361,15 @@ void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for con
 {
 	if (!converged)
 	{
-		printScreen(FColor::Red, TEXT("Beginning Convergence"));
+		//printScreen(FColor::Red, TEXT("Beginning Convergence"));
+		UE_LOG(LogTemp, Warning, TEXT("Beginning Convergence"));
 		ConvergenceManager::StartConvergence();
 		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
 	}
 	else//make sure to get rid of this code when done testing with pushing a button to converge and diverge
 	{
-		printScreen(FColor::Red, TEXT("Ending Convergence"));
+		//printScreen(FColor::Red, TEXT("Ending Convergence"));
+		UE_LOG(LogTemp, Warning, TEXT("Ending Convergence"));
 		ConvergenceManager::EndConvergence();
 		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
 	}
@@ -370,7 +378,8 @@ void ADistancePlayerController::OnConvergenceBegin()//Temporary Binding, for con
 
 void ADistancePlayerController::OnConvergenceEnd()
 {
-	printScreen(FColor::Red, TEXT("Ending Convergence"));
+	//printScreen(FColor::Red, TEXT("Ending Convergence"));
+	UE_LOG(LogTemp, Warning, TEXT("Ending Convergence"));
 	ConvergenceManager::EndConvergence();
 }
 

@@ -50,7 +50,7 @@ void ADistanceGameMode::PostLogin(APlayerController* NewPlayer)
 
 class ADItemPickup* ADistanceGameMode::SpawnLantern(ACharacter* player)
 {
-	printScreen(FColor::Red, TEXT("Spawning The thing"));
+	//printScreen(FColor::Red, TEXT("Spawning The thing"));
 	TSubclassOf<class ADItemPickup> ItemClass;
 	ItemClass = ItemTypes[0];
 	// Spawn item at player's location
@@ -61,25 +61,29 @@ class ADItemPickup* ADistanceGameMode::SpawnLantern(ACharacter* player)
 
 class ADItemPickup* ADistanceGameMode::SpawnItemAtLocation(TSubclassOf<class ADItemPickup> indexClass, FVector location)
 {
-	printScreen(FColor::Red, TEXT("Spawning Item"));
+	//printScreen(FColor::Red, TEXT("Spawning Item"));
+	UE_LOG(LogDistance, Warning, TEXT("Spawning Item"));
 	return GetWorld()->SpawnActor<ADItemPickup>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
-class ATentacle* ADistanceGameMode::SpawnTentacleAtLocation(TSubclassOf<class ATentacle> indexClass, FVector location)
+class ATentacle* ADistanceGameMode::SpawnTentacleAtLocation(TSubclassOf<class ATentacle> indexClass, FVector location)//TODO: check if we need this anymore
 {
-	printScreen(FColor::Red, TEXT("Spawning Tentacle"));
+	//printScreen(FColor::Red, TEXT("Spawning Tentacle"));
+	UE_LOG(LogDistance, Error, TEXT("Spawning Tentacle"));
 	return GetWorld()->SpawnActor<ATentacle>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
 void ADistanceGameMode::SpawnBossAtLocation(TSubclassOf<class ACharacter> indexClass, FVector location)
 {
-	printScreen(FColor::Red, TEXT("Spawning Boss"));
+	//printScreen(FColor::Red, TEXT("Spawning Boss"));
+	UE_LOG(LogDistance, Warning, TEXT("Spawning Boss"));
 	GetWorld()->SpawnActor<ACharacter>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
 void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
-	printScreen(FColor::Red, TEXT("Spawning Random Item"));
+	//printScreen(FColor::Red, TEXT("Spawning Random Item"));
+	UE_LOG(LogDistance, Warning, TEXT("Spawning Random Item"));
 	TSubclassOf<class ADItemPickup> ItemClass;
 	uint32 ItemIndex = FMath::RandRange(1, ItemTypes.Num()-1);
 	ItemClass = ItemFromIndex(ItemIndex);

@@ -79,7 +79,7 @@ void ATentacle::FindParent()//apparently, this cannot be called within any of th
 
 void ATentacle::SetBossParent(class AAIBoss_Doubt* parent)
 {
-	UE_LOG(LogDistance, Error, TEXT("Tentacle parents are set!"));
+	UE_LOG(LogDistance, Verbose, TEXT("Tentacle parents are set!"));
 	doubtParent = parent;
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(doubtParent, &AAIBoss_Doubt::OnTentacleOverlap);
 }

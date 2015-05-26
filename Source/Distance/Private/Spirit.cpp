@@ -53,7 +53,7 @@ void ASpirit::Tick(float DeltaTime)
 	if (fadeOut)
 	{
 		alphaVal += (DeltaTime / 8);
-		UE_LOG(LogDistance, Error, TEXT("Alpha color: %f"), alphaVal);
+		UE_LOG(LogDistance, Warning, TEXT("Alpha color: %f"), alphaVal);
 		if (alphaVal >= 1.0f)
 		{
 			alphaVal = 1.0f;
@@ -65,7 +65,7 @@ void ASpirit::Tick(float DeltaTime)
 
 void ASpirit::SetOwner(ADistanceCharacter* owningPlayer)
 {
-	UE_LOG(LogDistance, Error, TEXT("Spirit's owner is set!"));
+	UE_LOG(LogDistance, Verbose, TEXT("Spirit's owner is set!"));
 	//set owner for reference to move to player
 	OwningPawn = owningPlayer;
 	//begin deathtimer to countdown to death

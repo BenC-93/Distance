@@ -70,7 +70,7 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 void ADistanceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	printScreen(FColor::Red, TEXT("Begin Play"));
+	//printScreen(FColor::Red, TEXT("Begin Play"));
 	StartRegeneration();
 	ItemPickedUp();
 }
@@ -202,7 +202,7 @@ void ADistanceCharacter::ChangeHealth(float healthAmount)
 {
 	float tempHealth = Health + healthAmount;
 	Health = fmax(0.0f, fmin(MaxHealth, tempHealth));
-	UE_LOG(LogDistance, Verbose, TEXT("Changing Health Breakpoint: %f"), Health);
+	//UE_LOG(LogDistance, Verbose, TEXT("Changing Health Breakpoint: %f"), Health);
 }
 
 void ADistanceCharacter::RegenerateHealth()

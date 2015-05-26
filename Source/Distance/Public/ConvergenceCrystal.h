@@ -20,6 +20,9 @@ public:
 	float health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Crystal)
+	float maxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Crystal)
 	float healthLossRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Crystal)
@@ -46,10 +49,7 @@ public:
 	class ACharacter* player2;
 
 	UPROPERTY(EditAnywhere)
-	class AAIBoss_Doubt* bossDoubt;
-
-	UPROPERTY(EditAnywhere)
-	class AAIBoss_Betrayal* bossBetrayal;
+	class AAIBoss* boss;
 
 	AConvergenceCrystal(const class FObjectInitializer& ObjectInitializer);
 

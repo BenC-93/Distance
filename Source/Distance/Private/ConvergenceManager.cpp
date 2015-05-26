@@ -35,7 +35,8 @@ void TransitionPlayerToState(ADistanceCharacter* player, ConvergenceState NewSta
 		if (CurrentState == NewState)
 		{
 			// No state transition just log a message and stop
-			printScreen(FColor::Red, TEXT("Attempted to transition player to current state"));
+			//printScreen(FColor::Red, TEXT("Attempted to transition player to current state"));
+			UE_LOG(LogDistance, Error, TEXT("Attempted to transition player to current state"));
 			// Temporary for debugging transition back to divergence
 			ConvergenceManager::EndConvergence();
 		}
@@ -55,7 +56,8 @@ void TransitionPlayerToState(ADistanceCharacter* player, ConvergenceState NewSta
 	}
 	else
 	{
-		printScreen(FColor::Red, TEXT("Null player in state transition"));
+		//printScreen(FColor::Red, TEXT("Null player in state transition"));
+		UE_LOG(LogDistance, Error, TEXT("Null player in state transition"));
 	}
 }
 
@@ -105,16 +107,20 @@ ConvergenceState ConvergenceManager::StateFromLocation(FVector location)
 
 void ConvergenceManager::StartConvergence()
 {
-	printScreen(FColor::Red, TEXT("Start for player 1"));
+	//printScreen(FColor::Red, TEXT("Start for player 1"));
+	UE_LOG(LogDistance, Warning, TEXT("Conv: Start for player 1"));
 	TransitionPlayerToState(player1, ConvergenceState::CONVERGENCE);
-	printScreen(FColor::Red, TEXT("Start for player 2"));
+	//printScreen(FColor::Red, TEXT("Start for player 2"));
+	UE_LOG(LogDistance, Warning, TEXT("Conv: Start for player 2"));
 	TransitionPlayerToState(player2, ConvergenceState::CONVERGENCE);
 }
 
 void ConvergenceManager::EndConvergence()
 {
-	printScreen(FColor::Red, TEXT("End for player 1"));
+	//printScreen(FColor::Red, TEXT("End for player 1"));
+	UE_LOG(LogDistance, Warning, TEXT("End Conv: for player 1"));
 	TransitionPlayerToState(player1, ConvergenceState::DIVERGENCE1);
-	printScreen(FColor::Red, TEXT("End for player 2"));
+	//printScreen(FColor::Red, TEXT("End for player 2"));
+	UE_LOG(LogDistance, Warning, TEXT("End Conv: for player 2"));
 	TransitionPlayerToState(player2, ConvergenceState::DIVERGENCE2);
 }

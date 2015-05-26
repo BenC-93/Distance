@@ -9,3 +9,8 @@ AAIBoss::AAIBoss(const FObjectInitializer& ObjectInitializer)
 	Health = 100.0f;
 	MaxHealth = 100.0f;
 }
+
+void AAIBoss::EndOfBoss()
+{
+
+}

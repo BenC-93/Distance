@@ -28,6 +28,8 @@ public:
 	bool p1InTrigger;
 	bool p2InTrigger;
 
+	bool bossHasBegun;
+
 	//UPROPERTY(Category = Items, EditAnywhere)
 	//TSubclassOf<class ATentacle> TentacleClass;
 
@@ -90,10 +92,15 @@ public:
 	class ADistanceCharacter* swallowedPlayer;
 
 	UPROPERTY(EditAnywhere)
+	class ADistanceCharacter* secondSwallowedPlayer;
+
+	UPROPERTY(EditAnywhere)
 	class ADistanceCharacter* player;
 
 	UPROPERTY(EditAnywhere)
 	class ADistancePlayerController* playerController;
+
+	class ACharacter* FindTarget();
 
 	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Tentacle")
 	//TArray<class ATentacle*> tentacleArray;
@@ -107,6 +114,9 @@ public:
 	float tentacleCounter;
 	float tentacleSpriteLen;
 
+	bool isPullingObject;//whether or not an object is being pulled
+	class AActor* pullingObject;//object being pulled
+
 	class AActor* targetActor;
 	void PullActor(class AActor* tempActor);
 
@@ -114,20 +124,33 @@ public:
 	void ReleasePlayer(class ACharacter* tempChar);
 	void DrainPlayer(class ADistanceCharacter* tempPlayer);
 
+	class ADistanceCharacter* drainTarget1;
+	class ADistanceCharacter* drainTarget2;
+
 	void ActorPullTimer();
 	void DrainActor(class AActor* tempActor);
 	void ActorDrainTimer();
 
+	void CrystalTentacleTimer();
+	void StartCrystalTentacleTimer(float rate);
 	void TentacleTimer();
 	void StartTentacleTimer(float rate);
 	void AttackTimer();
 	void StartAttackTimer(float rate);
+	void CrystalAttackTimer();
+	void StartCrystalAttackTimer(float rate);
 	void DrainTimer();
 	void StartDrainTimer(float rate);
+	void AnotherDrainTimer();
+	void StartAnotherDrainTimer(float rate);
 	void SwallowedTimer();
 	void StartSwallowedTimer(float rate);
+	void SecondSwallowedTimer();
+	void StartSecondSwallowedTimer(float rate);
 
-	void EndOfBoss();
+	virtual void EndOfBoss() override;
+
+	bool CheckIfBothPlayersSwallowed();
 
 	void ChangeHealth(float healthAmount);
 

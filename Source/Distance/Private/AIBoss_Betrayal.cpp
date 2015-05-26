@@ -130,7 +130,7 @@ void AAIBoss_Betrayal::TransformPlayers(bool toMonster)
 {
 	if (toMonster)
 	{
-		//change sprites for players to monsters TODO
+		//change sprites for players to monsters TODO unless we are positively not transforming players, if thats the case, remove this method completly
 	}
 	else
 	{

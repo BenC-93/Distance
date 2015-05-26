@@ -23,7 +23,8 @@ void AItemCrystal::StartUse()
 		{
 			if (OwningPawn->GetDistanceTo(*ActorItr) <= rangeToShrine)
 			{
-				printScreen(FColor::Red, TEXT("Shrine Found"));
+				//printScreen(FColor::Red, TEXT("Shrine Found"));
+				UE_LOG(LogDistance, Warning, TEXT("Shrine Found"));
 				shrineFound = true;
 				break;
 			}

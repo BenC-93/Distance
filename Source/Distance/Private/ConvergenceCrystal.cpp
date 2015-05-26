@@ -2,13 +2,14 @@
 
 #include "Distance.h"
 #include "AIBoss_Doubt.h"
-#include "AIBoss_Betrayal.h"
+#include "AIBoss.h"
 #include "ConvergenceCrystal.h"
 
 AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	health = 300.0f;
+	maxHealth = 300.0f;
 
 	healthLossRate = 0.5f;
 	drainHealthDamage = 1.0f;
@@ -20,8 +21,6 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 	zmax = 25.f;
 
 	LightIntensity = 10.0f * health;
-
-	bossDoubt = NULL;
 
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -78,16 +77,15 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 		CameraBoom->TargetArmLength = fmax(800.f, (0.45f * FVector::Dist(player1->GetActorLocation(), player2->GetActorLocation())) + 450.f);
 		for (TActorIterator<AAIBoss_Doubt> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
-			bossDoubt = Cast<AAIBoss_Doubt>(*ActorItr);
-			if (ActorItr->p1InTrigger && ActorItr->p2InTrigger)
+			if (ActorItr->p1InTrigger && ActorItr->p2InTrigger)//special conditions if the boss is doubt
 			{
 				return;
 			}
 		}
 
-		for (TActorIterator<AAIBoss_Betrayal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		for (TActorIterator<AAIBoss> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
-			bossBetrayal = Cast<AAIBoss_Betrayal>(*ActorItr);
+			boss = Cast<AAIBoss>(*ActorItr);
 		}
 
 		FVector TargetLocation = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
@@ -119,8 +117,7 @@ void AConvergenceCrystal::LoseHealthTimer()
 	if (health - drainHealthDamage <= 0.0f)
 	{
 		health = 0;
-		//bossDoubt->EndOfBoss();//check if player controller is null
-		bossBetrayal->EndOfBoss();
+		boss->EndOfBoss();
 		Destroy();
 	}
 	else
@@ -129,7 +126,7 @@ void AConvergenceCrystal::LoseHealthTimer()
 		LightIntensity = 10.0f * health;
 		LightSource->SetIntensity(LightIntensity);
 	}
-	UE_LOG(LogDistance, Warning, TEXT("crystal health: %f"), health);
+	//UE_LOG(LogDistance, Warning, TEXT("crystal health: %f"), health);
 }
 
 void AConvergenceCrystal::Destroyed()

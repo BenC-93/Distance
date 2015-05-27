@@ -231,7 +231,9 @@ void AAIBoss_Betrayal::ChangeHealth(float healthAmount)
 }
 
 void AAIBoss_Betrayal::EndOfBoss()
-{	
+{
+	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
 	GetWorldTimerManager().ClearAllTimersForObject(this);
 
 	printScreen(FColor::Red, TEXT("End of Boss"));

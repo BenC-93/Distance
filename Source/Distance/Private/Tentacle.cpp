@@ -96,7 +96,7 @@ float ATentacle::ChangeHealth(float amount)
 			if (doubtParent)
 			{
 				UE_LOG(LogDistance, Error, TEXT("Did damage to boss"));
-				doubtParent->ChangeHealth(-25);
+				doubtParent->ChangeHealth(-25.0f);
 			}
 			DestroyTentacle();
 		}

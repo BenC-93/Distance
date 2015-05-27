@@ -18,6 +18,8 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	canMove = true;
+	notTrappedByEnemy = true;//essentially, this is canMove
+	canUseItem = true;
 	hitActor = NULL;
 	rangeToItem = 250.0f;
 
@@ -48,11 +50,11 @@ void ADistancePlayerController::SetupInputComponent()
 	//InputComponent->BindAction("SetDestination", IE_Pressed, this, &ADistancePlayerController::OnSetDestinationPressed);
 	//InputComponent->BindAction("SetDestination", IE_Released, this, &ADistancePlayerController::OnSetDestinationReleased);
 
-	InputComponent->BindAction("SetTarget", IE_Pressed, this, &ADistancePlayerController::OnSetTargetPressed);
-	InputComponent->BindAction("SetTarget", IE_Released, this, &ADistancePlayerController::OnSetTargetReleased);
+	//InputComponent->BindAction("SetTarget", IE_Pressed, this, &ADistancePlayerController::OnSetTargetPressed);
+	//InputComponent->BindAction("SetTarget", IE_Released, this, &ADistancePlayerController::OnSetTargetReleased);
 	// support touch devices 
-	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ADistancePlayerController::MoveToTouchLocation);
-	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ADistancePlayerController::MoveToTouchLocation);
+	//InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ADistancePlayerController::MoveToTouchLocation);
+	//InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ADistancePlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("UseItem", IE_Pressed, this, &ADistancePlayerController::OnUseItemPressed);
 	InputComponent->BindAction("UseItem", IE_Released, this, &ADistancePlayerController::OnUseItemReleased);
@@ -75,14 +77,14 @@ void ADistancePlayerController::SetupInputComponent()
 
 void ADistancePlayerController::MoveForward(float val)
 {
-	if (canMove) {
+	if (notTrappedByEnemy && canMove) {
 		DistanceCharacterClass->AddMovementInput(FVector(1.0, 0.0, 0.0), GetInputAxisValue("MoveForward"));
 	}
 }
 
 void ADistancePlayerController::MoveRight(float val)
 {
-	if (canMove) {
+	if (notTrappedByEnemy && canMove) {
 		DistanceCharacterClass->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
 		DistanceCharacterClass->FlipForDirection(val);
 	}
@@ -125,7 +127,7 @@ void ADistancePlayerController::MoveToMouseCursor()
 	FHitResult Hit;
 	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 
-	if (Hit.bBlockingHit && canMove)
+	if (Hit.bBlockingHit && notTrappedByEnemy && canMove)
 	{
 		// We hit something, move there
 		SetNewMoveDestination(Hit.ImpactPoint);
@@ -139,7 +141,7 @@ void ADistancePlayerController::MoveToTouchLocation(const ETouchIndex::Type Fing
 	// Trace to see what is under the touch location
 	FHitResult HitResult;
 	GetHitResultAtScreenPosition(ScreenSpaceLocation, CurrentClickTraceChannel, true, HitResult);
-	if (HitResult.bBlockingHit && canMove)
+	if (HitResult.bBlockingHit && notTrappedByEnemy && canMove)
 	{
 		// We hit something, move there
 		SetNewMoveDestination(HitResult.ImpactPoint);
@@ -235,7 +237,7 @@ void ADistancePlayerController::OnSetTargetPressed()
 		UE_LOG(LogTemp, Warning, TEXT("Clicked a Tentacle"));
 		enemyActor = hitActor;
 	}
-	else if (Hit.bBlockingHit && canMove)
+	else if (Hit.bBlockingHit && notTrappedByEnemy && canMove)
 	{
 		SetNewMoveDestination(Hit.ImpactPoint);
 		bMoveToMouseCursor = true;
@@ -259,8 +261,11 @@ void ADistancePlayerController::OnUseItemPressed()
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
-	DistanceCharacterClass->GetItem()->StartUse();
-	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+	if (canUseItem)
+	{
+		DistanceCharacterClass->GetItem()->StartUse();
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
 }
 
 //temp
@@ -277,7 +282,7 @@ void ADistancePlayerController::OnOtherUseItemPressed()
 		return;
 	}
 	DistanceCharacterClass->GetItem()->StartUse();
-	UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
+	//UE_LOG(LogTemp, Warning, TEXT("Item Pressed: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
 }
 
 void ADistancePlayerController::OnUseItemReleased()
@@ -293,7 +298,10 @@ void ADistancePlayerController::OnUseItemReleased()
 		UE_LOG(LogTemp, Error, TEXT("Light is null."));
 		return;
 	}
-	item->EndUse();
+	if (canUseItem)
+	{
+		item->EndUse();
+	}
 	/*UE_LOG(LogTemp, Warning, TEXT("Item Released: isInUse: %d"), DistanceCharacterClass->GetItemEnabled());
 	//UE_LOG(LogTemp, Warning, TEXT("Item name: %s"), *DistanceCharacterClass->GetItemName());
 	if (DistanceCharacterClass->GetItemName() == "LightBeam")

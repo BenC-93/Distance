@@ -24,7 +24,9 @@ public:
 
 	float rangeToShrine;
 
+	bool notTrappedByEnemy;
 	bool canMove;
+	bool canUseItem;
 
 	class AActor* hitActor;
 	class AActor* enemyActor;

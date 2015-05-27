@@ -36,6 +36,9 @@ public:
 	float zmin;
 	float zmax;
 
+	bool p1Near;
+	bool p2Near;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Light)
 	float LightIntensity;
 
@@ -70,6 +73,15 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	class UBoxComponent* CaptureBox1;
+
+	class UBoxComponent* CaptureBox2;
+	class UBoxComponent* CaptureBox3;
+	class UBoxComponent* CaptureBox4;
+
+	void TurnCaptureBoxesOn();
 
 	UFUNCTION(BlueprintCallable, Category = "Timers")
 	void LoseHealthTimer();

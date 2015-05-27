@@ -97,11 +97,12 @@ void AItemLightBeam::EndUse()
 		GetWorldTimerManager().ClearTimer(this, &AItemLightBeam::Charge);
 		bIsInUse = false;
 		bCanUse = false;
-		//start attack animation
-		
+		//start attack animation and sound
+		BPPlaySound();
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::AnimationTimer, 0.85f, false);
+
 		LightSource->SetVisibility(false);
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Regenerate, RegenRate, true);
 	}
@@ -132,7 +133,7 @@ void AItemLightBeam::OnOverlapBegin_Implementation(class AActor* OtherActor, cla
 	if (OtherActor && (OtherActor != this))
 	{
 		targetActor = OtherActor;
-		UE_LOG(LogDistance, Warning, TEXT("Overlaped with: %s"), *targetActor->GetName());
+		//UE_LOG(LogDistance, Warning, TEXT("Overlaped with: %s"), *targetActor->GetName());
 	}
 }
 

@@ -362,6 +362,8 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
 			StartDrainTimer(drainRate);
+			// play drain sound
+			BPPlayDrainSound();
 
 			DrainParticleSys->Activate();
 		}

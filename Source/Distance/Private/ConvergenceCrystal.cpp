@@ -20,6 +20,8 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 	zmin = 0.f;
 	zmax = 25.f;
 
+	p1Near = p2Near = false;
+
 	LightIntensity = 10.0f * health;
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -50,6 +52,38 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 	LightSource->Intensity = LightIntensity;
 	LightSource->bVisible = true;
 	LightSource->RelativeLocation.Z += 145.f;
+
+	CaptureBox1 = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CaptureBox1"));
+	CaptureBox1->Mobility = EComponentMobility::Movable;
+	CaptureBox1->bGenerateOverlapEvents = false;
+	CaptureBox1->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	CaptureBox1->SetBoxExtent(FVector(1000.f, 10.f, 200.f), true);
+	CaptureBox1->AttachTo(RootComponent);
+	CaptureBox1->SetRelativeLocation(FVector(0.f, 750.f, 0.f));
+
+	CaptureBox2 = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CaptureBox2"));
+	CaptureBox2->Mobility = EComponentMobility::Movable;
+	CaptureBox2->bGenerateOverlapEvents = false;
+	CaptureBox2->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	CaptureBox2->SetBoxExtent(FVector(1000.f, 10.f, 200.f), true);
+	CaptureBox2->AttachTo(RootComponent);
+	CaptureBox2->SetRelativeLocation(FVector(0.f, -750.f, 0.f));
+
+	CaptureBox3 = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CaptureBox3"));
+	CaptureBox3->Mobility = EComponentMobility::Movable;
+	CaptureBox3->bGenerateOverlapEvents = false;
+	CaptureBox3->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	CaptureBox3->SetBoxExtent(FVector(10.f, 1000.f, 200.f), true);
+	CaptureBox3->AttachTo(RootComponent);
+	CaptureBox3->SetRelativeLocation(FVector(750.f, 0.f, 0.f));
+
+	CaptureBox4 = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CaptureBox4"));
+	CaptureBox4->Mobility = EComponentMobility::Movable;
+	CaptureBox4->bGenerateOverlapEvents = false;
+	CaptureBox4->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	CaptureBox4->SetBoxExtent(FVector(10.f, 1000.f, 200.f), true);
+	CaptureBox4->AttachTo(RootComponent);
+	CaptureBox4->SetRelativeLocation(FVector(-750.f, 0.f, 0.f));
 }
 
 void AConvergenceCrystal::BeginPlay()
@@ -99,6 +133,9 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 				SetActorLocation(temp);
 			}
 		}
+		if (!p1Near && GetDistanceTo(player1) < 400.f) { p1Near = true; }
+		if (!p2Near && GetDistanceTo(player2) < 400.f) { p2Near = true; }
+		if (p1Near && p2Near) { TurnCaptureBoxesOn(); };
 	}
 }
 
@@ -127,6 +164,19 @@ void AConvergenceCrystal::LoseHealthTimer()
 		LightSource->SetIntensity(LightIntensity);
 	}
 	//UE_LOG(LogDistance, Warning, TEXT("crystal health: %f"), health);
+}
+
+void AConvergenceCrystal::TurnCaptureBoxesOn()
+{
+	UE_LOG(LogTemp, Warning, TEXT("TurnCaptureBoxOn() was called"));
+	if (CaptureBox1->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Block)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Turning on capture box"));
+		CaptureBox1->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		CaptureBox2->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		CaptureBox3->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		CaptureBox4->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	}
 }
 
 void AConvergenceCrystal::Destroyed()

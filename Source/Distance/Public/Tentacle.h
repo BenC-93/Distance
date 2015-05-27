@@ -41,7 +41,7 @@ public:
 
 	void SetBossParent(class AAIBoss_Doubt* parent);
 
-	float ChangeHealth(float amount);
+	void ChangeHealth(float amount);
 
 	void DestroyTentacle();
 	

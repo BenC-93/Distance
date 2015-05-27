@@ -16,14 +16,14 @@ ATentacle::ATentacle(const FObjectInitializer& ObjectInitializer)
 	RootComponent = RootSceneComponent;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
-	SpriteComponent->RelativeRotation = FRotator(0.0f, 90.0f, 0.0f);//y,z,x
+	SpriteComponent->RelativeRotation = FRotator(0.0f, -90.0f, 0.0f);//y,z,x or is it y, x, z
 	SpriteComponent->RelativeScale3D = FVector(7.0f, 3.0f, 3.0f);
 	SpriteComponent->AttachTo(RootComponent);
 	
 	TriggerBox = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("TriggerBox"));
 	TriggerBox->Mobility = EComponentMobility::Movable;
 	TriggerBox->SetBoxExtent(FVector(175.0f, 65.0f, 500.0f), true);
-	TriggerBox->RelativeLocation = FVector(-474.0f, -76.0f, 0.0f);
+	TriggerBox->RelativeLocation = FVector(-480.0f, 0.0f, 0.0f);
 	TriggerBox->AttachTo(RootComponent);
 
 }
@@ -84,7 +84,7 @@ void ATentacle::SetBossParent(class AAIBoss_Doubt* parent)
 	TriggerBox->OnComponentBeginOverlap.AddDynamic(doubtParent, &AAIBoss_Doubt::OnTentacleOverlap);
 }
 
-float ATentacle::ChangeHealth(float amount)
+void ATentacle::ChangeHealth(float amount)
 {
 	float tempHealth = health + amount;
 
@@ -106,7 +106,6 @@ float ATentacle::ChangeHealth(float amount)
 		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Tentacle health: %f"), health);
-	return health;
 }
 
 void ATentacle::DestroyTentacle()

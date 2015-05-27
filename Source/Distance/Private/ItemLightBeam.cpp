@@ -46,10 +46,11 @@ void AItemLightBeam::Tick(float DeltaTime)
 		//check for boss collision stuff
 		if (targetActor->IsA(ATentacle::StaticClass()))
 		{
-			UE_LOG(LogTemp, Error, TEXT("Light beam hit the tentacle!"));
+			UE_LOG(LogTemp, Error, TEXT("Light beam hit the tentacle! name: %s"), *targetActor->GetName());
 			Cast<ATentacle>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
 			totalChargedAmount = 0.0f;
 			hasAttacked = true;
+			targetActor = NULL;
 		}
 		else if (targetActor->IsA(AAIBoss_Betrayal::StaticClass()))
 		{
@@ -57,6 +58,7 @@ void AItemLightBeam::Tick(float DeltaTime)
 			Cast<AAIBoss_Betrayal>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
 			totalChargedAmount = 0.0f;
 			hasAttacked = true;
+			targetActor = NULL;
 		}
 		else if (targetActor->IsA(AAIBoss_Betrayal_Minion::StaticClass()))
 		{
@@ -64,6 +66,7 @@ void AItemLightBeam::Tick(float DeltaTime)
 			Cast<AAIBoss_Betrayal_Minion>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
 			totalChargedAmount = 0.0f;
 			hasAttacked = true;
+			targetActor = NULL;
 		}
 		else if (targetActor->IsA(ADistanceCharacter::StaticClass()))
 		{
@@ -71,6 +74,7 @@ void AItemLightBeam::Tick(float DeltaTime)
 			Cast<ADistanceCharacter>(targetActor)->ChangeHealth(-1 * (1 + totalChargedAmount));
 			totalChargedAmount = 0.0f;
 			hasAttacked = true;
+			targetActor = NULL;
 		}
 	}
 }
@@ -130,7 +134,7 @@ void AItemLightBeam::Charge()
 
 void AItemLightBeam::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && (OtherActor != this))
+	if (OtherActor && (OtherActor != this) && targetActor == NULL)
 	{
 		targetActor = OtherActor;
 		//UE_LOG(LogDistance, Warning, TEXT("Overlaped with: %s"), *targetActor->GetName());

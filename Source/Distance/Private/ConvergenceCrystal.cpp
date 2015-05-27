@@ -168,10 +168,10 @@ void AConvergenceCrystal::LoseHealthTimer()
 
 void AConvergenceCrystal::TurnCaptureBoxesOn()
 {
-	UE_LOG(LogTemp, Warning, TEXT("TurnCaptureBoxOn() was called"));
+	//UE_LOG(LogTemp, Warning, TEXT("TurnCaptureBoxOn() was called"));
 	if (CaptureBox1->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Block)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Turning on capture box"));
+		//UE_LOG(LogTemp, Warning, TEXT("Turning on capture box"));
 		CaptureBox1->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		CaptureBox2->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		CaptureBox3->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);

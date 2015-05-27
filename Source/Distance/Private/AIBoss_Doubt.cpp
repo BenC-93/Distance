@@ -77,7 +77,10 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 UChildActorComponent* AAIBoss_Doubt::CreateTentacleComponent(int i, const FObjectInitializer& ObjectInitializer)
 {
 	
-	FName componentName = FName(*FString::Printf(TEXT("TentacleComponent %d"), i));
+	//FName componentName = FName(*FString::Printf(TEXT("TentacleComponent %d"), i));//might not be working
+	FString name = FString(TEXT("TentacleComponent"));
+	name.AppendInt(i);
+	FName componentName = FName(*name);
 	class UChildActorComponent* TentacleComponent = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, componentName);
 	TentacleComponent->OnComponentCreated();
 	TentacleComponent->RelativeLocation = FVector(-465.0f, -370.0f + (i * 170.0f), -280.0f + (i * 3.0f));//add y by 170, add z by 3 each tentacle
@@ -699,6 +702,12 @@ void AAIBoss_Doubt::EndOfBoss()
 		ActorItr->Destroy();
 	}
 
+	//safety check on tentacles
+	for (TActorIterator<ATentacle> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ActorItr->Destroy();
+	}
+
 	//Set everything to null here if we decide not to destroy boss at end
 
 	playerController = Cast<ADistancePlayerController>(player1->GetController());
@@ -717,6 +726,12 @@ void AAIBoss_Doubt::EndOfBoss()
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)
 {
 	float tempHealth = Health + healthAmount;
+	if (tempHealth <= 0)
+	{
+		Health = 0.0f;//Defeated boss!
+		EndOfBoss();
+		return;
+	}
 	if (tempHealth <= MaxHealth)
 	{
 		if (isPullingObject && pullingObject)
@@ -735,25 +750,20 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)
 		if (numTentacles > 0 && !CheckIfBothPlayersSwallowed())
 		{
 			StartAttackTimer(3.0f);
+			UE_LOG(LogTemp, Error, TEXT("a tentacle died, start new attack normally"));
 		}
 		else if (numTentacles > 0 && CheckIfBothPlayersSwallowed())
 		{
 			StartCrystalAttackTimer(3.0f);
+			UE_LOG(LogTemp, Error, TEXT("a tentacle died, start new attack on crystal"));
 		}
 		else//no more tentacles
 		{
 			EndOfBoss();
 		}
 
-		if (tempHealth <= 0)
-		{
-			Health = 0.0f;//Defeated boss!
-			EndOfBoss();
-		}
-		else
-		{
-			Health = tempHealth;
-		}
+		Health = tempHealth;
+		
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Boss health: %f Num of Tentacles: %d"), Health, numTentacles);
 }
@@ -854,7 +864,8 @@ void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 				//set swallowed player
 				//printScreen(FColor::Red, TEXT("Beginning Draining Swallowed Player."));
 				UE_LOG(LogTemp, Warning, TEXT("Beginning Draining Swallowed Player."));
-				swallowedPlayer = player; // Cast<ADistanceCharacter>(OtherActor);
+				swallowedPlayer = Cast<ADistanceCharacter>(OtherActor); //was player
+				swallowedPlayer->SetActorLocation(GetActorLocation() + FVector(100.0f, -100.0f, 0.0f));//swallowed player needs to be behind boss
 				Cast<ADistancePlayerController>(swallowedPlayer->GetController())->canUseItem = false;
 				StartSwallowedTimer(drainRate / 1.5f);//drainRate = 0.25f normally
 				isPullingObject = false;
@@ -881,7 +892,8 @@ void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 			}
 			else if (!playerController->notTrappedByEnemy && swallowedPlayer != NULL)//previously was !playerController->notTrappedByEnemy && swallowedPlayer != NULL
 			{
-				secondSwallowedPlayer = player;
+				secondSwallowedPlayer = Cast<ADistanceCharacter>(OtherActor); //was player
+				secondSwallowedPlayer->SetActorLocation(GetActorLocation() + FVector(100.0f, 50.0f, 0.0f));//swallowed player needs to be behind boss
 				Cast<ADistancePlayerController>(secondSwallowedPlayer->GetController())->canUseItem = false;
 				//printScreen(FColor::Red, TEXT("Beginning Draining second Swallowed Player."));
 				UE_LOG(LogTemp, Warning, TEXT("Beginning Draining second Swallowed Player."));

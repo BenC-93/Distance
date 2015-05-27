@@ -14,6 +14,13 @@ enum class ConvergenceState : uint8
 	DIVERGENCE2 UMETA(DisplayName = "Divergence2")
 };
 
+// Direction the character model is or should be facing
+enum class CharacterOrientation : uint8
+{
+	LEFT,
+	RIGHT
+};
+
 UCLASS(Blueprintable)
 class ADistanceCharacter : public ACharacter
 {
@@ -35,6 +42,9 @@ class ADistanceCharacter : public ACharacter
 	
 	UPROPERTY(EditDefaultsOnly, Category = Item)
 	FName ItemSocket;
+	
+	// Current facing direction
+	CharacterOrientation CurrentDirection;
 
 public:
 	ADistanceCharacter(const FObjectInitializer& ObjectInitializer);
@@ -77,6 +87,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Camera)
 	void PlayConvergenceAnim();
+	
+	// Flip the character for movement, positive is right, negative is left
+	void FlipForDirection(float MovementInputDirection, bool bUseCurrentDirection = false);
 
 	/* Pick up nearby item object in the world */
 	UFUNCTION(BlueprintCallable, Category = Inventory)

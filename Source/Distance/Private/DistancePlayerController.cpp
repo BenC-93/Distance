@@ -84,14 +84,7 @@ void ADistancePlayerController::MoveRight(float val)
 {
 	if (canMove) {
 		DistanceCharacterClass->AddMovementInput(FVector(0.0, 1.0, 0.0), GetInputAxisValue("MoveRight"));
-		if (val > 0.f)
-		{
-			DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
-		}
-		else if (val < 0.f)
-		{
-			DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
-		}
+		DistanceCharacterClass->FlipForDirection(val);
 	}
 }
 
@@ -105,10 +98,6 @@ void ADistancePlayerController::ItemPickup()
 {
 	for (TActorIterator<ADItemPickup> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-//		if (ActorItr->IsA(AItemLantern::StaticClass()) || *ActorItr == DistanceCharacterClass->GetItem())
-//		{
-//			continue;
-//		}
 		if (DistanceCharacterClass->GetDistanceTo(*ActorItr) <= rangeToItem)
 		{
 			if (DistanceCharacterClass->HasInventorySpace())
@@ -170,16 +159,8 @@ void ADistancePlayerController::SetNewMoveDestination_Implementation(const FVect
 		{
 			NavSys->SimpleMoveToLocation(this, DestLocation);
 
-			if (DestLocation.Y >= DistanceCharacterClass->GetActorLocation().Y)
-			{
-				// Rotation sucks, I'm sorry for relying on scale #yolo
-				DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
-			}
-			else
-			{
-				// Rotation sucks, I'm sorry for using scale, please forgive me...
-				DistanceCharacterClass->GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
-			}
+			float direction = DestLocation.Y - DistanceCharacterClass->GetActorLocation().Y;
+			DistanceCharacterClass->FlipForDirection(direction);
 		}
 	}
 }

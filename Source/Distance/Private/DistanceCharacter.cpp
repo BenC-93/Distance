@@ -19,6 +19,9 @@ ADistanceCharacter::ADistanceCharacter(const FObjectInitializer& ObjectInitializ
 	MaxHealth = 100.0f;
 	BaseDamage = 1.0f;
 	EquippedSlot = 0;
+	
+	// Default model faces left
+	CurrentDirection = CharacterOrientation::LEFT;
 
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(20.f, 60.f);
@@ -308,6 +311,43 @@ void ADistanceCharacter::RemoveItem(ADItem* Item)
 bool ADistanceCharacter::HasInventorySpace()
 {
 	return Inventory.Num() < 5;
+}
+
+void ADistanceCharacter::FlipForDirection(float MovementInputDirection, bool bUseCurrentDirection)
+{
+	bool bShouldRefresh = false;
+	CharacterOrientation direction;
+	
+	if (bUseCurrentDirection)
+	{
+		// MovementInputDirection is not useful, we just want to refresh the flippiness
+		bShouldRefresh = true;
+		direction = CurrentDirection;
+	}
+	else if (MovementInputDirection > 0.0f)
+	{
+		direction = CharacterOrientation::RIGHT;
+		bShouldRefresh = (direction != CurrentDirection);
+	}
+	else if (MovementInputDirection < 0.0f)
+	{
+		direction = CharacterOrientation::LEFT;
+		bShouldRefresh = (direction != CurrentDirection);
+	}
+	
+	if (bShouldRefresh)
+	{
+		CurrentDirection = direction;
+		// TODO: figure out what to do with the items and sockets, I can't make it work :sad_face:
+		if (CurrentDirection == CharacterOrientation::LEFT)
+		{
+			GetMesh()->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+		}
+		else if (CurrentDirection == CharacterOrientation::RIGHT)
+		{
+			GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+		}
+	}
 }
 
 //

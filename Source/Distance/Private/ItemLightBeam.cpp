@@ -132,7 +132,7 @@ void AItemLightBeam::OnOverlapBegin_Implementation(class AActor* OtherActor, cla
 	if (OtherActor && (OtherActor != this))
 	{
 		targetActor = OtherActor;
-		UE_LOG(LogDistance, Warning, TEXT("Overlaped with: %s"), *targetActor->GetName());
+		//UE_LOG(LogDistance, Warning, TEXT("Overlaped with: %s"), *targetActor->GetName());
 	}
 }
 

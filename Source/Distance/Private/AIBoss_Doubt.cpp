@@ -95,7 +95,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 
 	if (player != NULL)
 	{
-		if (Health > 0)
+		if (!isPullingObject && swallowedPlayer == NULL)
 		{
 			if (p1InTrigger && p2InTrigger)//checks and sets the current player target to the closest player
 			{
@@ -118,31 +118,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			}
 		}
 	}
-	//if swallowedPlayer == player -> then currentPlayer needs to be other player
-	if (swallowedPlayer && player && !CheckIfBothPlayersSwallowed())
-	{
-		if (player == swallowedPlayer)
-		{
-			//printScreen(FColor::Red, TEXT("Resetting Target, one player has been swallowed"));
-			//UE_LOG(LogTemp, Warning, TEXT("Resetting Target, one player has been swallowed"));
-			if (player == player1)
-			{
-				currentPlayer = player2;
-				player = Cast<ADistanceCharacter>(currentPlayer);
-				playerController = Cast<ADistancePlayerController>(player->GetController());
-				//UE_LOG(LogTemp, Warning, TEXT("current player switched to second player"));
-			}
-			else
-			{
-				currentPlayer = player1;
-				player = Cast<ADistanceCharacter>(currentPlayer);
-				playerController = Cast<ADistancePlayerController>(player->GetController());
-				//UE_LOG(LogTemp, Warning, TEXT("current player switched to first player"));
-			}
-			StartAttackTimer(3.0f);//attack the new target
-		}
-	}
-	if (swallowedPlayer)
+	if (swallowedPlayer)//player switching items to release other
 	{
 		if (playerController)
 		{
@@ -151,6 +127,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 				//printScreen(FColor::Red, TEXT("Swallowed Player was Released by other player switching Items"));
 				UE_LOG(LogTemp, Error, TEXT("Swallowed Player was Released by other player switching Items"));
 				ReleasePlayer(swallowedPlayer);
+				StartAttackTimer(3.0f);
 				playerController->switchedItem = false;
 			}
 		}
@@ -205,6 +182,25 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 	{
 		//TentacleComponentArray[chosenTentacleIndex]->SetRelativeScale3D(FVector(1, 1, 1));
 	}
+	if (isPullingObject && pullingObject && !CheckIfBothPlayersSwallowed())//for constant checking while pulling a player to set their speed accordingly
+	{
+		class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(pullingObject);
+		
+		if (tempPlayer->GetItem() == NULL)
+		{
+			//printScreen(FColor::Red, TEXT("Player's item is NULL! LOOK, THIS IS BAD!"));
+			UE_LOG(LogTemp, Error, TEXT("Error: PullPlayer: player's item is NULL!"));
+			tempPlayer->ChangeSpeed(100);
+		}
+		else if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
+		{
+			tempPlayer->ChangeSpeed(10);//shield is enabled
+		}
+		else
+		{
+			tempPlayer->ChangeSpeed(100);
+		}
+	}
 }
 
 void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
@@ -214,6 +210,7 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 		UE_LOG(LogTemp, Error, TEXT("Error: PullPlayer, tempChar is Null."));
 		return;
 	}
+	isPullingObject = true;
 	pullingObject = Cast<AActor>(tempChar);
 	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
 	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
@@ -232,7 +229,23 @@ void AAIBoss_Doubt::PullPlayer(class ACharacter* tempChar)
 	{
 		tempPlayer->ChangeSpeed(100);
 	}
-	tempPlayerController->canMove = false;
+
+	/*player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+	if (tempChar == player1)
+	{
+		Cast<ADistancePlayerController>(player1->GetController())->notTrappedByEnemy = false;
+		//UE_LOG(LogTemp, Error, TEXT("pulling player1's notTrappedByEnemy: %d"), Cast<ADistancePlayerController>(player1->GetController())->notTrappedByEnemy);
+	}
+	else if (tempChar == player2)
+	{
+		Cast<ADistancePlayerController>(player2->GetController())->notTrappedByEnemy = false;
+		//UE_LOG(LogTemp, Error, TEXT("pulling player2's notTrappedByEnemy: %d"), Cast<ADistancePlayerController>(player2->GetController())->notTrappedByEnemy);
+	}*/
+	tempPlayerController->notTrappedByEnemy = false;
+	UE_LOG(LogTemp, Error, TEXT("pulling tmepplayer's notTrappedByEnemy: %d"), tempPlayerController->notTrappedByEnemy);
+
+
 	tempPlayerController->SetNewMoveDestination(GetActorLocation());
 }
 
@@ -243,6 +256,7 @@ void AAIBoss_Doubt::PullActor(class AActor* tempActor)
 		UE_LOG(LogTemp, Error, TEXT("Error: PullActor, tempActor is Null."));
 		return;
 	}
+	isPullingObject = true;
 	pullingObject = tempActor;
 	FVector direction = tempActor->GetActorLocation() - GetActorLocation();
 	direction.Normalize();
@@ -275,20 +289,28 @@ void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)
 		UE_LOG(LogTemp, Error, TEXT("Error: ReleasePlayer, tempChar is Null."));
 		return;
 	}
+	isPullingObject = false;
+	pullingObject = NULL;
 
 	class ADistanceCharacter* tempPlayer = Cast<ADistanceCharacter>(tempChar);
 	class ADistancePlayerController* tempPlayerController = Cast<ADistancePlayerController>(tempPlayer->GetController());
 
-	if (!tempPlayerController->canMove)//if they were under ai control, stop moving them
+	if (!tempPlayerController->notTrappedByEnemy)//if they were under ai control, stop moving them
 	{
 		tempPlayerController->SetNewMoveDestination(tempPlayer->GetActorLocation() - FVector(121.0f, 0.0f, 0.0f));//for stopping the last forced move
 	}
-	tempPlayerController->canMove = true;
+	tempPlayerController->notTrappedByEnemy = true;
+	tempPlayerController->canUseItem = true;
 	tempPlayer->ChangeSpeed(600);
 	if (tempPlayer == swallowedPlayer)//if releasing swallowed player -> stop its timer, and reset swallowed player to null so we can get a current closest player again (might happen instantly, idk)
 	{
 		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SwallowedTimer);
 		swallowedPlayer = NULL;
+	}
+	else if (tempPlayer == secondSwallowedPlayer)
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SecondSwallowedTimer);
+		secondSwallowedPlayer = NULL;
 	}
 	else
 	{
@@ -306,6 +328,7 @@ void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)
 	}
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);//TODO: do we really want this, its been there forever, but now i dont know
 	//printScreen(FColor::Red, "Player was Released Normally");
+	UE_LOG(LogTemp, Error, TEXT("Player was Released Normally."));
 }
 
 void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
@@ -696,9 +719,9 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)
 	float tempHealth = Health + healthAmount;
 	if (tempHealth <= MaxHealth)
 	{
-		if (player)
+		if (isPullingObject && pullingObject)
 		{
-			ReleasePlayer(player);
+			ReleasePlayer(Cast<ACharacter>(pullingObject));//might give error if crystal can ever be the pullingObject while a player is killing a tentacle, so it should give problems
 		}
 		numTentacles--;
 		//UChildActorComponent* tempTentacle = TentacleComponentArray[numTentacles];
@@ -707,10 +730,15 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)
 		if (numTentacles > -1)
 		{
 			TentacleComponentArray[numTentacles]->DestroyComponent();
+			UE_LOG(LogTemp, Error, TEXT("Boss kknows that it destroied its tentacle****************"));
 		}
-		if (numTentacles > 0)
+		if (numTentacles > 0 && !CheckIfBothPlayersSwallowed())
 		{
 			StartAttackTimer(3.0f);
+		}
+		else if (numTentacles > 0 && CheckIfBothPlayersSwallowed())
+		{
+			StartCrystalAttackTimer(3.0f);
 		}
 		else//no more tentacles
 		{
@@ -816,32 +844,56 @@ void AAIBoss_Doubt::OnOverlapEnd_Implementation(class AActor* OtherActor, class 
 
 void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Something entered swallowed trigger."));
 	if (OtherActor && (OtherActor != this))
 	{
 		if (CheckIfPlayer(OtherActor))
 		{
-			if (OtherActor == pullingObject && !playerController->canMove && swallowedPlayer == NULL)//Can't move, therefore, i've dragged them in, and swallowed them
+			if (OtherActor == pullingObject && !Cast<ADistancePlayerController>(Cast<ACharacter>(OtherActor)->GetController())->notTrappedByEnemy && swallowedPlayer == NULL)//Can't move, therefore, i've dragged them in, and swallowed them
 			{
 				//set swallowed player
 				//printScreen(FColor::Red, TEXT("Beginning Draining Swallowed Player."));
 				UE_LOG(LogTemp, Warning, TEXT("Beginning Draining Swallowed Player."));
 				swallowedPlayer = player; // Cast<ADistanceCharacter>(OtherActor);
+				Cast<ADistancePlayerController>(swallowedPlayer->GetController())->canUseItem = false;
 				StartSwallowedTimer(drainRate / 1.5f);//drainRate = 0.25f normally
 				isPullingObject = false;
+				pullingObject = NULL;
+
+				//if swallowedPlayer == player -> then currentPlayer needs to be other player
+				if (swallowedPlayer == player1)
+				{
+					currentPlayer = player2;
+					player = Cast<ADistanceCharacter>(currentPlayer);
+					playerController = Cast<ADistancePlayerController>(player->GetController());
+					UE_LOG(LogTemp, Warning, TEXT("current player switched to second player"));
+				}
+				else
+				{
+					currentPlayer = player1;
+					player = Cast<ADistanceCharacter>(currentPlayer);
+					playerController = Cast<ADistancePlayerController>(player->GetController());
+					UE_LOG(LogTemp, Warning, TEXT("current player switched to first player"));
+				}
+				UE_LOG(LogTemp, Warning, TEXT("Resetting Target, one player has been swallowed, beginning new attack"));
+				StartAttackTimer(3.0f);//attack the new target
+				
 			}
-			else if (!playerController->canMove && swallowedPlayer != NULL)//previously was !playerController->canMove && swallowedPlayer != NULL
+			else if (!playerController->notTrappedByEnemy && swallowedPlayer != NULL)//previously was !playerController->notTrappedByEnemy && swallowedPlayer != NULL
 			{
 				secondSwallowedPlayer = player;
+				Cast<ADistancePlayerController>(secondSwallowedPlayer->GetController())->canUseItem = false;
 				//printScreen(FColor::Red, TEXT("Beginning Draining second Swallowed Player."));
 				UE_LOG(LogTemp, Warning, TEXT("Beginning Draining second Swallowed Player."));
 				StartSecondSwallowedTimer(drainRate / 1.5f);
+				isPullingObject = false;
+				pullingObject = NULL;
 				for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 				{
 					targetActor = Cast<AActor>(*ActorItr);
 					currentPlayer = NULL;
 					player = NULL;
 					playerController = NULL;
-					isPullingObject = true;
 					StartCrystalAttackTimer(3.0f);//begin attack on crystal
 					UE_LOG(LogTemp, Warning, TEXT("Starting attack on crystal."));
 				}
@@ -867,7 +919,7 @@ void AAIBoss_Doubt::OnExitAttackTrigger(class AActor* OtherActor)
 
 void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && (OtherActor != this) && OtherComp)
+	if (OtherActor && (OtherActor != this) && OtherComp && !isPullingObject)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("****THING Entered TENTACLE Triggered Area: %s"), *OtherActor->GetName());
 		if (CheckIfPlayer(OtherActor))
@@ -893,7 +945,6 @@ void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, c
 			{
 				UE_LOG(LogTemp, Error, TEXT("WTF, cant decide on a drain target so no draining happens"));
 			}
-			isPullingObject = true;
 			
 			UE_LOG(LogTemp, Warning, TEXT("****Player Entered TENTACLE Triggered Area"));
 		}
@@ -903,9 +954,8 @@ void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, c
 			{
 				UE_LOG(LogTemp, Warning, TEXT("TargetActor is set"));
 				targetActor = OtherActor;
-				GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorPullTimer, 0.1f, true);
-				GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorDrainTimer, 0.1f, true);
-				isPullingObject = true;
+				GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorPullTimer, 0.1f, true);//pull the crystal
+				GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::ActorDrainTimer, 0.1f, true);//drain the crystal faster
 			}
 		}
 	}
@@ -939,7 +989,7 @@ bool AAIBoss_Doubt::CheckIfBothPlayersSwallowed()
 	{
 		class ADistancePlayerController* tempController1 = Cast<ADistancePlayerController>(player1->GetController());
 		class ADistancePlayerController* tempController2 = Cast<ADistancePlayerController>(player2->GetController());
-		if (!tempController1->canMove && !tempController2->canMove && swallowedPlayer && secondSwallowedPlayer)
+		if (!tempController1->notTrappedByEnemy && !tempController2->notTrappedByEnemy && swallowedPlayer && secondSwallowedPlayer)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Both players are swallowed."));
 			return true;

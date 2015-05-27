@@ -60,6 +60,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AIEnemy")
 	void RunAway();
 
+	/* Play draining sound in blueprints. */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlayDrainSound();
+
 	/*UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBeginAttack(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 

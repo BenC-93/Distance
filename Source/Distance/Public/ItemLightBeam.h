@@ -43,6 +43,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Timers")
 	void AnimationTimer();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlaySound();
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	

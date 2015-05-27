@@ -97,11 +97,12 @@ void AItemLightBeam::EndUse()
 		GetWorldTimerManager().ClearTimer(this, &AItemLightBeam::Charge);
 		bIsInUse = false;
 		bCanUse = false;
-		//start attack animation
-		
+		//start attack animation and sound
+		BPPlaySound();
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::AnimationTimer, 0.85f, false);
+
 		LightSource->SetVisibility(false);
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Regenerate, RegenRate, true);
 	}

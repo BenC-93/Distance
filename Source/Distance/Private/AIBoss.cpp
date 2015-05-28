@@ -12,5 +12,6 @@ AAIBoss::AAIBoss(const FObjectInitializer& ObjectInitializer)
 
 void AAIBoss::EndOfBoss()
 {
-
+	// TODO: only do this when successful
+	GetWorld()->GetAuthGameMode<ADistanceGameMode>()->AdvanceToNextBoss();
 }

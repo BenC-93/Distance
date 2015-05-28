@@ -249,6 +249,7 @@ void AAIBoss_Betrayal::EndOfBoss()
 		ActorItr->Destroy();
 	}
 
+	Super::EndOfBoss();
 	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(player1->GetController());
 	if (playerController)
 	{

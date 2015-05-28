@@ -710,6 +710,7 @@ void AAIBoss_Doubt::EndOfBoss()
 
 	//Set everything to null here if we decide not to destroy boss at end
 
+	Super::EndOfBoss();
 	playerController = Cast<ADistancePlayerController>(player1->GetController());
 	if (playerController)
 	{

@@ -21,6 +21,9 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 		UE_LOG(LogDistance, Verbose, TEXT("Turning on on-screen debugging"));
 		GEngine->bEnableOnScreenDebugMessages = true;
 	}
+	
+	// Start on first boss
+	BossIndex = 0;
 }
 
 void ADistanceGameMode::StartPlay()
@@ -73,11 +76,29 @@ class ATentacle* ADistanceGameMode::SpawnTentacleAtLocation(TSubclassOf<class AT
 	return GetWorld()->SpawnActor<ATentacle>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
 }
 
-void ADistanceGameMode::SpawnBossAtLocation(TSubclassOf<class ACharacter> indexClass, FVector location)
+void ADistanceGameMode::SpawnBossAtLocation(TSubclassOf<class AAIBoss> indexClass, FVector location)
 {
 	//printScreen(FColor::Red, TEXT("Spawning Boss"));
 	UE_LOG(LogDistance, Warning, TEXT("Spawning Boss"));
-	GetWorld()->SpawnActor<ACharacter>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	GetWorld()->SpawnActor<AAIBoss>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+}
+
+void ADistanceGameMode::SpawnBossForConvergence()
+{
+	TSubclassOf<AAIBoss> BossClass = BossClasses[BossIndex];
+	SpawnBossAtLocation(BossClass, BossSpawnTransform.GetLocation());
+}
+
+void ADistanceGameMode::AdvanceToNextBoss()
+{
+	BossIndex++;
+	if (BossIndex == BossClasses.Num())
+	{
+		// Beat the last boss
+		// TODO: You won
+		BossIndex = 0;
+		UE_LOG(LogDistance, Error, TEXT("YOU WON"));
+	}
 }
 
 void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)

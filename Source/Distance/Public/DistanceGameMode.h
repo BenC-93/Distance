@@ -3,6 +3,7 @@
 #include "GameFramework/GameMode.h"
 #include "ItemDataList.h"
 #include "DItemPickup.h"
+#include "AIBoss.h"
 #include "Tentacle.h"
 #include "DistanceGameMode.generated.h"
 
@@ -10,12 +11,22 @@ UCLASS(minimalapi)
 class ADistanceGameMode : public AGameMode
 {
 	GENERATED_BODY()
+	
+	uint32 BossIndex;
 
 public:
 	ADistanceGameMode(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(Category=Items, EditAnywhere)
 	TArray<TSubclassOf<ADItemPickup>> ItemTypes;
+	
+	// Transform location for the boss
+	UPROPERTY(Category=Bosses, BlueprintReadWrite)
+	FTransform BossSpawnTransform;
+	
+	// List of classes to spawn as Convergence bosses, spawned in order as players clear the previous boss
+	UPROPERTY(Category=Bosses, EditAnywhere)
+	TArray<TSubclassOf<AAIBoss>> BossClasses;
 	
 	UFUNCTION(BlueprintCallable, Category = "Convergence")
 	void InitializeConvergence(class ADistanceCharacter* p1, class ADistanceCharacter* p2);
@@ -30,7 +41,13 @@ public:
 	class ATentacle* SpawnTentacleAtLocation(TSubclassOf<class ATentacle> indexClass, FVector location);
 
 	UFUNCTION(BlueprintCallable, Category = Spawning)
-	void SpawnBossAtLocation(TSubclassOf<class ACharacter> indexClass, FVector location);
+	void SpawnBossAtLocation(TSubclassOf<class AAIBoss> indexClass, FVector location);
+	
+	UFUNCTION(BlueprintCallable, Category = Bosses)
+	void SpawnBossForConvergence();
+	
+	UFUNCTION(BlueprintCallable, Category = Bosses)
+	void AdvanceToNextBoss();
 
 	UFUNCTION(BlueprintCallable, Category = Items)
 	void SpawnRandomItemAtLocation(FVector location);

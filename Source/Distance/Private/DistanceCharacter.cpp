@@ -338,15 +338,32 @@ void ADistanceCharacter::FlipForDirection(float MovementInputDirection, bool bUs
 	if (bShouldRefresh)
 	{
 		CurrentDirection = direction;
-		// TODO: figure out what to do with the items and sockets, I can't make it work :sad_face:
+		// Pitch yaw and roll got switched up because the model itself is rotated now
+		// Previously, we rotated the model in engine after import
+		float roll = 0.0f;
+		float pitch = DEFAULT_SPRITE_ROLL; // negate to flip
+		float yaw = 0.0f; // Rotate by 180 to flip
+		
+		// Flips which side of the model is facing the camera
+		float xScale = 1.0f;
+		
 		if (CurrentDirection == CharacterOrientation::LEFT)
 		{
-			GetMesh()->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+			// Don't scale, this is the natural orientation of the model
 		}
 		else if (CurrentDirection == CharacterOrientation::RIGHT)
 		{
-			GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+			// Rotate the character model
+			pitch = -DEFAULT_SPRITE_ROLL;
+			yaw = 180.0f;
+			// Flip the character so the back side of the model doesn't show
+			xScale = -1.0f;
 		}
+		GetMesh()->SetRelativeRotation(FRotator(pitch, yaw, roll));
+		GetMesh()->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
+		// Also scale the item in the X direction
+		// For whatever reason this works whereas doing the y-scale without rotation was not
+		CurrentItem->RootSceneComponent->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
 	}
 }
 

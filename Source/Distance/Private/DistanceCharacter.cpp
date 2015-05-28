@@ -259,6 +259,9 @@ void ADistanceCharacter::SetCurrentItem(class ADItem* NewItem, class ADItem* Las
 	{
 		NewItem->OnEquip();
 	}
+	
+	// Refresh item flipping
+	FlipForDirection(0.0f, true);
 }
 
 void ADistanceCharacter::AddItem(class ADItem* NewItem)

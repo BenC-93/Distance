@@ -10,8 +10,12 @@ AAIBoss::AAIBoss(const FObjectInitializer& ObjectInitializer)
 	MaxHealth = 100.0f;
 }
 
-void AAIBoss::EndOfBoss()
+void AAIBoss::EndOfBoss(bool KilledBoss)
 {
+	GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
 	// TODO: only do this when successful
-	GetWorld()->GetAuthGameMode<ADistanceGameMode>()->AdvanceToNextBoss();
+	if (KilledBoss)
+	{
+		GetWorld()->GetAuthGameMode<ADistanceGameMode>()->AdvanceToNextBoss();
+	}
 }

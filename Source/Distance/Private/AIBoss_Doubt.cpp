@@ -687,7 +687,7 @@ void AAIBoss_Doubt::StartSecondSwallowedTimer(float rate)
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Doubt::SecondSwallowedTimer, rate, true);
 }
 
-void AAIBoss_Doubt::EndOfBoss()
+void AAIBoss_Doubt::EndOfBoss(bool KilledBoss)
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
@@ -715,13 +715,14 @@ void AAIBoss_Doubt::EndOfBoss()
 	if (playerController)
 	{
 		playerController->OnConvergenceEnd();
-		GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
-		Destroy();
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error: End of Boss, playerController is null"));
 	}
+	
+	Super::EndOfBoss(KilledBoss);
+	Destroy();
 }
 
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)
@@ -730,7 +731,7 @@ void AAIBoss_Doubt::ChangeHealth(float healthAmount)
 	if (tempHealth <= 0)
 	{
 		Health = 0.0f;//Defeated boss!
-		EndOfBoss();
+		EndOfBoss(true);
 		return;
 	}
 	if (tempHealth <= MaxHealth)

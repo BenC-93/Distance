@@ -21,15 +21,17 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	baseDamage = -2.0f;
 	drainRate = 0.1f;//half or tenth of a second
 
-	scaleRateOpp = 1.5f;//shrink rate when player chases down the shadow was 1
-	scaleRateSame = 7.0f;//grow rate while player runs away was 5
+	scaleRateOpp = 0.8f;//shrink rate when player chases down the shadow was 1, then 1.5
+	scaleRateSame = 7.0f;//grow rate while player runs away was 5, then 7
 	scaleRateNorm = 2.0f;//grow rate while player runs in any direction within trigger
+
+	slowPlayerSpeed = 350.0f; //was 400
 
 	range = 15.0f;//range in degrees + and - for the encounter to determine if the player is running away or at the monster
 
 	deathCounter = 10;
 
-	scaleCounter = 3.5f;//initial size of shadow
+	scaleCounter = 5.0f;//initial size of shadow was 3.5
 	scaleLimit = 10.0f;//max size of shadow
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
@@ -137,10 +139,12 @@ void AAIEnemy::Tick(float DeltaTime)
 			{
 				//UE_LOG(LogTemp, Error, TEXT("Increased range for player gettting close to monster"));
 				range = 25.0f;
+				scaleRateOpp = 1.5f;
 			}
 			else
 			{
 				range = 15.0f;
+				scaleRateOpp = 0.8f;
 			}
 			if (myYaw > playerYaw - range && myYaw < playerYaw + range)//going in same direction
 			{//grow shadow even faster
@@ -260,16 +264,6 @@ void AAIEnemy::StartDrainTimer(float rate)
 	GetWorldTimerManager().SetTimer(this, &AAIEnemy::DrainTimer, rate, true);
 }
 
-void AAIEnemy::ChangeHealth(float amount)
-{
-
-}
-
-void AAIEnemy::Attack(float amount)
-{
-
-}
-
 float AAIEnemy::ConvertToUnitCircle(float degrees)//convert to 0 - 360
 {
 	float unrealDeg = degrees;
@@ -358,7 +352,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 			//UE_LOG(LogTemp, Warning, TEXT("Slowed Player1 and beginning drain"));
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);
-			player->ChangeSpeed(400);//Works, but when do we set it back to normal??
+			player->ChangeSpeed(slowPlayerSpeed);
 			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
 			StartDrainTimer(drainRate);

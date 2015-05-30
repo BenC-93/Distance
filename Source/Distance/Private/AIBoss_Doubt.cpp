@@ -121,40 +121,6 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 			}
 		}
 	}
-	if (swallowedPlayer)//player switching items to release other
-	{
-		if (playerController)
-		{
-			if (playerController->switchedItem)//other player, not the swallowed one
-			{
-				//printScreen(FColor::Red, TEXT("Swallowed Player was Released by other player switching Items"));
-				UE_LOG(LogTemp, Error, TEXT("Swallowed Player was Released by other player switching Items"));
-				ReleasePlayer(swallowedPlayer);
-				StartAttackTimer(3.0f);
-				playerController->switchedItem = false;
-			}
-		}
-		else
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("Tick: checking if player switched items: current playercontroller target is null, might have both players swallowed"));
-		}
-	}
-	else
-	{
-		if (player1 && player2)
-		{
-			ADistancePlayerController *player1Controller = Cast<ADistancePlayerController>(player1->GetController());
-			ADistancePlayerController *player2Controller = Cast<ADistancePlayerController>(player2->GetController());
-			if (player1Controller->switchedItem)
-			{
-				player1Controller->switchedItem = false;
-			}
-			if (player2Controller->switchedItem)
-			{
-				player2Controller->switchedItem = false;
-			}
-		}
-	}
 	if (isPullingObject && pullingObject && !GetWorldTimerManager().IsTimerActive(this, &AAIBoss_Doubt::TentacleTimer) && TentacleComponentArray.IsValidIndex(chosenTentacleIndex))//shrink and rotate tentacle that is pulling the player to match the player getting pulled in
 	{
 		//UE_LOG(LogTemp, Error, TEXT("shrinking tentalces"));
@@ -315,20 +281,18 @@ void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)
 		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::SecondSwallowedTimer);
 		secondSwallowedPlayer = NULL;
 	}
-	else
+
+	if (drainTarget1 && tempPlayer == drainTarget1)
 	{
-		if (drainTarget1 && tempPlayer == drainTarget1)
-		{
-			GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
-			drainTarget1 = NULL;
-		}
-		else if(drainTarget2 && tempPlayer == drainTarget2)
-		{
-			GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AnotherDrainTimer);
-			drainTarget2 = NULL;
-		}
-		
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::DrainTimer);
+		drainTarget1 = NULL;
 	}
+	else if(drainTarget2 && tempPlayer == drainTarget2)
+	{
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AnotherDrainTimer);
+		drainTarget2 = NULL;
+	}
+	
 	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);//TODO: do we really want this, its been there forever, but now i dont know
 	//printScreen(FColor::Red, "Player was Released Normally");
 	UE_LOG(LogTemp, Error, TEXT("Player was Released Normally."));
@@ -866,7 +830,7 @@ void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 				//printScreen(FColor::Red, TEXT("Beginning Draining Swallowed Player."));
 				UE_LOG(LogTemp, Warning, TEXT("Beginning Draining Swallowed Player."));
 				swallowedPlayer = Cast<ADistanceCharacter>(OtherActor); //was player
-				swallowedPlayer->SetActorLocation(GetActorLocation() + FVector(100.0f, -100.0f, 0.0f));//swallowed player needs to be behind boss
+				//swallowedPlayer->SetActorLocation(GetActorLocation() + FVector(50.0f, -100.0f, 0.0f));//swallowed player needs to be behind boss
 				Cast<ADistancePlayerController>(swallowedPlayer->GetController())->canUseItem = false;
 				StartSwallowedTimer(drainRate / 1.5f);//drainRate = 0.25f normally
 				isPullingObject = false;
@@ -894,7 +858,7 @@ void AAIBoss_Doubt::OnAttackTrigger(class AActor* OtherActor)
 			else if (!playerController->notTrappedByEnemy && swallowedPlayer != NULL)//previously was !playerController->notTrappedByEnemy && swallowedPlayer != NULL
 			{
 				secondSwallowedPlayer = Cast<ADistanceCharacter>(OtherActor); //was player
-				secondSwallowedPlayer->SetActorLocation(GetActorLocation() + FVector(100.0f, 50.0f, 0.0f));//swallowed player needs to be behind boss
+				//secondSwallowedPlayer->SetActorLocation(GetActorLocation() + FVector(50.0f, 50.0f, 0.0f));//swallowed player needs to be behind boss
 				Cast<ADistancePlayerController>(secondSwallowedPlayer->GetController())->canUseItem = false;
 				//printScreen(FColor::Red, TEXT("Beginning Draining second Swallowed Player."));
 				UE_LOG(LogTemp, Warning, TEXT("Beginning Draining second Swallowed Player."));

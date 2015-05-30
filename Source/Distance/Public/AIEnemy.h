@@ -88,6 +88,8 @@ public:
 	float scaleRateSame;
 	float scaleRateNorm;
 
+	float slowPlayerSpeed;
+
 	float range;
 
 	float deathCounter;
@@ -120,9 +122,5 @@ private:
 	float health;
 	float maxHealth;
 	float baseDamage;
-	
-	void ChangeHealth(float amount);
-
-	void Attack(float amount);
 	
 };

@@ -40,7 +40,7 @@ void AItemLightBeam::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!hasAttacked && targetActor && GetWorldTimerManager().IsTimerActive(this, &AItemLightBeam::AnimationTimer))
+	if (hasAttacked == false && targetActor && GetWorldTimerManager().IsTimerActive(this, &AItemLightBeam::AnimationTimer))
 	{
 		//UE_LOG(LogDistance, Error, TEXT("timer active and targetActor is: %s"), *targetActor->GetName());
 		//check for boss collision stuff
@@ -134,10 +134,10 @@ void AItemLightBeam::Charge()
 
 void AItemLightBeam::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && (OtherActor != this) && targetActor == NULL)
+	if (OtherActor && (OtherActor != this) && OtherActor != GetOwningPawn())
 	{
 		targetActor = OtherActor;
-		//UE_LOG(LogDistance, Warning, TEXT("Overlaped with: %s"), *targetActor->GetName());
+		UE_LOG(LogDistance, Warning, TEXT("Overlaped with: %s"), *targetActor->GetName());
 	}
 }
 

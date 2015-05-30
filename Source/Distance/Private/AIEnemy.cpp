@@ -21,17 +21,17 @@ AAIEnemy::AAIEnemy(const FObjectInitializer& ObjectInitializer)
 	baseDamage = -2.0f;
 	drainRate = 0.1f;//half or tenth of a second
 
-	scaleRateOpp = 0.8f;//shrink rate when player chases down the shadow was 1, then 1.5
+	scaleRateOpp = 2.0f;//shrink rate when player chases down the shadow was 1, then 1.5
 	scaleRateSame = 7.0f;//grow rate while player runs away was 5, then 7
-	scaleRateNorm = 2.0f;//grow rate while player runs in any direction within trigger
+	scaleRateNorm = 0.75f;//grow rate while player runs in any direction within trigger
 
 	slowPlayerSpeed = 350.0f; //was 400
 
-	range = 15.0f;//range in degrees + and - for the encounter to determine if the player is running away or at the monster
+	range = 22.0f;//range in degrees + and - for the encounter to determine if the player is running away or at the monster
 
 	deathCounter = 10;
 
-	scaleCounter = 5.0f;//initial size of shadow was 3.5
+	scaleCounter = 3.5f;//initial size of shadow was 3.5
 	scaleLimit = 10.0f;//max size of shadow
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
@@ -138,13 +138,13 @@ void AAIEnemy::Tick(float DeltaTime)
 			if (distToPlayer < 500.0f)//make it easier when you get closer to the lonliness monster
 			{
 				//UE_LOG(LogTemp, Error, TEXT("Increased range for player gettting close to monster"));
-				range = 25.0f;
-				scaleRateOpp = 1.5f;
+				range = 30.0f;
+				scaleRateOpp = 1.0f;
 			}
 			else
 			{
-				range = 15.0f;
-				scaleRateOpp = 0.8f;
+				range = 22.0f;
+				scaleRateOpp = 2.0f;
 			}
 			if (myYaw > playerYaw - range && myYaw < playerYaw + range)//going in same direction
 			{//grow shadow even faster

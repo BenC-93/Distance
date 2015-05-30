@@ -335,7 +335,6 @@ void ADistancePlayerController::OnUseItemReleased()
 
 void ADistancePlayerController::OnInventoryPressed()
 {
-	switchedItem = true;
 	DistanceCharacterClass->ToggleInventory();
 }
 

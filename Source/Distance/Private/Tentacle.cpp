@@ -98,7 +98,7 @@ void ATentacle::ChangeHealth(float amount)
 				UE_LOG(LogDistance, Error, TEXT("Did damage to boss"));
 				doubtParent->ChangeHealth(-25.0f);
 			}
-			DestroyTentacle();
+			//DestroyTentacle();
 		}
 		else
 		{

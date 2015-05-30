@@ -31,8 +31,6 @@ public:
 	class AActor* hitActor;
 	class AActor* enemyActor;
 
-	bool switchedItem;//Temporary Bool, for boss testing***************************************
-
 	void OnConvergenceEnd();
 	
 	FORCEINLINE class ADistanceCharacter* GetDistanceCharacter() const { return DistanceCharacterClass; }

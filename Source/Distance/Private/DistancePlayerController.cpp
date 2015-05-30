@@ -27,7 +27,6 @@ ADistancePlayerController::ADistancePlayerController(const FObjectInitializer& O
 
 	converged = false;//for testing
 
-	switchedItem = false;//Temporary Bool, for boss testing***************************************
 }
 
 void ADistancePlayerController::PlayerTick(float DeltaTime)
@@ -92,7 +91,6 @@ void ADistancePlayerController::MoveRight(float val)
 
 void ADistancePlayerController::CycleInventory()
 {
-	switchedItem = true;
 	DistanceCharacterClass->ToggleInventory();
 }
 
@@ -337,7 +335,6 @@ void ADistancePlayerController::OnUseItemReleased()
 
 void ADistancePlayerController::OnInventoryPressed()
 {
-	switchedItem = true;
 	DistanceCharacterClass->ToggleInventory();
 }
 

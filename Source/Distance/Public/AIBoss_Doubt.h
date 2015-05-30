@@ -148,7 +148,7 @@ public:
 	void SecondSwallowedTimer();
 	void StartSecondSwallowedTimer(float rate);
 
-	virtual void EndOfBoss() override;
+	virtual void EndOfBoss(bool KilledBoss = false) override;
 
 	bool CheckIfBothPlayersSwallowed();
 

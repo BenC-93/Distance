@@ -81,7 +81,7 @@ public:
 
 	void BeginCycleTimer();
 
-	virtual void EndOfBoss() override;
+	virtual void EndOfBoss(bool KilledBoss = false) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Trigger Functions")
 	bool CheckIfPlayer(class AActor* OtherActor);

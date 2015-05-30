@@ -23,6 +23,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Health")
 	float MaxHealth;
 
-	virtual void EndOfBoss();
+	virtual void EndOfBoss(bool KilledBoss = false);
 	
 };

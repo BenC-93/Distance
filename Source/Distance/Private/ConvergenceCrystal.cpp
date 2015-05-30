@@ -91,8 +91,8 @@ void AConvergenceCrystal::BeginPlay()
 	ConvergenceCam->SetActive(true);
 	if (player1) { Cast<APlayerController>(player1->GetController())->SetViewTarget(this); }
 	if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(this); }
-	zmin += zmin + SpriteComponent->RelativeLocation.Z;
-	zmax += zmax + SpriteComponent->RelativeLocation.Z;
+	zmin += SpriteComponent->GetRelativeTransform().GetLocation().Z;
+	zmax += SpriteComponent->GetRelativeTransform().GetLocation().Z;
 }
 
 void AConvergenceCrystal::Tick(float DeltaTime)
@@ -100,8 +100,8 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	//move to inbetween players
 	float tempH = (DeltaTime * zflip * 75.f) + SpriteComponent->RelativeLocation.Z;
-	SpriteComponent->SetRelativeLocation(FVector(SpriteComponent->RelativeLocation.X, SpriteComponent->RelativeLocation.Y, tempH));
-	if (SpriteComponent->RelativeLocation.Z >= zmax || SpriteComponent->RelativeLocation.Z <= zmin)
+	SpriteComponent->SetRelativeLocation(FVector(SpriteComponent->RelativeLocation.X, SpriteComponent->RelativeLocation.Y, fmax(zmin, fmin(zmax, tempH))));
+	if (SpriteComponent->RelativeLocation.Z == zmax || SpriteComponent->RelativeLocation.Z == zmin)
 	{
 		zflip *= -1.f;
 	}

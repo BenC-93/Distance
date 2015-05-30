@@ -220,7 +220,7 @@ void AAIBoss_Betrayal::ChangeHealth(float healthAmount)
 		if (tempHealth <= 0)
 		{
 			Health = 0.0f;//Defeated boss!
-			EndOfBoss();
+			EndOfBoss(true);
 		}
 		else
 		{
@@ -230,7 +230,7 @@ void AAIBoss_Betrayal::ChangeHealth(float healthAmount)
 	UE_LOG(LogTemp, Warning, TEXT("Boss health: %f"), Health);
 }
 
-void AAIBoss_Betrayal::EndOfBoss()
+void AAIBoss_Betrayal::EndOfBoss(bool KilledBoss)
 {
 	player1 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	player2 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
@@ -249,17 +249,18 @@ void AAIBoss_Betrayal::EndOfBoss()
 		ActorItr->Destroy();
 	}
 
-	Super::EndOfBoss();
 	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(player1->GetController());
 	if (playerController)
 	{
 		playerController->OnConvergenceEnd();
-		Destroy();
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error: End of Boss, playerController1 is null"));
 	}
+	
+	Super::EndOfBoss(KilledBoss);
+	Destroy();
 }
 
 void AAIBoss_Betrayal::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

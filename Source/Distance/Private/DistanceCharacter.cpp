@@ -277,6 +277,8 @@ void ADistanceCharacter::AddItem(class ADItem* NewItem)
 			ADItem* NewestItem = Inventory.Last();
 			EquipItem(NewestItem);
 		}
+
+		ItemPickedUp();
 	}
 }
 

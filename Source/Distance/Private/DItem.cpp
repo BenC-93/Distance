@@ -50,10 +50,12 @@ void ADItem::SetOwningPawn(ADistanceCharacter* NewOwner)
 void ADItem::OnEnterInventory(ADistanceCharacter* NewOwner)
 {
 	SetOwningPawn(NewOwner);
+	AttachToPawn();
 }
 
 void ADItem::OnLeaveInventory()
 {
+	DetachFromPawn();
 	if (HasAuthority())
 	{
 		SetOwningPawn(nullptr);
@@ -73,7 +75,7 @@ void ADItem::EndUse()
 
 void ADItem::OnEquip()
 {
-	AttachToPawn();
+	SetActorHiddenInGame(false);
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
 	GetWorldTimerManager().SetTimer(this, &ADItem::Regenerate, RegenRate, true);
@@ -81,7 +83,7 @@ void ADItem::OnEquip()
 
 void ADItem::OnUnequip()
 {
-	DetachFromPawn();
+	SetActorHiddenInGame(true);
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
 	GetWorldTimerManager().ClearTimer(this, &ADItem::Regenerate);

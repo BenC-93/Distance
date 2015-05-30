@@ -4,6 +4,7 @@
 #include "DistanceGameMode.h"
 #include "DistancePlayerController.h"
 #include "DistanceCharacter.h"
+#include "AIBoss_Doubt.h"
 #include "ConvergenceManager.h"
 
 ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -80,7 +81,13 @@ void ADistanceGameMode::SpawnBossAtLocation(TSubclassOf<class AAIBoss> indexClas
 {
 	//printScreen(FColor::Red, TEXT("Spawning Boss"));
 	UE_LOG(LogDistance, Warning, TEXT("Spawning Boss"));
-	GetWorld()->SpawnActor<AAIBoss>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	AAIBoss* boss = GetWorld()->SpawnActor<AAIBoss>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	if (boss->IsA(AAIBoss_Doubt::StaticClass()))
+	{
+		boss->SetActorRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+		FVector bossLoc = boss->GetActorLocation();
+		boss->SetActorLocation(FVector(bossLoc.X + 300.0f, bossLoc.Y, 200.0f));
+	}
 }
 
 void ADistanceGameMode::SpawnBossForConvergence()

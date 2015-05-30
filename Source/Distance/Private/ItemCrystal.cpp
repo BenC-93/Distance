@@ -31,8 +31,8 @@ void AItemCrystal::StartUse()
 		}
 		if (shrineFound && OwningPawn->PlayerConvergenceState != ConvergenceState::CONVERGENCE)
 		{
-			ConvergenceManager::StartConvergence();
 			GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnBossForConvergence();
+			ConvergenceManager::StartConvergence();
 			GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
 			SpawnConvergenceCrystal();
 		}

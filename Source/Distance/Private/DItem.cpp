@@ -119,3 +119,8 @@ ADistanceCharacter* ADItem::GetOwningPawn()
 {
 	return OwningPawn;
 }
+
+void ADItem::FlipForDirection(float xFlip)
+{
+	RootSceneComponent->SetRelativeScale3D(FVector(xFlip, 1.0f, 1.0f));
+}

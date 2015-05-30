@@ -57,3 +57,11 @@ void AItemLantern::ChangeAmount(float value)
 		GetWorldTimerManager().ClearTimer(this, &ADItem::Regenerate);
 	}
 }
+
+void AItemLantern::FlipForDirection(float xFlip)
+{
+	Super::FlipForDirection(xFlip);
+	FVector lightPos = LightSource->GetRelativeTransform().GetLocation();
+	lightPos.Y = -1.0f * xFlip * FMath::Abs(lightPos.Y);
+	LightSource->SetRelativeLocation(lightPos);
+}

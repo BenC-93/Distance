@@ -366,9 +366,8 @@ void ADistanceCharacter::FlipForDirection(float MovementInputDirection, bool bUs
 		}
 		GetMesh()->SetRelativeRotation(FRotator(pitch, yaw, roll));
 		GetMesh()->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
-		// Also scale the item in the X direction
-		// For whatever reason this works whereas doing the y-scale without rotation was not
-		CurrentItem->RootSceneComponent->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
+		// Also scale the item in the X direction and potentially do other item specific transformation hacks
+		CurrentItem->FlipForDirection(xScale);
 	}
 }
 

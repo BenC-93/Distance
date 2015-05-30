@@ -98,5 +98,5 @@ public:
 	
 	class ADistanceCharacter* GetOwningPawn();
 	
-	
+	virtual void FlipForDirection(float xFlip = 1.0f);
 };

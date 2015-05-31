@@ -101,6 +101,7 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)
 		{
 			dir = FVector(1, 0, 0);
 		}
+		FVector tempDir = dir;
 		//UE_LOG(LogTemp, Warning, TEXT("vector of rotation after: %s"), *dir.ToString());
 		float lengthDir = 1100.0f;
 		//dir.ToDirectionAndLength(dir, lengthDir);
@@ -109,11 +110,17 @@ void AEnemyAIController::AIMoveAwayFromPlayer(class ACharacter* player)
 		UE_LOG(LogTemp, Warning, TEXT("old location: %s"), *myPos.ToString());
 		FVector loc = myPos + dir;
 		UE_LOG(LogTemp, Warning, TEXT("new location: %s"), *loc.ToString());
-
+		float oppLenDir = -2;
+		float counter = 0;
 		while (!GetNavComponent()->FindPathToLocation(loc))
 		{
-			// TODO: This can get stuck in an infinite loop
-			loc += FVector(1, 0, 0) + dir;
+			tempDir *= oppLenDir;
+			loc += tempDir;
+			counter++;
+			if (counter >= 25.0f)
+			{
+				break;
+			}
 			UE_LOG(LogTemp, Warning, TEXT("Changed Locationg for running away"));
 		}
 		UE_LOG(LogTemp, Warning, TEXT("Found valid run away location"));

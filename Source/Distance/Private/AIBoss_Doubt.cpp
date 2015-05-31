@@ -11,8 +11,8 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	Health = 100.0f;
-	MaxHealth = 100.0f;//TODO: will change
-	baseDamage = -1.0f;//TODO: will change along with other vars here during playtesting
+	MaxHealth = 100.0f;
+	baseDamage = -1.0f;
 	drainRate = 0.25f;
 	tentacleHealth = 10.0f;
 	numTentacles = 4;
@@ -163,7 +163,7 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 		}
 		else if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 		{
-			tempPlayer->ChangeSpeed(10);//shield is enabled
+			tempPlayer->ChangeSpeed(20);//shield is enabled
 		}
 		else
 		{
@@ -293,7 +293,7 @@ void AAIBoss_Doubt::ReleasePlayer(class ACharacter* tempChar)
 		drainTarget2 = NULL;
 	}
 	
-	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);//TODO: do we really want this, its been there forever, but now i dont know
+	GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::AttackTimer);
 	//printScreen(FColor::Red, "Player was Released Normally");
 	UE_LOG(LogTemp, Error, TEXT("Player was Released Normally."));
 }
@@ -314,7 +314,7 @@ void AAIBoss_Doubt::DrainPlayer(class ADistanceCharacter* tempPlayer)
 	}
 	else if (tempPlayer->GetItem()->IsA(AItemShield::StaticClass()) && tempPlayer->GetItemEnabled() && tempPlayer->GetItemAmount() > 0)
 	{
-		tempPlayer->ChangeItemAmount(baseDamage);//shield is enabled TODO: do we want to drain shield, we used to want to, do we still?
+		tempPlayer->ChangeItemAmount(baseDamage);
 	}
 	else
 	{

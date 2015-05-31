@@ -72,9 +72,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Cycle")
 	void EndCycle();
 
-	UFUNCTION(BlueprintCallable, Category = "Cycle")
-	void TransformPlayers(bool toMonster);
-
 	void SpawnMonster(FVector offset, MoveState movestate, class ACharacter* target);
 
 	void DrainTimer();

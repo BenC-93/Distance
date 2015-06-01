@@ -24,10 +24,16 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 
 	LightIntensity = 10.0f * health;
 
+	inDoubtBoss = false;
+	doubtTriggers = false;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
 	RootComponent = RootSceneComponent;
+
+	FocusPoint = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("FocusPoint"));
+	FocusPoint->AttachTo(RootComponent);
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -70.f);
@@ -35,7 +41,7 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 	SpriteComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 	CameraBoom = ObjectInitializer.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraBoom"));
-	CameraBoom->AttachTo(RootComponent);
+	CameraBoom->AttachTo(FocusPoint);
 	CameraBoom->bAbsoluteRotation = true; // Don't want arm to rotate when character does
 	CameraBoom->TargetArmLength = 800.f;
 	CameraBoom->RelativeRotation = FRotator(-70.f, 0.f, 0.f);
@@ -58,32 +64,44 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 	CaptureBox1->bGenerateOverlapEvents = false;
 	CaptureBox1->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	CaptureBox1->SetBoxExtent(FVector(1000.f, 10.f, 200.f), true);
-	CaptureBox1->AttachTo(RootComponent);
+	CaptureBox1->AttachTo(FocusPoint);
 	CaptureBox1->SetRelativeLocation(FVector(0.f, 750.f, 0.f));
+	CaptureBox1->bVisible = true;
+	CaptureBox1->bHiddenInGame = false;
+	
 
 	CaptureBox2 = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CaptureBox2"));
 	CaptureBox2->Mobility = EComponentMobility::Movable;
 	CaptureBox2->bGenerateOverlapEvents = false;
 	CaptureBox2->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	CaptureBox2->SetBoxExtent(FVector(1000.f, 10.f, 200.f), true);
-	CaptureBox2->AttachTo(RootComponent);
+	CaptureBox2->AttachTo(FocusPoint);
 	CaptureBox2->SetRelativeLocation(FVector(0.f, -750.f, 0.f));
+	CaptureBox2->bVisible = true;
+	CaptureBox2->bHiddenInGame = false;
+	
 
 	CaptureBox3 = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CaptureBox3"));
 	CaptureBox3->Mobility = EComponentMobility::Movable;
 	CaptureBox3->bGenerateOverlapEvents = false;
 	CaptureBox3->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	CaptureBox3->SetBoxExtent(FVector(10.f, 1000.f, 200.f), true);
-	CaptureBox3->AttachTo(RootComponent);
+	CaptureBox3->AttachTo(FocusPoint);
 	CaptureBox3->SetRelativeLocation(FVector(750.f, 0.f, 0.f));
+	CaptureBox3->bVisible = true;
+	CaptureBox3->bHiddenInGame = false;
+	
 
 	CaptureBox4 = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CaptureBox4"));
 	CaptureBox4->Mobility = EComponentMobility::Movable;
 	CaptureBox4->bGenerateOverlapEvents = false;
 	CaptureBox4->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	CaptureBox4->SetBoxExtent(FVector(10.f, 1000.f, 200.f), true);
-	CaptureBox4->AttachTo(RootComponent);
+	CaptureBox4->AttachTo(FocusPoint);
 	CaptureBox4->SetRelativeLocation(FVector(-750.f, 0.f, 0.f));
+	CaptureBox4->bVisible = true;
+	CaptureBox4->bHiddenInGame = false;
+	
 }
 
 void AConvergenceCrystal::BeginPlay()
@@ -109,11 +127,18 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 	if (player1 && player2)
 	{
 		CameraBoom->TargetArmLength = fmax(800.f, (0.45f * FVector::Dist(player1->GetActorLocation(), player2->GetActorLocation())) + 450.f);
+		inDoubtBoss = false;
+		doubtTriggers = false;
 		for (TActorIterator<AAIBoss_Doubt> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
+			inDoubtBoss = true;
 			if (ActorItr->p1InTrigger && ActorItr->p2InTrigger)//special conditions if the boss is doubt
 			{
-				return;
+				doubtTriggers = true;
+			}
+			else
+			{
+				//FocusPoint->SetWorldLocation(GetActorLocation());
 			}
 		}
 
@@ -122,20 +147,45 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 			boss = Cast<AAIBoss>(*ActorItr);
 		}
 
-		FVector TargetLocation = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
-		FVector temp = TargetLocation - GetActorLocation();
-		temp.Normalize();
-		temp = (DeltaTime * temp * movementSpeed) + GetActorLocation();
-		if (GetDistanceTo(player1) > 150.0f || GetDistanceTo(player2) > 150.0f)
+		if (inDoubtBoss)//follow focus ponit because in combat with doubt
 		{
-			if (FVector::Dist(TargetLocation, GetActorLocation()) > 50.0f)
+			FVector TargetLocation = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
+			if (GetDistanceTo(player1) > 150.0f || GetDistanceTo(player2) > 150.0f)
 			{
-				SetActorLocation(temp);
+				if (FVector::Dist(TargetLocation, GetActorLocation()) > 50.0f)
+				{
+					FocusPoint->SetWorldLocation(TargetLocation);
+				}
 			}
+			if (!p1Near && (TargetLocation - player1->GetActorLocation()).Size() < 400.f) { p1Near = true; }
+			if (!p2Near && (TargetLocation - player2->GetActorLocation()).Size() < 400.f) { p2Near = true; }
 		}
-		if (!p1Near && GetDistanceTo(player1) < 400.f) { p1Near = true; }
-		if (!p2Near && GetDistanceTo(player2) < 400.f) { p2Near = true; }
-		if (p1Near && p2Near) { TurnCaptureBoxesOn(); };
+		
+		if (!doubtTriggers)
+		{
+			FVector TargetLocation = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
+			FVector temp = TargetLocation - GetActorLocation();
+			temp.Normalize();
+			temp = (DeltaTime * temp * movementSpeed) + GetActorLocation();
+			if (GetDistanceTo(player1) > 150.0f || GetDistanceTo(player2) > 150.0f)
+			{
+				if (FVector::Dist(TargetLocation, GetActorLocation()) > 50.0f)
+				{
+					SetActorLocation(temp);
+				}
+			}
+			if (!p1Near && GetDistanceTo(player1) < 400.f) { p1Near = true; }
+			if (!p2Near && GetDistanceTo(player2) < 400.f) { p2Near = true; }
+		}
+		
+		if (p1Near && p2Near) 
+		{ 
+			TurnCaptureBoxesOn(); 
+		}
+		else
+		{
+			TurnCaptureBoxesOff();
+		}
 	}
 }
 
@@ -176,6 +226,19 @@ void AConvergenceCrystal::TurnCaptureBoxesOn()
 		CaptureBox2->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		CaptureBox3->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		CaptureBox4->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	}
+}
+
+void AConvergenceCrystal::TurnCaptureBoxesOff()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("TurnCaptureBoxOn() was called"));
+	if (CaptureBox1->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Ignore)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Turning on capture box"));
+		CaptureBox1->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CaptureBox2->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CaptureBox3->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CaptureBox4->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	}
 }
 

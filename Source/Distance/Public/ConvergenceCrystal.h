@@ -54,6 +54,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class AAIBoss* boss;
 
+	bool inDoubtBoss;
+	bool doubtTriggers;
+
 	AConvergenceCrystal(const class FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
@@ -64,6 +67,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Root, meta = (AllowPrivateAccess = "true"))
 	class USceneComponent *RootSceneComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Root, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent *FocusPoint;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent *SpriteComponent;
@@ -82,6 +88,8 @@ public:
 	class UBoxComponent* CaptureBox4;
 
 	void TurnCaptureBoxesOn();
+
+	void TurnCaptureBoxesOff();
 
 	UFUNCTION(BlueprintCallable, Category = "Timers")
 	void LoseHealthTimer();

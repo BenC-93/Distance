@@ -12,9 +12,5 @@ AAIBoss::AAIBoss(const FObjectInitializer& ObjectInitializer)
 
 void AAIBoss::EndOfBoss(bool KilledBoss)
 {
-	GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
-	if (KilledBoss)
-	{
-		GetWorld()->GetAuthGameMode<ADistanceGameMode>()->AdvanceToNextBoss();
-	}
+	GetWorld()->GetAuthGameMode<ADistanceGameMode>()->OnEndConvergence(KilledBoss);
 }

@@ -19,6 +19,7 @@ void AItemCrystal::StartUse()
 	if (!bIsInUse && OwningPawn != NULL)
 	{
 		bool shrineFound = false;
+		ADistanceGameMode* GameMode = GetWorld()->GetAuthGameMode<ADistanceGameMode>();
 		for (TActorIterator<AShrine> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
 			if (OwningPawn->GetDistanceTo(*ActorItr) <= rangeToShrine)
@@ -31,14 +32,21 @@ void AItemCrystal::StartUse()
 		}
 		if (shrineFound && OwningPawn->PlayerConvergenceState != ConvergenceState::CONVERGENCE)
 		{
-			GetWorld()->GetAuthGameMode<ADistanceGameMode>()->SpawnBossForConvergence();
+			GameMode->SpawnBossForConvergence();
 			ConvergenceManager::StartConvergence();
 			GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
 			SpawnConvergenceCrystal();
+			GameMode->OnCrystalUsed(true);
 		}
 		else if (OwningPawn->PlayerConvergenceState != ConvergenceState::CONVERGENCE)
 		{
 			SpawnSpirit();
+			GameMode->OnCrystalUsed(false);
+		}
+		else
+		{
+			// TODO: Something else should probably happen here other than the crystal just getting consumed
+			GameMode->OnCrystalUsed(false);
 		}
 		
 		// Remove from inventory and consume

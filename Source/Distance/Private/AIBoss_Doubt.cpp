@@ -661,28 +661,10 @@ void AAIBoss_Doubt::EndOfBoss(bool KilledBoss)
 
 	GetWorldTimerManager().ClearAllTimersForObject(this);
 
-	for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		ActorItr->Destroy();
-	}
-
 	//safety check on tentacles
 	for (TActorIterator<ATentacle> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		ActorItr->Destroy();
-	}
-
-	//Set everything to null here if we decide not to destroy boss at end
-
-	Super::EndOfBoss();
-	playerController = Cast<ADistancePlayerController>(player1->GetController());
-	if (playerController)
-	{
-		playerController->OnConvergenceEnd();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Error: End of Boss, playerController is null"));
 	}
 	
 	Super::EndOfBoss(KilledBoss);

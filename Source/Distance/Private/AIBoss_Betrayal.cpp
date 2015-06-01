@@ -229,21 +229,6 @@ void AAIBoss_Betrayal::EndOfBoss(bool KilledBoss)
 	{
 		ActorItr->Destroy();
 	}
-
-	for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		ActorItr->Destroy();
-	}
-
-	class ADistancePlayerController* playerController = Cast<ADistancePlayerController>(player1->GetController());
-	if (playerController)
-	{
-		playerController->OnConvergenceEnd();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Error: End of Boss, playerController1 is null"));
-	}
 	
 	Super::EndOfBoss(KilledBoss);
 	Destroy();

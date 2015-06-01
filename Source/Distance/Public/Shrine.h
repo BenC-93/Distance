@@ -23,4 +23,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Sprite, meta = (AllowPrivateAccess = "true"))
 	class UPaperSpriteComponent *SpriteComponent;
+	
+	UPROPERTY(EditAnywhere, Category = Sprite, meta = (AllowPrivateAccess = "true"))
+	class UPaperSprite* DecayedSprite;
+	
+	void TriggerDecay();
 };

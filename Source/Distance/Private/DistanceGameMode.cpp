@@ -5,6 +5,8 @@
 #include "DistancePlayerController.h"
 #include "DistanceCharacter.h"
 #include "AIBoss_Doubt.h"
+#include "Shrine.h"
+#include "ConvergenceCrystal.h"
 #include "ConvergenceManager.h"
 
 ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -105,6 +107,56 @@ void ADistanceGameMode::AdvanceToNextBoss()
 		// TODO: You won
 		BossIndex = 0;
 		UE_LOG(LogDistance, Error, TEXT("YOU WON"));
+	}
+}
+
+void ADistanceGameMode::OnCrystalUsed(bool TriggeredConvergence)
+{
+	CrystalsUsed++;
+	if (!TriggeredConvergence && CrystalsUsed >= TotalAvailableCrystals)
+	{
+		// Did not trigger convergence, but used up the last crystal
+		// If bosses haven't been defeated players are in permanent divergence
+		for (TActorIterator<AShrine> ShrineItr(GetWorld()); ShrineItr; ++ShrineItr)
+		{
+			ShrineItr->TriggerDecay();
+		}
+	}
+	// Else check when convergence ends
+}
+
+void ADistanceGameMode::OnEndConvergence(bool DefeatedBoss)
+{
+	bool ConvergenceConditionAchieved = false;
+	if (DefeatedBoss)
+	{
+		uint32 NextBoss = BossIndex + 1;
+		if (NextBoss >= BossClasses.Num())
+		{
+			// Players have successfully defeated all bosses, don't end convergence
+			ConvergenceConditionAchieved = true;
+		}
+		AdvanceToNextBoss();
+	}
+	
+	if (!ConvergenceConditionAchieved)
+	{
+		// Return players to divergence
+		for (TActorIterator<AConvergenceCrystal> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ActorItr->Destroy();
+		}
+		ConvergenceManager::EndConvergence();
+		
+		// Check if all crystals are used up
+		if (CrystalsUsed >= TotalAvailableCrystals)
+		{
+			// If bosses haven't been defeated players are in permanent divergence
+			for (TActorIterator<AShrine> ShrineItr(GetWorld()); ShrineItr; ++ShrineItr)
+			{
+				ShrineItr->TriggerDecay();
+			}
+		}
 	}
 }
 

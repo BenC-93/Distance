@@ -13,3 +13,11 @@ AShrine::AShrine(const FObjectInitializer& ObjectInitializer)
 	SpriteComponent->RelativeRotation = FRotator(0.f, 90.f, -70.f);
 	SpriteComponent->AttachTo(RootComponent);
 }
+
+void AShrine::TriggerDecay()
+{
+	if (DecayedSprite)
+	{
+		SpriteComponent->SetSprite(DecayedSprite);
+	}
+}

@@ -13,12 +13,17 @@ class ADistanceGameMode : public AGameMode
 	GENERATED_BODY()
 	
 	uint32 BossIndex;
+	
+	uint32 CrystalsUsed;
 
 public:
 	ADistanceGameMode(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(Category=Items, EditAnywhere)
 	TArray<TSubclassOf<ADItemPickup>> ItemTypes;
+	
+	UPROPERTY(Category=Items, BlueprintReadWrite, EditAnywhere)
+	uint8 TotalAvailableCrystals;
 	
 	// Transform location for the boss
 	UPROPERTY(Category=Bosses, BlueprintReadWrite)
@@ -48,6 +53,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = Bosses)
 	void AdvanceToNextBoss();
+	
+	void OnCrystalUsed(bool TriggeredConvergence);
+	
+	void OnEndConvergence(bool DefeatedBoss);
 
 	UFUNCTION(BlueprintCallable, Category = Items)
 	void SpawnRandomItemAtLocation(FVector location);

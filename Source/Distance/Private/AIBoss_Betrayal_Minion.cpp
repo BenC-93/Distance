@@ -5,6 +5,7 @@
 #include "AIBoss_Betrayal_Minion.h"
 #include "DistanceCharacter.h"
 #include "DItem.h"
+#include "MinionItem.h"
 
 AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -12,9 +13,12 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);
 	SpriteComponent->AttachTo(RootComponent);
+	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	HeldItem = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("HeldItem"));
-	HeldItem->AttachTo(RootComponent);
+	HeldItem->AttachTo(GetMesh(), FName("ItemSocket"));
+
+	ItemSocket = TEXT("ItemSocket");
 
 	Health = MaxHealth = 10.f;
 	TargetActor = this;
@@ -35,9 +39,11 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 		if (TargetActor != NULL && TargetActor != this)
 		{
 			ADistanceCharacter* player = Cast<ADistanceCharacter>(TargetActor);
-			// TODO: this isn't going to work
-//			HeldItem->SetSprite(player->GetItem()->SpriteComponent->GetSprite());
-			HeldItem->SetRelativeRotation(FRotator(0.f, 90.f, -65.f));
+			if (HeldItem->GetSprite() != player->GetItem()->SpriteComponent->GetSprite())
+			{
+				HeldItem->SetSprite(player->GetItem()->SpriteComponent->GetSprite());
+				HeldItem->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
 		}
 
 		if (TargetSpeed <= 0.f && canMove)
@@ -53,11 +59,13 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 				temp.Normalize();
 				if (temp.Y > 0.f)
 				{
-					GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+					GetMesh()->SetRelativeScale3D(FVector(1.f, -1.f, 1.f));
+					HeldItem->SetRelativeRotation(FRotator(135.f, 0.f, 0.f));
 				}
 				else if (temp.Y < 0.f)
 				{
-					GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+					GetMesh()->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
+					HeldItem->SetRelativeRotation(FRotator());
 				}
 				temp = (DeltaTime * temp * TargetSpeed) + GetActorLocation();
 				if (ActiveMoveState == FOLLOW)
@@ -194,10 +202,12 @@ void AAIBoss_Betrayal_Minion::MoveCopy()
 	if (TargetActor->GetVelocity().Y > 0.f)
 	{
 		GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
+		HeldItem->SetRelativeRotation(FRotator(135.f, 0.f, 0.f));
 	}
 	else if (TargetActor->GetVelocity().Y < 0.f)
 	{
 		GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+		HeldItem->SetRelativeRotation(FRotator());
 	}
 }
 
@@ -213,7 +223,6 @@ void AAIBoss_Betrayal_Minion::MoveRandom()
 	float distRange = 300.f;
 	float speedRange = 300.f;
 	FVector temp = FVector(FMath::FRandRange(-distRange, distRange), FMath::FRandRange(-distRange, distRange), 0.f);
-	//temp.Normalize();
 	TargetLocation = GetActorLocation() + temp;
 	TargetSpeed = FMath::RandRange(100.f, speedRange);
 	currentSpeed = TargetSpeed;
@@ -221,7 +230,7 @@ void AAIBoss_Betrayal_Minion::MoveRandom()
 
 void AAIBoss_Betrayal_Minion::StartMoveRandomTimer()
 {
-	float timeTilMove = FMath::FRandRange(1.f, 5.f); //add a range to this func call, then uncomment
+	float timeTilMove = FMath::FRandRange(1.f, 5.f);
 	currentSpeed = 0.0f;
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::MoveRandom, timeTilMove, true);
 }
@@ -259,4 +268,9 @@ void AAIBoss_Betrayal_Minion::StartAttackRandomTimer()
 {
 	float timeTilAttack = FMath::FRandRange(2.f, 10.f);
 	GetWorldTimerManager().SetTimer(this, &AAIBoss_Betrayal_Minion::AttackTimer, timeTilAttack, false);
+}
+
+FName AAIBoss_Betrayal_Minion::GetItemAttachPoint()
+{
+	return ItemSocket;
 }

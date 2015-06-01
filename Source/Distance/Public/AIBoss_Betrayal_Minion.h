@@ -23,6 +23,10 @@ public:
 
 	class UPaperSpriteComponent* HeldItem;
 
+	class AMinionItem* CurrentItem;
+	
+	FName ItemSocket;
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual FVector GetVelocity() const override;
@@ -75,5 +79,6 @@ public:
 	UAnimationAsset* AttackAnimation;
 
 	void StartAttackRandomTimer();
+	FName GetItemAttachPoint();
 
 };

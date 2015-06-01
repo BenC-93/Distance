@@ -22,6 +22,8 @@ public:
 	class UPaperSpriteComponent* SpriteComponent;
 
 	class UPaperSpriteComponent* HeldItem;
+	
+	FName ItemSocket;
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -75,5 +77,6 @@ public:
 	UAnimationAsset* AttackAnimation;
 
 	void StartAttackRandomTimer();
+	FName GetItemAttachPoint();
 
 };

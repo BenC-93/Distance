@@ -24,6 +24,7 @@ public:
 	AItemLantern(const class FObjectInitializer& ObjectInitializer);
 	virtual void StartUse() override;
 	virtual void EndUse() override;
+	virtual void OnUnequip() override;
 	virtual void ChangeAmount(float value) override;
 	virtual void FlipForDirection(float xFlip = 1.0f) override;
 };

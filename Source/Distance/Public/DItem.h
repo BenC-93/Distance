@@ -80,11 +80,11 @@ public:
 	
 	/* What happens when the player equips the item. */
 	UFUNCTION(BlueprintCallable, Category = Item)
-	void OnEquip();
+	virtual void OnEquip();
 	
 	/* What happens when the player unequips the item. */
 	UFUNCTION(BlueprintCallable, Category = Item)
-	void OnUnequip();
+	virtual void OnUnequip();
 	
 	void AttachToPawn();
 	

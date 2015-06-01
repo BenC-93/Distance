@@ -43,6 +43,16 @@ void AItemLantern::EndUse()
 	return;
 }
 
+void AItemLantern::OnUnequip()
+{
+	// Lantern is a toggle, turn it off when unequipping
+	if (bIsInUse)
+	{
+		StartUse();
+	}
+	Super::OnUnequip();
+}
+
 void AItemLantern::ChangeAmount(float value)
 {
 	Super::ChangeAmount(value);

@@ -100,5 +100,5 @@ public:
 
 	class AAIBoss_Betrayal_Minion* GetOwningPawn();
 
-	virtual void FlipForDirection(float xFlip = 1.0f);
+	void FlipForDirection(float xFlip = 1.0f);
 };

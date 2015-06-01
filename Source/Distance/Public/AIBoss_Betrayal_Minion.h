@@ -22,6 +22,8 @@ public:
 	class UPaperSpriteComponent* SpriteComponent;
 
 	class UPaperSpriteComponent* HeldItem;
+
+	class AMinionItem* CurrentItem;
 	
 	FName ItemSocket;
 

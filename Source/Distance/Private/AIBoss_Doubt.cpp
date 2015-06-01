@@ -23,7 +23,7 @@ AAIBoss_Doubt::AAIBoss_Doubt(const FObjectInitializer& ObjectInitializer)
 	tentacleYaw = 0;
 	chosenTentacleIndex = 0;
 	tentacleCounter = 0;
-	tentacleSpriteLen = 290.0f;//actual sprite len is 616, cut in half is 308 because the bp is scaled to .5, i go less so that it overreaches by a little
+	tentacleSpriteLen = 270.0f;//actual sprite len is 616, cut in half is 308 because the bp is scaled to .5, i go less so that it overreaches by a little
 
 	swallowedPlayer = NULL;
 	secondSwallowedPlayer = NULL;
@@ -133,12 +133,12 @@ void AAIBoss_Doubt::Tick(float DeltaTime)
 
 		float myYaw = FaceActorRotation(TentacleComponentArray[chosenTentacleIndex]->GetComponentLocation(), pullingObject).Yaw;
 		if (pullingObject->GetActorLocation().Y > GetActorLocation().Y)
-		{
+		{//on the right of the boss
 			//rotate //y,z,x
-			TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, (myYaw - 180), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+			TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, (myYaw - 185), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
 		}
 		else
-		{
+		{//on the left of the boss
 			TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, (myYaw + 185), 0));
 		}
 		float maxScale = distToObject / tentacleSpriteLen;
@@ -377,14 +377,23 @@ void AAIBoss_Doubt::TentacleTimer()
 			playerController = Cast<ADistancePlayerController>(player->GetController());
 
 			StartAttackTimer(3.0f);
+			UE_LOG(LogTemp, Warning, TEXT("missed th eplayer, begin another attack on player"));
 		}
 
 		return;
 	}
-	if (currentPlayer->GetActorLocation().Y > GetActorLocation().Y)
+	if (currentPlayer && currentPlayer->GetActorLocation().Y > GetActorLocation().Y && currentPlayer->GetActorLocation().X >= GetActorLocation().X)
 	{
 		//rotate //y,z,x
-		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 180), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 190), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	}
+	else if (currentPlayer && currentPlayer->GetActorLocation().Y > GetActorLocation().Y)
+	{
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 185), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	}
+	else if (currentPlayer && currentPlayer->GetActorLocation().Y <= GetActorLocation().Y && currentPlayer->GetActorLocation().X >= GetActorLocation().X)
+	{
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw + 190), tentacleCounter), 0));
 	}
 	else
 	{
@@ -404,21 +413,37 @@ void AAIBoss_Doubt::CrystalTentacleTimer()
 	if (tentacleCounter >= 1.0f)//End of the tentacle scaling
 	{
 		//printScreen(FColor::Red, TEXT("Stopping tentacle timer"));
-		UE_LOG(LogTemp, Warning, TEXT("Stopping tentacle timer"));
-		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::TentacleTimer);
+		UE_LOG(LogTemp, Warning, TEXT("Stopping tentacle timer crystal"));
+		GetWorldTimerManager().ClearTimer(this, &AAIBoss_Doubt::CrystalTentacleTimer);
 
 		//check if we didnt hit a player, try again with a new target, or same, depending
 		if (!isPullingObject)
 		{
 			StartCrystalAttackTimer(3.0f);
+			UE_LOG(LogTemp, Warning, TEXT("we missed the crystal, begin attacking crystal"));
+		}
+		else
+		{
+			if (pullingObject)
+			{
+				UE_LOG(LogTemp, Error, TEXT("we think we are pulling an object and shouldn't be, its name is: %s"), *pullingObject->GetName());
+			}
 		}
 
 		return;
 	}
-	if (targetActor&& targetActor->GetActorLocation().Y > GetActorLocation().Y)
+	if (targetActor && targetActor->GetActorLocation().Y > GetActorLocation().Y && targetActor->GetActorLocation().X >= GetActorLocation().X)
 	{
 		//rotate //y,z,x
-		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 180), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 190), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	}
+	else if (targetActor && targetActor->GetActorLocation().Y > GetActorLocation().Y)
+	{
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw - 185), tentacleCounter), 0));//tentacleYaw + 180 works but wrong rotation wise, tentacleYaw - 217 works for rotation wise and for boss being base, 195 seems to work from tentacle itself
+	}
+	else if (targetActor && targetActor->GetActorLocation().Y <= GetActorLocation().Y && targetActor->GetActorLocation().X >= GetActorLocation().X)
+	{
+		TentacleComponentArray[chosenTentacleIndex]->SetWorldRotation(FRotator(0, FMath::Lerp(0.0f, (tentacleYaw + 190), tentacleCounter), 0));
 	}
 	else
 	{
@@ -882,7 +907,7 @@ void AAIBoss_Doubt::OnTentacleOverlap_Implementation(class AActor* OtherActor, c
 	if (OtherActor && (OtherActor != this) && OtherComp && !isPullingObject)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("****THING Entered TENTACLE Triggered Area: %s"), *OtherActor->GetName());
-		if (CheckIfPlayer(OtherActor))
+		if (CheckIfPlayer(OtherActor) && !CheckIfBothPlayersSwallowed())
 		{
 			currentPlayer = Cast<ADistanceCharacter>(OtherActor);
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
@@ -951,7 +976,7 @@ bool AAIBoss_Doubt::CheckIfBothPlayersSwallowed()
 		class ADistancePlayerController* tempController2 = Cast<ADistancePlayerController>(player2->GetController());
 		if (!tempController1->notTrappedByEnemy && !tempController2->notTrappedByEnemy && swallowedPlayer && secondSwallowedPlayer)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Both players are swallowed."));
+			//UE_LOG(LogTemp, Warning, TEXT("Both players are swallowed."));
 			return true;
 		}
 	}

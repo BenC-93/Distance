@@ -56,6 +56,9 @@ public:
 
 	bool inDoubtBoss;
 	bool doubtTriggers;
+	bool oneDoubtTrigger;
+
+	FVector cameraOffset;
 
 	AConvergenceCrystal(const class FObjectInitializer& ObjectInitializer);
 

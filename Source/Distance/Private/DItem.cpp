@@ -83,6 +83,11 @@ void ADItem::OnEquip()
 
 void ADItem::OnUnequip()
 {
+	// Stop using the item automatically when you unequip it
+	if (bIsInUse)
+	{
+		EndUse();
+	}
 	SetActorHiddenInGame(true);
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)

@@ -5,7 +5,14 @@
 #include "AIBoss_Betrayal_Minion.h"
 #include "DistanceCharacter.h"
 #include "DItem.h"
-#include "MinionItem.h"
+
+// items pls
+#include "ItemLantern.h"
+#include "ItemLightBeam.h"
+#include "ItemShield.h"
+#include "ItemCrystal.h"
+#include "ItemDagger.h"
+// no more items pls
 
 AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -15,10 +22,11 @@ AAIBoss_Betrayal_Minion::AAIBoss_Betrayal_Minion(const FObjectInitializer& Objec
 	SpriteComponent->AttachTo(RootComponent);
 	SpriteComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	HeldItem = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("HeldItem"));
-	HeldItem->AttachTo(GetMesh(), FName("ItemSocket"));
-
 	ItemSocket = TEXT("ItemSocket");
+
+	CurrentItem = NULL;
+	PlayerItem = NULL;
+	CurrDirection = MinionOrientation::LEFT;
 
 	Health = MaxHealth = 10.f;
 	TargetActor = this;
@@ -39,11 +47,12 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 		if (TargetActor != NULL && TargetActor != this)
 		{
 			ADistanceCharacter* player = Cast<ADistanceCharacter>(TargetActor);
-			if (HeldItem->GetSprite() != player->GetItem()->SpriteComponent->GetSprite())
+			if (PlayerItem != player->CurrentItem)
 			{
-				HeldItem->SetSprite(player->GetItem()->SpriteComponent->GetSprite());
-				HeldItem->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				PlayerItem = player->CurrentItem;
+				EquipCorrectClassItem(PlayerItem);
 			}
+
 		}
 
 		if (TargetSpeed <= 0.f && canMove)
@@ -59,13 +68,11 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 				temp.Normalize();
 				if (temp.Y > 0.f)
 				{
-					GetMesh()->SetRelativeScale3D(FVector(1.f, -1.f, 1.f));
-					HeldItem->SetRelativeRotation(FRotator(135.f, 0.f, 0.f));
+					FlipForDirection(1.f);
 				}
 				else if (temp.Y < 0.f)
 				{
-					GetMesh()->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
-					HeldItem->SetRelativeRotation(FRotator());
+					FlipForDirection(-1.f);
 				}
 				temp = (DeltaTime * temp * TargetSpeed) + GetActorLocation();
 				if (ActiveMoveState == FOLLOW)
@@ -108,6 +115,36 @@ void AAIBoss_Betrayal_Minion::Tick(float DeltaTime)
 		MoveFollow();
 		return;
 	}
+}
+
+void AAIBoss_Betrayal_Minion::EquipCorrectClassItem(ADItem *blah)
+{
+	if (CurrentItem != NULL)
+	{
+		CurrentItem->Destroy();
+	}
+	if (blah->IsA(AItemLantern::StaticClass()))
+	{
+		CurrentItem = GetWorld()->SpawnActor<AItemLantern>(LanternClass);
+	}
+	else if (blah->IsA(AItemLightBeam::StaticClass()))
+	{
+		CurrentItem = GetWorld()->SpawnActor<AItemLightBeam>(StaffClass);
+	}
+	else if (blah->IsA(AItemShield::StaticClass()))
+	{
+		CurrentItem = GetWorld()->SpawnActor<AItemShield>(ShieldClass);
+	}
+	else if (blah->IsA(AItemCrystal::StaticClass()))
+	{
+		CurrentItem = GetWorld()->SpawnActor<AItemCrystal>(CrystalClass);
+	}
+	else if (blah->IsA(AItemDagger::StaticClass()))
+	{
+		CurrentItem = GetWorld()->SpawnActor<AItemDagger>(SwordClass);
+	}
+	CurrentItem->GetRootComponent()->AttachTo(GetMesh(), FName("ItemSocket"));
+	FlipForDirection(0.0f, true);
 }
 
 FVector AAIBoss_Betrayal_Minion::GetVelocity() const
@@ -201,13 +238,11 @@ void AAIBoss_Betrayal_Minion::MoveCopy()
 	currentSpeed = TargetActor->GetVelocity().Size();
 	if (TargetActor->GetVelocity().Y > 0.f)
 	{
-		GetMesh()->SetRelativeScale3D(FVector(1.0f, -1.0f, 1.0f));
-		HeldItem->SetRelativeRotation(FRotator(135.f, 0.f, 0.f));
+		FlipForDirection(1.f);
 	}
 	else if (TargetActor->GetVelocity().Y < 0.f)
 	{
-		GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
-		HeldItem->SetRelativeRotation(FRotator());
+		FlipForDirection(-1.f);
 	}
 }
 
@@ -273,4 +308,57 @@ void AAIBoss_Betrayal_Minion::StartAttackRandomTimer()
 FName AAIBoss_Betrayal_Minion::GetItemAttachPoint()
 {
 	return ItemSocket;
+}
+
+void AAIBoss_Betrayal_Minion::FlipForDirection(float MovementInputDirection, bool bUseCurrentDirection)
+{
+	bool bShouldRefresh = false;
+	MinionOrientation direction;
+
+	if (bUseCurrentDirection)
+	{
+		// MovementInputDirection is not useful, we just want to refresh the flippiness
+		bShouldRefresh = true;
+		direction = CurrDirection;
+	}
+	else if (MovementInputDirection > 0.0f)
+	{
+		direction = MinionOrientation::RIGHT;
+		bShouldRefresh = (direction != CurrDirection);
+	}
+	else if (MovementInputDirection < 0.0f)
+	{
+		direction = MinionOrientation::LEFT;
+		bShouldRefresh = (direction != CurrDirection);
+	}
+
+	if (bShouldRefresh)
+	{
+		CurrDirection = direction;
+		// Pitch yaw and roll got switched up because the model itself is rotated now
+		// Previously, we rotated the model in engine after import
+		float roll = 0.0f;
+		float pitch = DEFAULT_SPRITE_ROLL; // negate to flip
+		float yaw = 0.0f; // Rotate by 180 to flip
+
+		// Flips which side of the model is facing the camera
+		float xScale = 1.0f;
+
+		if (CurrDirection == MinionOrientation::LEFT)
+		{
+			// Don't scale, this is the natural orientation of the model
+		}
+		else if (CurrDirection == MinionOrientation::RIGHT)
+		{
+			// Rotate the character model
+			pitch = -DEFAULT_SPRITE_ROLL;
+			yaw = 180.0f;
+			// Flip the character so the back side of the model doesn't show
+			xScale = -1.0f;
+		}
+		GetMesh()->SetRelativeRotation(FRotator(pitch, yaw, roll));
+		GetMesh()->SetRelativeScale3D(FVector(xScale, 1.0f, 1.0f));
+		// Also scale the item in the X direction and potentially do other item specific transformation hacks
+		if (CurrentItem != NULL) { CurrentItem->FlipForDirection(xScale); }
+	}
 }

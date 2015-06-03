@@ -22,7 +22,7 @@ AAIBoss_Betrayal::AAIBoss_Betrayal(const FObjectInitializer& ObjectInitializer)
 	p2InTrigger = false;
 
 	numOfMinions = 0.0f;
-	numOfCycles = 4.0f;
+	numOfCycles = 3.0f;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x

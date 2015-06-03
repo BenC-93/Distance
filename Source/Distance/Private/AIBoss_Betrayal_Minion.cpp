@@ -159,6 +159,7 @@ void AAIBoss_Betrayal_Minion::ChangeHealth(float h)
 	float temp = GetHealth() + h;
 	if (temp <= 0.f)
 	{
+		CurrentItem->Destroy();
 		OwningPawn->NotifyDeath();
 		Destroy();
 	}

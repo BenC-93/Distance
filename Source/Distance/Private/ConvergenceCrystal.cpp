@@ -182,7 +182,6 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 				if (FVector::Dist(TargetLocation, GetActorLocation()) > 50.0f)
 				{
 					SetActorLocation(temp);
-					FocusPoint->SetWorldLocation(FocusPoint->GetComponentLocation() + cameraOffset);
 				}
 			}
 			if (!p1Near && GetDistanceTo(player1) < 400.f) { p1Near = true; }

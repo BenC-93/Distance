@@ -2,6 +2,7 @@
 
 #include "Distance.h"
 #include "ItemLantern.h"
+#include "Classes/PaperSpriteComponent.h"
 
 AItemLantern::AItemLantern(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

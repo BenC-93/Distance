@@ -22,7 +22,7 @@ AAIBoss_Betrayal::AAIBoss_Betrayal(const FObjectInitializer& ObjectInitializer)
 	p2InTrigger = false;
 
 	numOfMinions = 0.0f;
-	numOfCycles = 3.0f;
+	numOfCycles = 4.0f;
 
 	SpriteComponent = ObjectInitializer.CreateDefaultSubobject<UPaperSpriteComponent>(this, TEXT("SpriteComponent"));
 	SpriteComponent->RelativeRotation = FRotator(DEFAULT_SPRITE_PITCH, DEFAULT_SPRITE_YAW, DEFAULT_SPRITE_ROLL);//y,z,x
@@ -39,6 +39,7 @@ AAIBoss_Betrayal::AAIBoss_Betrayal(const FObjectInitializer& ObjectInitializer)
 	TentacleComponent0 = CreateTentacleComponent(0, ObjectInitializer);
 	TentacleComponent1 = CreateTentacleComponent(1, ObjectInitializer);
 	TentacleComponent2 = CreateTentacleComponent(2, ObjectInitializer);
+	TentacleComponent3 = CreateTentacleComponent(3, ObjectInitializer);
 }
 
 UChildActorComponent* AAIBoss_Betrayal::CreateTentacleComponent(int i, const FObjectInitializer& ObjectInitializer)

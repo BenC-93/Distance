@@ -55,6 +55,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tentacle", meta = (AllowPrivateAccess = "true"))
 	class UChildActorComponent* TentacleComponent2;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tentacle", meta = (AllowPrivateAccess = "true"))
+	class UChildActorComponent* TentacleComponent3;
+
 	UChildActorComponent* CreateTentacleComponent(int i, const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(Category = Monster, EditAnywhere)

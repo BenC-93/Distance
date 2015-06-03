@@ -39,6 +39,7 @@ AAIBoss_Betrayal::AAIBoss_Betrayal(const FObjectInitializer& ObjectInitializer)
 	TentacleComponent0 = CreateTentacleComponent(0, ObjectInitializer);
 	TentacleComponent1 = CreateTentacleComponent(1, ObjectInitializer);
 	TentacleComponent2 = CreateTentacleComponent(2, ObjectInitializer);
+	TentacleComponent3 = CreateTentacleComponent(3, ObjectInitializer);
 }
 
 UChildActorComponent* AAIBoss_Betrayal::CreateTentacleComponent(int i, const FObjectInitializer& ObjectInitializer)

@@ -7,9 +7,8 @@
 
 enum MoveState { STATIC, COPY, FOLLOW, RANDOM };
 
-/**
- * 
- */
+enum MinionOrientation : uint8 { LEFT, RIGHT };
+
 UCLASS()
 class DISTANCE_API AAIBoss_Betrayal_Minion : public ACharacter
 {
@@ -17,13 +16,29 @@ class DISTANCE_API AAIBoss_Betrayal_Minion : public ACharacter
 	
 public:
 	AAIBoss_Betrayal_Minion(const FObjectInitializer& ObjectInitializer);
+
+	void EquipCorrectClassItem(ADItem *blah);
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sprite")
 	class UPaperSpriteComponent* SpriteComponent;
 
-	class UPaperSpriteComponent* HeldItem;
+	class ADItem* CurrentItem;
+	class ADItem* PlayerItem;
 
-	class AMinionItem* CurrentItem;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ADItem> LanternClass;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ADItem> StaffClass;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ADItem> ShieldClass;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ADItem> CrystalClass;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ADItem> SwordClass;
 	
 	FName ItemSocket;
 
@@ -81,4 +96,7 @@ public:
 	void StartAttackRandomTimer();
 	FName GetItemAttachPoint();
 
+	MinionOrientation CurrDirection;
+
+	void FlipForDirection(float MovementInputDirection, bool bUseCurrentDirection = false);
 };

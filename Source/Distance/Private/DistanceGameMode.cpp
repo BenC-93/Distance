@@ -130,7 +130,7 @@ void ADistanceGameMode::OnEndConvergence(bool DefeatedBoss)
 	bool ConvergenceConditionAchieved = false;
 	if (DefeatedBoss)
 	{
-		uint32 NextBoss = BossIndex + 1;
+		int32 NextBoss = BossIndex + 1;
 		if (NextBoss >= BossClasses.Num())
 		{
 			// Players have successfully defeated all bosses, don't end convergence

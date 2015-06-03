@@ -110,7 +110,7 @@ void ADistanceCharacter::ServerPickupItem_Implementation(ADItemPickup* Item)
 	PickupItem(Item);
 }
 
-AItem* ADistanceCharacter::DropItem(int32 InvSlot)
+ADItem* ADistanceCharacter::DropItem(int32 InvSlot)
 {
 	//TODO: ALL THE DROP STUFF
 //	if (Inventory.Num() != 0 && Inventory.IsValidIndex(InvSlot) && InvSlot != 0)

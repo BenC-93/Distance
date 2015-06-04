@@ -60,9 +60,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AIEnemy")
 	void RunAway();
 
+	/* Play entered trigger sound in blueprints. */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlayTriggerSound();
+
 	/* Play draining sound in blueprints. */
 	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
 	void BPPlayDrainSound();
+
+	/* Play death sound in blueprints. */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlayDeathSound();
 
 	/*UFUNCTION(BlueprintNativeEvent, Category = "Trigger Functions")
 	void OnOverlapBeginAttack(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

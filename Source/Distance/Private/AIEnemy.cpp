@@ -218,6 +218,9 @@ void AAIEnemy::RunAway()
 	moveAway = true;
 	GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
 	DrainParticleSys->Deactivate();
+
+	// play sound
+	BPPlayDeathSound();
 }
 
 void AAIEnemy::DrainTimer()
@@ -262,6 +265,8 @@ void AAIEnemy::StartDrainTimer(float rate)
 {
 	GetWorldTimerManager().ClearTimer(this, &AAIEnemy::DrainTimer);
 	GetWorldTimerManager().SetTimer(this, &AAIEnemy::DrainTimer, rate, true);
+	// play drain sound
+	BPPlayDrainSound();
 }
 
 float AAIEnemy::ConvertToUnitCircle(float degrees)//convert to 0 - 360
@@ -327,6 +332,9 @@ void AAIEnemy::OnOverlapBegin_Implementation(class AActor* OtherActor, class UPr
 			player = Cast<ADistanceCharacter>(currentPlayer);//added for use of player methods
 			//orient shadow towards player//y,z,x
 			ShadowSpriteComponent->SetWorldRotation(FRotator(0, FaceActorRotation(player).Yaw + 90, -90));
+
+			// play sound
+			BPPlayTriggerSound();
 		}
 	}
 }
@@ -356,8 +364,7 @@ void AAIEnemy::OnAttackTrigger(class AActor* OtherActor)
 			//GetWorldTimerManager().SetTimer(this, &AAIEnemy::Drain, 1.0f, true);
 
 			StartDrainTimer(drainRate);
-			// play drain sound
-			BPPlayDrainSound();
+			
 
 			DrainParticleSys->Activate();
 		}

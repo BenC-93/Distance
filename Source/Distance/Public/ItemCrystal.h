@@ -38,4 +38,8 @@ public:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerSpawnConvergenceCrystal();
+
+	/* Plays start use sound in blueprint*/
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlayUseSound();
 };

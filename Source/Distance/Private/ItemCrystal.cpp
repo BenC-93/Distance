@@ -36,11 +36,15 @@ void AItemCrystal::StartUse()
 			ConvergenceManager::StartConvergence();
 			GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(true);
 			SpawnConvergenceCrystal();
+			// play crystal use sound
+			BPPlayUseSound();
 			GameMode->OnCrystalUsed(true);
 		}
 		else if (OwningPawn->PlayerConvergenceState != ConvergenceState::CONVERGENCE)
 		{
 			SpawnSpirit();
+			// play crystal use sound
+			BPPlayUseSound();
 			GameMode->OnCrystalUsed(false);
 		}
 		else

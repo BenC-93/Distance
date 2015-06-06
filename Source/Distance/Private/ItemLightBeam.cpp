@@ -59,6 +59,8 @@ void AItemLightBeam::StartUse()
 	{
 		lightChargeAmount = 0.0f;
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::Charge, chargeRate, true);
+		// start charging sound
+		BPStartCharging();
 		//start charging animation
 		LightSource->SetVisibility(true);
 		bIsInUse = true;
@@ -75,8 +77,10 @@ void AItemLightBeam::EndUse()
 		GetWorldTimerManager().ClearTimer(this, &AItemLightBeam::Charge);
 		bIsInUse = false;
 		bCanUse = false;
+		// stop charging sound
+		BPEndCharging();
 		//start attack animation and sound
-		BPPlaySound();
+		BPPlayHitSound();
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
 		GetWorldTimerManager().SetTimer(this, &AItemLightBeam::AnimationTimer, 0.85f, false);

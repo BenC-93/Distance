@@ -25,8 +25,15 @@ public:
 	bool fadeOut;
 	float alphaVal;
 
+	// used for sprite bobbing
+	float zflip;
+	float zmin;
+	float zmax;
+
 	UPROPERTY(EditAnywhere, Category = Spirit)
 	ADistanceCharacter* OwningPawn;
+
+	virtual void BeginPlay() override;
 
 	ASpirit(const class FObjectInitializer& ObjectInitializer);
 

@@ -17,6 +17,10 @@ ASpirit::ASpirit(const FObjectInitializer& ObjectInitializer)
 	fadeOut = false;
 	alphaVal = 0.0f; //in this case, 0 is not transparent, 1 is fully transparent
 
+	zflip = 1.f;
+	zmin = 0.f;
+	zmax = 25.f;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootSceneComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
@@ -34,10 +38,24 @@ ASpirit::ASpirit(const FObjectInitializer& ObjectInitializer)
 	TriggerBox->AttachTo(RootComponent);
 }
 
+void ASpirit::BeginPlay()
+{
+	Super::BeginPlay();
+	zmin += SpriteComponent->GetRelativeTransform().GetLocation().Z;
+	zmax += SpriteComponent->GetRelativeTransform().GetLocation().Z;
+}
+
 void ASpirit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//move to player
+	float tempH = (DeltaTime * zflip * 75.f) + SpriteComponent->RelativeLocation.Z;
+	SpriteComponent->SetRelativeLocation(FVector(SpriteComponent->RelativeLocation.X, SpriteComponent->RelativeLocation.Y, fmax(zmin, fmin(zmax, tempH))));
+	if (SpriteComponent->RelativeLocation.Z == zmax || SpriteComponent->RelativeLocation.Z == zmin)
+	{
+		zflip *= -1.f;
+	}
+
 	if (OwningPawn)
 	{
 		FVector direction = OwningPawn->GetActorLocation() - GetActorLocation();
@@ -48,6 +66,14 @@ void ASpirit::Tick(float DeltaTime)
 		if (GetDistanceTo(OwningPawn) > 150.0f)
 		{
 			SetActorLocation(newLoc);
+		}
+		if (direction.Y > 0.f)
+		{
+			SpriteComponent->SetRelativeScale3D(FVector(1.f, 1.0f, 1.0f));
+		}
+		else if (direction.Y < 0.f)
+		{
+			SpriteComponent->SetRelativeScale3D(FVector(-1.f, 1.0f, 1.0f));
 		}
 	}
 	if (fadeOut)

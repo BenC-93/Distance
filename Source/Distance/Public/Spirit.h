@@ -57,5 +57,13 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Sprite)
 	void ChangeSpriteAlpha(float alphaValue);
+
+	/* Starts sound in blueprint */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPStartPlaySound();
+
+	/* Stops sound in blueprint */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPStopPlaySound();
 	
 };

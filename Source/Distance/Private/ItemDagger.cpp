@@ -77,6 +77,8 @@ void AItemDagger::StartUse()
 	{
 		lightChargeAmount = 0.0f;
 		GetWorldTimerManager().SetTimer(this, &AItemDagger::Charge, chargeRate, true);
+		// start charging sound
+		BPStartCharging();
 		//start charging animation
 		LightSource->SetVisibility(true);
 		bIsInUse = true;
@@ -93,8 +95,10 @@ void AItemDagger::EndUse()
 		GetWorldTimerManager().ClearTimer(this, &AItemDagger::Charge);
 		bIsInUse = false;
 		bCanUse = false;
+		// stop charging sound
+		BPEndCharging();
 		//start attack animation and sound
-		BPPlaySound();
+		BPPlayHitSound();
 		playerController->canMove = false;
 		GetOwningPawn()->GetMesh()->PlayAnimation(UseAnimation, false);
 		GetWorldTimerManager().SetTimer(this, &AItemDagger::AnimationTimer, 0.85f, false);

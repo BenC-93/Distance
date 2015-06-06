@@ -65,6 +65,8 @@ void ASpirit::Tick(float DeltaTime)
 
 void ASpirit::SetOwner(ADistanceCharacter* owningPlayer)
 {
+	// start playing spirit sound
+	BPStartPlaySound();
 	UE_LOG(LogDistance, Verbose, TEXT("Spirit's owner is set!"));
 	//set owner for reference to move to player
 	OwningPawn = owningPlayer;
@@ -74,6 +76,8 @@ void ASpirit::SetOwner(ADistanceCharacter* owningPlayer)
 
 void ASpirit::DeathTimer()
 {
+	// stop playing spirit sound
+	BPStopPlaySound();
 	//destroy, or i could make a fade away
 	fadeOut = true;
 	//Destroy();

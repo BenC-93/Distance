@@ -129,7 +129,7 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 
 	if (player1 && player2)
 	{
-		CameraBoom->TargetArmLength = fmax(800.f, (0.45f * FVector::Dist(player1->GetActorLocation(), player2->GetActorLocation())) + 450.f);
+		CameraBoom->TargetArmLength = fmax(800.f, (0.45f * FVector::Dist(player1->GetActorLocation(), player2->GetActorLocation())) + 650.f);
 		inDoubtBoss = false;
 		doubtTriggers = false;
 		oneDoubtTrigger = false;
@@ -159,12 +159,16 @@ void AConvergenceCrystal::Tick(float DeltaTime)
 		if (inDoubtBoss)//follow focus ponit because in combat with doubt
 		{
 			FVector TargetLocation = (player1->GetActorLocation() + player2->GetActorLocation()) / 2;
+			TargetLocation = TargetLocation + cameraOffset;
+			FVector temp = TargetLocation - FocusPoint->GetComponentLocation();
+			temp.Normalize();
+			temp = (DeltaTime * temp * movementSpeed) + FocusPoint->GetComponentLocation();
 			if (GetDistanceTo(player1) > 150.0f || GetDistanceTo(player2) > 150.0f)
 			{
-				if (FVector::Dist(TargetLocation, GetActorLocation()) > 50.0f)
+				if (FVector::Dist(TargetLocation, FocusPoint->GetComponentLocation()) > 50.0f)
 				{
-					FocusPoint->SetWorldLocation(TargetLocation);
-					FocusPoint->SetWorldLocation(FocusPoint->GetComponentLocation() + cameraOffset);
+					FocusPoint->SetWorldLocation(temp);
+					//FocusPoint->SetWorldLocation(FocusPoint->GetComponentLocation() + cameraOffset);
 				}
 			}
 			if (!p1Near && (TargetLocation - player1->GetActorLocation()).Size() < 400.f) { p1Near = true; }

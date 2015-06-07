@@ -96,6 +96,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Timers")
 	void LoseHealthTimer();
+
 	
 	virtual void Destroyed() override;
+
+	/* Plays damage sound in blueprint*/
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlayDamageSound();
+
+	/* Plays death sound in blueprint*/
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlayDeathSound();
+
 };

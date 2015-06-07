@@ -218,6 +218,9 @@ void AConvergenceCrystal::LoseHealthTimer()
 	//lose health over time
 	if (health - drainHealthDamage <= 0.0f)
 	{
+		// play death sound
+		BPPlayDeathSound();
+
 		health = 0;
 		boss->EndOfBoss();
 		Destroy();
@@ -227,6 +230,12 @@ void AConvergenceCrystal::LoseHealthTimer()
 		health -= drainHealthDamage;
 		LightIntensity = 10.0f * health;
 		LightSource->SetIntensity(LightIntensity);
+
+
+		if (remainder(health, 25) == 0) {
+			// play damage sound
+			BPPlayDamageSound();
+		}
 	}
 	//UE_LOG(LogDistance, Warning, TEXT("crystal health: %f"), health);
 }
@@ -259,10 +268,13 @@ void AConvergenceCrystal::TurnCaptureBoxesOff()
 
 void AConvergenceCrystal::Destroyed()
 {
+	
 	GetWorldTimerManager().ClearAllTimersForObject(this);
 	//convergence crystal just died, blow shit up, do stuff, idk...wait i found it out, end the boss
+	
 	ConvergenceCam->SetActive(false);
 	GetWorld()->GetGameViewport()->SetDisableSplitscreenOverride(false);
 	if (player1) { Cast<APlayerController>(player1->GetController())->SetViewTarget(player1); }
 	if (player2) { Cast<APlayerController>(player2->GetController())->SetViewTarget(player2); }
 }
+

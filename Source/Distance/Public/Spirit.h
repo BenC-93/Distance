@@ -22,7 +22,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Spirit)
 	float movementSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Spirit)
 	bool fadeOut;
+
 	float alphaVal;
 
 	// used for sprite bobbing

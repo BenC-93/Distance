@@ -10,8 +10,8 @@ AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitial
 {
 	// was 300
 	// 50 for testing
-	health = 50.0f;
-	maxHealth = 50.0f;
+	health = 300.0f;
+	maxHealth = 300.0f;
 
 	healthLossRate = 0.5f;
 	drainHealthDamage = 1.0f;

@@ -24,5 +24,14 @@ public:
 	float MaxHealth;
 
 	virtual void EndOfBoss(bool KilledBoss = false);
+
+	/* Do blueprint damage stuff */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPBossDamage();
+
+	/* Do blueprint death stuff */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPBossDeath();
+
 	
 };

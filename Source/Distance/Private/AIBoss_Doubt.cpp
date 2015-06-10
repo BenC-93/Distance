@@ -699,9 +699,14 @@ void AAIBoss_Doubt::EndOfBoss(bool KilledBoss)
 void AAIBoss_Doubt::ChangeHealth(float healthAmount)
 {
 	float tempHealth = Health + healthAmount;
+	// if negative health was given to doubt
+	if (healthAmount < 0.0f) {
+		BPBossDamage();
+	}
 	if (tempHealth <= 0)
 	{
 		Health = 0.0f;//Defeated boss!
+		BPBossDeath();
 		EndOfBoss(true);
 		return;
 	}

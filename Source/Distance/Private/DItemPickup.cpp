@@ -35,6 +35,10 @@ void ADItemPickup::OnUsed(APawn *InstigatorPawn)
 			// Create the actual item for the inventory
 			ADItem* NewItem = GetWorld()->SpawnActor<ADItem>(ItemClass);
 			MyCharacter->AddItem(NewItem);
+
+			// play the sound
+			BPPlayPickupSound();
+
 			// TODO: Items that you drop need to save their value in the pickup class, make sure this gets transferred back
 			
 			Destroy();

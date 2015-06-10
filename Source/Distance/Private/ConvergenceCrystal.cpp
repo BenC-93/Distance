@@ -8,8 +8,10 @@
 AConvergenceCrystal::AConvergenceCrystal(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	health = 300.0f;
-	maxHealth = 300.0f;
+	// was 300
+	// 50 for testing
+	health = 50.0f;
+	maxHealth = 50.0f;
 
 	healthLossRate = 0.5f;
 	drainHealthDamage = 1.0f;
@@ -218,8 +220,7 @@ void AConvergenceCrystal::LoseHealthTimer()
 	//lose health over time
 	if (health - drainHealthDamage <= 0.0f)
 	{
-		// play death sound
-		BPPlayDeathSound();
+		
 
 		health = 0;
 		boss->EndOfBoss();
@@ -235,6 +236,11 @@ void AConvergenceCrystal::LoseHealthTimer()
 		if (remainder(health, 25) == 0) {
 			// play damage sound
 			BPPlayDamageSound();
+		}
+
+		if (health < 5.0f) {
+			// play death sound
+			BPPlayDeathSound();
 		}
 	}
 	//UE_LOG(LogDistance, Warning, TEXT("crystal health: %f"), health);

@@ -78,6 +78,10 @@ void ADItem::OnEquip()
 	SetActorHiddenInGame(false);
 	// Do any special effects like particles, or effects to the player
 	// (that need to happen for all items)
+	
+	// play equip sound
+	BPPlayEquipSound();
+
 	GetWorldTimerManager().SetTimer(this, &ADItem::Regenerate, RegenRate, true);
 }
 

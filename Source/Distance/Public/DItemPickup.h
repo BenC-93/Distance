@@ -39,4 +39,8 @@ public:
 //
 	// Pickup the thing
 	virtual void OnUsed(APawn* InstigatorPawn);
+
+	/* Play the sound when picking up the thing */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlayPickupSound();
 };

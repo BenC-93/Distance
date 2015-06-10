@@ -85,6 +85,10 @@ public:
 	/* What happens when the player unequips the item. */
 	UFUNCTION(BlueprintCallable, Category = Item)
 	virtual void OnUnequip();
+
+	/* Play the sound when equippings the item */
+	UFUNCTION(BlueprintImplementableEvent, Category = Sound)
+	void BPPlayEquipSound();
 	
 	void AttachToPawn();
 	
@@ -99,4 +103,6 @@ public:
 	class ADistanceCharacter* GetOwningPawn();
 	
 	virtual void FlipForDirection(float xFlip = 1.0f);
+
+	
 };

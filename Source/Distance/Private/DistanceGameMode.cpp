@@ -27,6 +27,9 @@ ADistanceGameMode::ADistanceGameMode(const FObjectInitializer& ObjectInitializer
 	
 	// Start on first boss
 	BossIndex = 0;
+	// Skip spawning the lantern from item drops
+	ItemIndexDivergence1 = 1;
+	ItemIndexDivergence2 = 1;
 }
 
 void ADistanceGameMode::StartPlay()
@@ -162,12 +165,35 @@ void ADistanceGameMode::OnEndConvergence(bool DefeatedBoss)
 
 void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
-	//printScreen(FColor::Red, TEXT("Spawning Random Item"));
-	UE_LOG(LogDistance, Warning, TEXT("Spawning Random Item"));
+	ConvergenceState ItemSpawnState = ConvergenceManager::StateFromLocation(location);
 	TSubclassOf<class ADItemPickup> ItemClass;
-	uint32 ItemIndex = FMath::RandRange(1, ItemTypes.Num()-1);
-	ItemClass = ItemFromIndex(ItemIndex);
-	GetWorld()->SpawnActor<ADItemPickup>(ItemClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	uint32 ItemIndex;
+	uint32 LastIndexToSpawn = ItemTypes.Num() - 1;
+	// Spawn random item in convergence (unused), but go in order according to each divergence state
+	switch (ItemSpawnState) {
+		case ConvergenceState::CONVERGENCE:
+			UE_LOG(LogDistance, Warning, TEXT("Spawning Random Item"));
+			ItemIndex = FMath::RandRange(1, LastIndexToSpawn);
+			break;
+		case ConvergenceState::DIVERGENCE1:
+			ItemIndex = ItemIndexDivergence1;
+			ItemIndexDivergence1++;
+			break;
+		case ConvergenceState::DIVERGENCE2:
+			ItemIndex = ItemIndexDivergence2;
+			ItemIndexDivergence2++;
+			break;
+	}
+	if (ItemIndex <= LastIndexToSpawn)
+	{
+		ItemClass = ItemFromIndex(ItemIndex);
+		GetWorld()->SpawnActor<ADItemPickup>(ItemClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	}
+	else
+	{
+		// One of the divergence states has spawned all valid items
+		UE_LOG(LogDistance, Warning, TEXT("Out of items to spawn for state: %d"), ItemSpawnState);
+	}
 }
 
 TSubclassOf<class ADItemPickup> ADistanceGameMode::ItemFromIndex(uint32 ItemIndex)

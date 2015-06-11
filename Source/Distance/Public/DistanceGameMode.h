@@ -14,6 +14,10 @@ class ADistanceGameMode : public AGameMode
 	uint32 BossIndex;
 	
 	uint32 CrystalsUsed;
+	
+	// Item spawn indices for tracking which items have already spawned;
+	uint8 ItemIndexDivergence1;
+	uint8 ItemIndexDivergence2;
 
 public:
 	ADistanceGameMode(const FObjectInitializer& ObjectInitializer);

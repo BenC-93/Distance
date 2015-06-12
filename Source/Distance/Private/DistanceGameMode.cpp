@@ -167,7 +167,7 @@ void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 {
 	ConvergenceState ItemSpawnState = ConvergenceManager::StateFromLocation(location);
 	TSubclassOf<class ADItemPickup> ItemClass;
-	uint32 ItemIndex;
+	uint32 ItemIndex = 1;
 	uint32 LastIndexToSpawn = ItemTypes.Num() - 1;
 	// Spawn random item in convergence (unused), but go in order according to each divergence state
 	switch (ItemSpawnState) {
@@ -192,7 +192,7 @@ void ADistanceGameMode::SpawnRandomItemAtLocation(FVector location)
 	else
 	{
 		// One of the divergence states has spawned all valid items
-		UE_LOG(LogDistance, Warning, TEXT("Out of items to spawn for state: %d"), ItemSpawnState);
+		//UE_LOG(LogDistance, Warning, TEXT("Out of items to spawn for state: %d"), ItemSpawnState);
 	}
 }
 

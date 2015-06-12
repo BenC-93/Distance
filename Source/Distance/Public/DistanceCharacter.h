@@ -147,6 +147,12 @@ public:
 
 	void SetCurrentItem(class ADItem* NewItem, class ADItem* LastItem = nullptr);
 	
+	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
+	void OnBossSpawned(class AAIBoss* NewBoss);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = Convergence)
+	void OnConvergenceCrystalSpawned(class AConvergenceCrystal* NewCrystal);
+	
 //
 //
 //	

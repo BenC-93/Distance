@@ -87,6 +87,13 @@ void ADistanceGameMode::SpawnBossAtLocation(TSubclassOf<class AAIBoss> indexClas
 	//printScreen(FColor::Red, TEXT("Spawning Boss"));
 	UE_LOG(LogDistance, Warning, TEXT("Spawning Boss"));
 	AAIBoss* boss = GetWorld()->SpawnActor<AAIBoss>(indexClass, location, FRotator(0.0f, 0.0f, 0.0f));
+	
+	// Notify players that the boss spawned
+	ADistanceCharacter* p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	ADistanceCharacter* p2 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 1));
+	p1->OnBossSpawned(boss);
+	p2->OnBossSpawned(boss);
+	
 	if (boss->IsA(AAIBoss_Doubt::StaticClass()))
 	{
 		boss->SetActorRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));

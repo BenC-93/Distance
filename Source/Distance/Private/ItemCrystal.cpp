@@ -81,7 +81,14 @@ void AItemCrystal::ServerSpawnSpirit_Implementation()
 
 void AItemCrystal::SpawnConvergenceCrystal()
 {
-	GetWorld()->SpawnActor<AConvergenceCrystal>(ConvergenceCrystalClass, FVector(OwningPawn->GetActorLocation()) - FVector(150.0f, 0.0f, 0.0f), FRotator(OwningPawn->GetActorRotation()));
+	AConvergenceCrystal* crystal = GetWorld()->SpawnActor<AConvergenceCrystal>(ConvergenceCrystalClass, FVector(OwningPawn->GetActorLocation()) - FVector(150.0f, 0.0f, 0.0f), FRotator(OwningPawn->GetActorRotation()));
+	
+	// Notify players that the crystal spawned
+	ADistanceCharacter* p1 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	ADistanceCharacter* p2 = Cast<ADistanceCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 1));
+	p1->OnConvergenceCrystalSpawned(crystal);
+	p2->OnConvergenceCrystalSpawned(crystal);
+	
 	/*if (Role < ROLE_Authority)
 	{
 	ServerSpawnSpirit();
